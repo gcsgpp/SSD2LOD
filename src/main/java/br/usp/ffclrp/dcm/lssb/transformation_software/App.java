@@ -1,4 +1,4 @@
-package br.usp.dcm.lssb.transformation_software;
+package br.usp.ffclrp.dcm.lssb.transformation_software;
 
 /**
  * Hello world!

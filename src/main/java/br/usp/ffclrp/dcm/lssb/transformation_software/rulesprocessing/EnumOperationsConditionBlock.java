@@ -1,10 +1,10 @@
 package br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing;
 
-public enum OperationsConditionBlock {
+public enum EnumOperationsConditionBlock {
 	EQUAL("="), DIFFERENT("!"), LESSTHAN("<"), GREATERTHAN(">");
 	
 	private final String operation;
-	private OperationsConditionBlock(String operation) {
+	private EnumOperationsConditionBlock(String operation) {
 		this.operation = operation;
 	}
 	

@@ -10,10 +10,12 @@ public class TSVColumn {
 		
 	}
 	
-	public TSVColumn(String title, Enum<EnumContentDirectionTSVColumn> contentDirection, boolean metadata, List<Flag> flags){
+	public TSVColumn(String title, List<Flag> flags){
 		this.title = title;
-		this.contentDirection = contentDirection;
-		this.metadata = metadata;
 		this.flags = flags;
+	}
+	
+	public String getTitle() {
+		return title;
 	}
 }

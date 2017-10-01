@@ -1,7 +1,0 @@
-["id", "class":"predicate" = "tsv column" /D /R /nm /sp("-",12,21) /cb(10),"predicate" = "tsv column" /D /R /nm /sp("-",12,21) /cb(10),"predicate" = 10]
-["id", "class":"predicate" = "tsv column" /D /R /nm /sp("-",12,21) /cb(10),"predicate" = "tsv column" /D /R /nm /sp("-",12,21) /cb(10),"predicate" = 10]
-["id", "class":"predicate" = "tsv column" /D /R /nm /sp("-",12,21) /cb(10),"predicate" = "tsv column" /D /R /nm /sp("-",12,21) /cb(10),"predicate" = 10]
-["id", "class":"predicate" = "tsv column" /D /R /nm /sp("-",12,21) /cb(10),"predicate" = "tsv column" /D /R /nm /sp("-",12,21) /cb(10),"predicate" = 10]
-["id", "class":"predicate" = "tsv column" /D /R /nm /sp("-",12,21) /cb(10),"predicate" = "tsv column" /D /R /nm /sp("-",12,21) /cb(10),"predicate" = 10]
-["id", "class":"predicate" = "tsv column" /D /R /nm /sp("-",12,21) /cb(10),"predicate" = "tsv column" /D /R /nm /sp("-",12,21) /cb(10),"predicate" = 10]
-["id", "class":"predicate" = "tsv column" /D /R /nm /sp("-",12,21) /cb(10),"predicate" = "tsv column" /D /R /nm /sp("-",12,21) /cb(10),"predicate" = 10]asdasdasdasdsadsads

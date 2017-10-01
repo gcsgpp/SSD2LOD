@@ -2,11 +2,16 @@ package br.usp.ffclrp.dcm.lssb.transformation_software;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Stream;
+
+import javax.annotation.Nonnull;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.formats.RDFXMLDocumentFormat;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLAnnotation;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
@@ -19,6 +24,7 @@ import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.semanticweb.owlapi.model.OWLProperty;
 import org.semanticweb.owlapi.model.PrefixManager;
 import org.semanticweb.owlapi.model.parameters.ChangeApplied;
+import org.semanticweb.owlapi.search.EntitySearcher;
 import org.semanticweb.owlapi.util.DefaultPrefixManager;
 import org.semanticweb.owlapi.util.OWLEntityRemover;
 
@@ -28,6 +34,7 @@ public class OntologyHelper {
 	public OWLOntology o;
 	OWLOntologyManager m;
 	OWLDataFactory factory;
+	Map<String, OWLClass> mappingClassesAnnotations;
 	
 	public OntologyHelper(){
 		this.m = OWLManager.createOWLOntologyManager();
@@ -41,11 +48,37 @@ public class OntologyHelper {
 		InputStream is = OntologyHelper.class.getResourceAsStream(path);
 		try {
 			o = m.loadOntologyFromOntologyDocument(is);
+			addAllClassesLabelsToMap();
 
 		} catch (OWLOntologyCreationException e) {
 			e.printStackTrace();
 		}
 	}
+
+	private void addAllClassesLabelsToMap() {
+		
+		mappingClassesAnnotations = new HashMap<String, OWLClass>();
+		
+		Stream<OWLClass> stream = o.classesInSignature();
+		stream.forEach(c -> mappingClassesAnnotations.put(labelFor(c), c));
+		
+	}
+	
+	// @author Ignazio Palmisano (https://github.com/ignazio1977)
+	// Modified by Gabriel Gusmao (https://github.com/gcsgpp)
+	private String labelFor(@Nonnull OWLClass clazz) {
+        /*
+         * Use a visitor to extract label annotations
+         */
+        LabelExtractor le = new LabelExtractor();
+        EntitySearcher.getAnnotationObjects(clazz, o).forEach( anno -> anno.accept(le));
+        
+        /* Print out the label if there is one. If not, just return null */
+        if (le.getResult() != null)
+            return le.getResult();
+        else
+        	return null;
+    }
 
 	public void printClasses(){
 		Stream<OWLClass> stream = o.classesInSignature();

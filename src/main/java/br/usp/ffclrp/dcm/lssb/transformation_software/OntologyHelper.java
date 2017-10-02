@@ -87,17 +87,9 @@ public class OntologyHelper {
 				e -> System.out.println(e + " -> " + e.getIRI()));
 	}
 	
-	public OWLClass getClass(String className){
-		Stream<OWLClass> stream = o.classesInSignature();
+	public OWLClass getClass(String classLabel){
 		
-		//stream.forEach(e -> System.out.println(e.getIRI().toString()));
-		
-		Stream<OWLClass> t = stream.filter(s -> s.getIRI().toString().contains("#"+className));
-	
-		//System.out.println("printing:");
-		//t.forEach(e -> System.out.println(e.getIRI().toString()));
-		//System.out.println("print ended.");
-		return t.findFirst().get();
+		return mappingClassesAnnotations.get(classLabel);
 	}
 	
 	//Prerequisite: baseIri must **not** end with "#"

@@ -2,18 +2,27 @@ package br.usp.ffclrp.dcm.lssb.transformation_software;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
+import org.apache.jena.vocabulary.OWL;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.formats.RDFXMLDocumentFormat;
+import org.semanticweb.owlapi.io.SystemOutDocumentTarget;
+import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotation;
+import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
+import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
@@ -29,12 +38,14 @@ import org.semanticweb.owlapi.util.DefaultPrefixManager;
 import org.semanticweb.owlapi.util.OWLEntityRemover;
 
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.EnumTypeOfProperty;
+import uk.ac.manchester.cs.owl.owlapi.OWLAnnotationAssertionAxiomImpl;
 
 public class OntologyHelper {
 	public OWLOntology o;
 	OWLOntologyManager m;
 	OWLDataFactory factory;
 	Map<String, OWLClass> mappingClassesAnnotations;
+	Map<String, OWLProperty> mappingPredicatesAnnotations;
 	
 	public OntologyHelper(){
 		this.m = OWLManager.createOWLOntologyManager();
@@ -48,11 +59,27 @@ public class OntologyHelper {
 		InputStream is = OntologyHelper.class.getResourceAsStream(path);
 		try {
 			o = m.loadOntologyFromOntologyDocument(is);
-			addAllClassesLabelsToMap();
+			addAllClassesLabelsToMap();			
+			addAllPredicadesToMap();
 
 		} catch (OWLOntologyCreationException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private void addAllPredicadesToMap() {
+		mappingPredicatesAnnotations = new HashMap<String, OWLProperty>();
+		
+		Stream<OWLDataProperty> dataProperties = o.dataPropertiesInSignature();
+		dataProperties.forEach(p -> mappingPredicatesAnnotations.put(labelFor(p), p));
+	}
+
+	private void addAllDataProperties(OWLClass value) {
+		value.dataPropertiesInSignature().forEach(o -> mappingPredicatesAnnotations.put(labelFor(o), o));
+	}
+
+	private void addAllObjectProperties(OWLClass value) {
+		value.objectPropertiesInSignature().forEach(o -> mappingPredicatesAnnotations.put(labelFor(o), o));
 	}
 
 	private void addAllClassesLabelsToMap() {
@@ -63,6 +90,22 @@ public class OntologyHelper {
 		stream.forEach(c -> mappingClassesAnnotations.put(labelFor(c), c));
 		
 	}
+	
+	private String labelFor(@Nonnull OWLProperty property) {
+        /*
+         * Use a visitor to extract label annotations
+         */
+        LabelExtractor le = new LabelExtractor();
+        EntitySearcher.getAnnotationObjects(property, o).forEach( anno -> anno.accept(le));
+        
+        /* Print out the label if there is one. If not, just return null */
+        if (le.getResult() != null)
+            return le.getResult();
+        else
+        	return null;
+	}
+    
+	
 	
 	// @author Ignazio Palmisano (https://github.com/ignazio1977)
 	// Modified by Gabriel Gusmao (https://github.com/gcsgpp)
@@ -90,6 +133,11 @@ public class OntologyHelper {
 	public OWLClass getClass(String classLabel){
 		
 		return mappingClassesAnnotations.get(classLabel);
+	}
+	
+	public OWLProperty getProperty(String predicateLabel){
+		
+		return mappingPredicatesAnnotations.get(predicateLabel);
 	}
 	
 	//Prerequisite: baseIri must **not** end with "#"

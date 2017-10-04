@@ -171,8 +171,8 @@ private List<Rule> extractRulesFromString(String fileContent) {
 		
 		for(String s : eachTSVColumnWithFlags){
 			
-			String title = extractDataFromFirstQuotationMarkInsideRegex(s, EnumRegexList.SELECTALLCONTENTBYQUOTATIONMARK.getExpression());
-			s = removeRegexFromContent(EnumRegexList.SELECTALLCONTENTBYQUOTATIONMARK.getExpression(), s);
+			String title = extractDataFromFirstQuotationMarkInsideRegex(s, EnumRegexList.SELECTCONTENTFIRSTQUOTATIONMARK.getExpression());
+			s = removeRegexFromContent(EnumRegexList.SELECTCONTENTFIRSTQUOTATIONMARK.getExpression(), s);
 			
 			List<Flag> flags = extractFlagsFromSentence(s);
 			
@@ -317,7 +317,7 @@ private List<Rule> extractRulesFromString(String fileContent) {
 		data = matcher.group(); 
 		data = data.substring(data.indexOf("\"")+1, data.lastIndexOf("\""));
 		
-		System.out.println(data);
+		//System.out.println(data);
 		
 		return data;
 	}

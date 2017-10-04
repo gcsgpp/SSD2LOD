@@ -24,6 +24,7 @@ import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
+import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -71,15 +72,21 @@ public class OntologyHelper {
 		mappingPredicatesAnnotations = new HashMap<String, OWLProperty>();
 		
 		Stream<OWLDataProperty> dataProperties = o.dataPropertiesInSignature();
-		dataProperties.forEach(p -> mappingPredicatesAnnotations.put(labelFor(p), p));
-	}
-
-	private void addAllDataProperties(OWLClass value) {
-		value.dataPropertiesInSignature().forEach(o -> mappingPredicatesAnnotations.put(labelFor(o), o));
-	}
-
-	private void addAllObjectProperties(OWLClass value) {
-		value.objectPropertiesInSignature().forEach(o -> mappingPredicatesAnnotations.put(labelFor(o), o));
+		dataProperties.forEach(p -> {//System.out.println(labelFor(p) + " -> " + p);
+									mappingPredicatesAnnotations.put(labelFor(p), p);
+									});
+		
+		Stream<OWLObjectProperty> objectProperties = o.objectPropertiesInSignature();
+		objectProperties.forEach(p -> {//System.out.println(labelFor(p) + " -> " + p);
+									  mappingPredicatesAnnotations.put(labelFor(p), p);
+									  });
+		
+		for(int i=0; i<mappingPredicatesAnnotations.size(); i++){
+			System.out.println( mappingPredicatesAnnotations.keySet().toArray()[i] + " -> " +
+								mappingPredicatesAnnotations.values().toArray()[i]);
+		}
+		
+		System.out.println("End");
 	}
 
 	private void addAllClassesLabelsToMap() {
@@ -91,30 +98,14 @@ public class OntologyHelper {
 		
 	}
 	
-	private String labelFor(@Nonnull OWLProperty property) {
-        /*
-         * Use a visitor to extract label annotations
-         */
-        LabelExtractor le = new LabelExtractor();
-        EntitySearcher.getAnnotationObjects(property, o).forEach( anno -> anno.accept(le));
-        
-        /* Print out the label if there is one. If not, just return null */
-        if (le.getResult() != null)
-            return le.getResult();
-        else
-        	return null;
-	}
-    
-	
-	
 	// @author Ignazio Palmisano (https://github.com/ignazio1977)
 	// Modified by Gabriel Gusmao (https://github.com/gcsgpp)
-	private String labelFor(@Nonnull OWLClass clazz) {
+	private String labelFor(@Nonnull OWLEntity entity) {
         /*
          * Use a visitor to extract label annotations
          */
         LabelExtractor le = new LabelExtractor();
-        EntitySearcher.getAnnotationObjects(clazz, o).forEach( anno -> anno.accept(le));
+        EntitySearcher.getAnnotationObjects(entity, o).forEach( anno -> anno.accept(le));
         
         /* Print out the label if there is one. If not, just return null */
         if (le.getResult() != null)

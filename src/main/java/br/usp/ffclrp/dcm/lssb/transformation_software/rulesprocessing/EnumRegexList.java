@@ -6,7 +6,7 @@ public enum EnumRegexList {
 	SELECTSUBJECTLINE(":(\\s*?)\""),
 	SELECTPREDICATESDIVISIONS("(:|,)(\\s*?)\"(.*?)\"\\s?="),
 	SELECTPREDICATE("(.*?)="),
-	SELECTALLCONTENTBYQUOTATIONMARK("\"(.*?)\"");
+	SELECTCONTENTFIRSTQUOTATIONMARK("(\"[^\"]*\"){1}?");
 	
 	private final String regexExpressions;
 	

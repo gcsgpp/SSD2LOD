@@ -22,6 +22,7 @@ import org.semanticweb.owlapi.model.OWLProperty;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ConditionBlock;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ContentDirectionTSVColumn;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.EnumContentDirectionTSVColumn;
+import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.EnumRegexList;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FixedContent;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Flag;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagConditionBlock;
@@ -52,6 +53,8 @@ public class App
     	ontologyHelper.loadingOntologyFromFile("enchimentdata.owl");
     	String fileContent = readFile(pathfile);
     	//System.out.println(fileContent);
+    	fileContent = fileContent.replaceAll("\n", "");
+    	fileContent = fileContent.replaceAll("\t", "");
     	List<Rule> rulesList = extractRulesFromString(fileContent.replaceAll("\n", ""));
     	
     	printRules(rulesList);
@@ -81,27 +84,42 @@ public class App
 }
 private List<Rule> extractRulesFromString(String fileContent) {
     	
-    	List<String> listRulesAsText = identifyRulesBlocksFromString(fileContent);
+    	List<String> rulesListAsText = identifyRulesBlocksFromString(fileContent);
     	
 		List<Rule> ruleList = new ArrayList<Rule>();
 		
-		for(String s : listRulesAsText){
+		for(String s : rulesListAsText){
 				ruleList.add(createRulesFromBlock(s));
 		}
 		
 		return ruleList;
 	}
 
+	
+	private String[] splitByIndex(String content, int index){
+		
+		String[] splitContent = new String[2];
+		splitContent[0] = content.substring(0, index);
+		splitContent[1] = content.substring(index, content.length()); // index not included
+		
+		return splitContent;
+	}
+
 	private Rule createRulesFromBlock(String blockRulesAsText) {
+		Matcher matcher = matchRegexOnString(EnumRegexList.SELECTSUBJECTLINE.getExpression(), blockRulesAsText);
+		String subjectLine 				=	splitByIndex(blockRulesAsText, matcher.start())[0];
+		String predicatesLinesOneBlock 	= 	splitByIndex(blockRulesAsText, matcher.start())[1];
 		
-		String ruleId = extractIDFromSentence(blockRulesAsText); // \[(\s*?)"(.*?)"(,|\s) //remove the string
-		OWLClass ruleSubject = extractSubjectFromSentence(blockRulesAsText); // (\s|,)"(.*?)":{1} //remove the string
-		//List<OWLProperty> ruleProperties = extractPropertyFromSentence(listRulesAsText); // ((,(.?))|(:(.?)))"\w*"(\s*?)= //remove the string
+		String ruleId 						= extractIDFromSentence(subjectLine);
+		OWLClass ruleSubject 				= extractSubjectFromSentence(subjectLine);
+		List<TSVColumn> subjectTsvcolumns 	= extractTSVColumnsFromSentence(subjectLine);
 		
-		String ruleCleaned = removeIdAndSubjectFromRule(blockRulesAsText);
+		/*String ruleCleaned = removeIdAndSubjectFromRule(blockRulesAsText);
 		ruleCleaned = removeRegexFromContent("]", ruleCleaned);
 		Matcher matcher = matchRegexOnString("((,?(.?))|(:(.?)))\"\\w*\"(\\s*?)=", ruleCleaned);
+		*/
 		
+		matcher = matchRegexOnString(EnumRegexList.SELECTPREDICATESDIVISIONS.getExpression(), predicatesLinesOneBlock);
 		List<Integer> initialOfEachMatch = new ArrayList<Integer>();
 		while(!matcher.hitEnd()){
 			initialOfEachMatch.add(matcher.start());
@@ -111,10 +129,16 @@ private List<Rule> extractRulesFromString(String fileContent) {
 		//List<String> predicateLinesList = new ArrayList<String>();
 		
 		Map<OWLProperty, TripleObject> predicateObjects = new Hashtable<OWLProperty, TripleObject>();
-		for(int i = 0; i <= initialOfEachMatch.size(); i++){
-			String lineFromBlock = ruleCleaned.substring(initialOfEachMatch.get(i) + 1, // +1 exists to not include the first character, a comma
-														  initialOfEachMatch.get(i+1) - 1); // -1 exists to not include the first character of the other match, a comma
-			OWLProperty propertyFromLine = exctratPredicateFromBlockLine(lineFromBlock);
+		for(int i = 0; i <= initialOfEachMatch.size()-1; i++){
+			int finalChar;
+			if(i == initialOfEachMatch.size()-1)
+				finalChar = predicatesLinesOneBlock.length();
+			else
+				finalChar = initialOfEachMatch.get(i+1);
+			
+			String lineFromBlock = predicatesLinesOneBlock.substring(initialOfEachMatch.get(i) + 1, // +1 exists to not include the first character, a comma
+																	 finalChar); // -1 exists to not include the first character of the other match, a comma
+			OWLProperty propertyFromLine = extractPredicateFromBlockLine(lineFromBlock);
 			lineFromBlock = removePredicateFromBlockLine(lineFromBlock);
 			
 			List<TSVColumn> tsvcolumns = extractTSVColumnsFromSentence(lineFromBlock);
@@ -129,34 +153,26 @@ private List<Rule> extractRulesFromString(String fileContent) {
 			}
 		}
 		
-		
-		return new Rule(ruleId, ruleSubject, predicateObjects);
+		return new Rule(ruleId, ruleSubject, subjectTsvcolumns, predicateObjects);
 	}
 	private String removePredicateFromBlockLine(String lineFromBlock) {
-		return removeRegexFromContent("((,?(.?))|(:(.?)))\"\\w*\"(\\s*?)=", lineFromBlock);
+		return removeRegexFromContent(EnumRegexList.SELECTPREDICATE.getExpression(), lineFromBlock);
 	}
 
-	private OWLProperty exctratPredicateFromBlockLine(String lineFromBlock) {
-		Rule rule = new Rule();
+	private OWLProperty extractPredicateFromBlockLine(String lineFromBlock) {		
+		String predicateName = extractDataFromFirstQuotationMarkInsideRegex(lineFromBlock, EnumRegexList.SELECTPREDICATE.getExpression());		
 		
-		String predicateName = extractDataFromFirstQuotationMarkInsideRegex(lineFromBlock, "((,?(.?))|(:(.?)))\"\\w*\"(\\s*?)=");
-		
-		
-		
-		//buscar aqui a propriedade na ontologia
-		
-		
-		return null;
+		return ontologyHelper.getProperty(predicateName);
 	}
 	
 	private List<TSVColumn> extractTSVColumnsFromSentence(String sentence){
 		List<TSVColumn> listOfColumns = new ArrayList<TSVColumn>();
-		String[] eachTSVColumnWithFlags = sentence.split("((\\D);(\\D))");
+		String[] eachTSVColumnWithFlags = sentence.split(";");
 		
 		for(String s : eachTSVColumnWithFlags){
 			
-			String title = extractDataFromFirstQuotationMarkInsideRegex(s, "\"(.*?)\"");
-			s = removeRegexFromContent("\"(.*?)\"", s);
+			String title = extractDataFromFirstQuotationMarkInsideRegex(s, EnumRegexList.SELECTALLCONTENTBYQUOTATIONMARK.getExpression());
+			s = removeRegexFromContent(EnumRegexList.SELECTALLCONTENTBYQUOTATIONMARK.getExpression(), s);
 			
 			List<Flag> flags = extractFlagsFromSentence(s);
 			
@@ -241,7 +257,9 @@ private List<Rule> extractRulesFromString(String fileContent) {
 
 	private Matcher matchRegexOnString(String regex, String content){
 		Pattern pattern = Pattern.compile(regex);
-		return pattern.matcher(content);
+		Matcher m = pattern.matcher(content);
+		m.find();
+		return m;
 	}
 	
 	private String removeIdAndSubjectFromRule(String blockRulesAsText) {
@@ -277,14 +295,17 @@ private List<Rule> extractRulesFromString(String fileContent) {
 		return contentCleaned.trim(); 
 	}
 	
-	private String extractIDFromSentence(String blockRulesAsText) { // \[(\s*?)"(.*?)"(,|\s)
+	private String extractIDFromSentence(String blockRulesAsText) {
+		String data = "";
 		
-		return extractDataFromFirstQuotationMarkInsideRegex(blockRulesAsText, "\\[(\\s*?)\"(.*?)\"(,|\\s)");
+		Matcher matcher = matchRegexOnString(EnumRegexList.SELECTRULEID.getExpression(), blockRulesAsText);
+		data = matcher.group().replace("[", "");
+		return data;
 	}
 
 	private OWLClass extractSubjectFromSentence(String blockRulesAsText) { // (\s|,)"(.*?)":{1}
 		
-		String subject = extractDataFromFirstQuotationMarkInsideRegex(blockRulesAsText, "(\\s|,)\"(.*?)\":{1}");
+		String subject = extractDataFromFirstQuotationMarkInsideRegex(blockRulesAsText, EnumRegexList.SELECTSUBJECTCLASSNAME.getExpression());
 				
 		return ontologyHelper.getClass(subject);
 	}
@@ -293,9 +314,7 @@ private List<Rule> extractRulesFromString(String fileContent) {
 		String data = "";
 		
 		Matcher matcher = matchRegexOnString(regex, content);
-		//data = content.substring(matcher.start(), matcher.end());
-		matcher.find();
-		data = matcher.group();
+		data = matcher.group(); 
 		data = data.substring(data.indexOf("\"")+1, data.lastIndexOf("\""));
 		
 		System.out.println(data);

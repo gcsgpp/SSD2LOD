@@ -24,19 +24,19 @@ public class Rule {
 	}
 
 	public String getId() {
-		return id;
+		return this.id;
 	}
 
 	public OWLClass getSubject() {
-		return subject;
+		return this.subject;
 	}
 	
 	public List<TSVColumn> getSubjectTSVColumns(){
-		return subjectTSVColumns;
+		return this.subjectTSVColumns;
 	}
 
 	public Map<OWLProperty, TripleObject> getPredicateObjects() {
-		return predicateObjects;
+		return this.predicateObjects;
 	}
 	
 	

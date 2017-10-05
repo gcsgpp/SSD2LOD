@@ -6,7 +6,12 @@ public enum EnumRegexList {
 	SELECTSUBJECTLINE(":(\\s*?)\""),
 	SELECTPREDICATESDIVISIONS("(:|,)(\\s*?)\"(.*?)\"\\s?="),
 	SELECTPREDICATE("(.*?)="),
-	SELECTCONTENTFIRSTQUOTATIONMARK("(\"[^\"]*\"){1}?");
+	SELECTCONTENTQUOTATIONMARK("(\"[^\"]*\"){1}?"),
+	SELECTFIRSTNUMBERS("(\\d)+"),
+	SELECTBASEIRIFLAG("\\/BASEIRI\\(\"(.*?)\"\\)"),
+	SELECTFIXEDCONTENTFLAG("\\/\\!\\(\"(.*?)\"\\)"),
+	SELECTCONDITIONBLOCKFLAG("\\/CB\\(\\d*?\\)"),
+	SELECTSEPARATORFLAG("\\/SP\\(\"(.*?)\"((,(.*?)\\))|\\))");
 	
 	private final String regexExpressions;
 	

@@ -11,7 +11,11 @@ public enum EnumRegexList {
 	SELECTBASEIRIFLAG("\\/BASEIRI\\(\"(.*?)\"\\)"),
 	SELECTFIXEDCONTENTFLAG("\\/\\!\\(\"(.*?)\"\\)"),
 	SELECTCONDITIONBLOCKFLAG("\\/CB\\(\\d*?\\)"),
-	SELECTSEPARATORFLAG("\\/SP\\(\"(.*?)\"((,(.*?)\\))|\\))");
+	SELECTSEPARATORFLAG("\\/SP\\(\"(.*?)\"((,(.*?)\\))|\\))"),
+	//CONDITION BLOCK REGEX:
+	SELECTCOLUMNCONDITIONBLOCK("(\".*\")\\s(=|!|>|<)"),
+	SELECTPREDICATESDIVISIONSCONDITIONBLOCK("(:|,)(\\s*?)\"(.*?)\"\\s?(=|!|>|<)"),
+	SELECTOPERATIONCONDITIONBLOCK("(=|!|>|<)");
 	
 	private final String regexExpressions;
 	

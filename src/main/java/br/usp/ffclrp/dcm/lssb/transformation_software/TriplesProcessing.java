@@ -23,6 +23,8 @@ import org.semanticweb.owlapi.model.OWLProperty;
 
 import com.fasterxml.jackson.databind.ser.std.MapProperty;
 
+import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Condition;
+import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ConditionBlock;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Flag;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagBaseIRI;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagOWNID;
@@ -35,10 +37,11 @@ import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TripleObje
 
 public class TriplesProcessing {
 
-	SemistructuredFileReader fileReader;
-	Model model = null;
-	List<TriplePool> triplePoolList = new ArrayList<TriplePool>();
-	List<ResourcesMapping> resourcesMapping = new ArrayList<ResourcesMapping>();
+	private SemistructuredFileReader fileReader;
+	private Model model = null;
+	private List<TriplePool> triplePoolList = new ArrayList<TriplePool>();
+	private List<ResourcesMapping> resourcesMapping = new ArrayList<ResourcesMapping>();
+	
 
 	public TriplesProcessing(String relativePathDataFile) {
 		model = ModelFactory.createDefaultModel();
@@ -46,14 +49,12 @@ public class TriplesProcessing {
 	}
 
 	@SuppressWarnings("unchecked")
-	public void createTriplesFromRules(List<Rule> listRules, String defaultNs) throws Exception{	
+	public void createTriplesFromRules(List<Rule> listRules, List<ConditionBlock> conditionBlocks,  String defaultNs) throws Exception{	
 		for(Rule rule : listRules){
-
 			for(Integer tsvLineNumber = 1; tsvLineNumber < fileReader.getAllDataRows().size(); tsvLineNumber++){
 
 				// *** SUBJECT ***
 				List<Resource> subjectList = getSubject(rule, defaultNs, tsvLineNumber);
-
 
 				// *** PREDICATE AND OBJECT ***
 				Property predicate;
@@ -73,7 +74,7 @@ public class TriplesProcessing {
 							for(Integer ruleNumber : (List<Integer>) predicateMapEntry.getValue().getObject()){
 								triplePoolList.add(new TriplePool(subject, predicate, ruleNumber, tsvLineNumber));
 							}
-							//TRIPLEOBJECTS POINTING TO LIST OF TSV COLUMNS PROCESS FLOW
+						//TRIPLEOBJECTS POINTING TO LIST OF TSV COLUMNS PROCESS FLOW
 						}else{
 							List<String> content = extractDataFromTSVColumn((List<TSVColumn>) predicateMapEntry.getValue().getObject(), tsvLineNumber);
 
@@ -133,9 +134,9 @@ public class TriplesProcessing {
 				}
 			}
 			if(!extractedData){
-					String[] columnData = new String[1];
-					columnData[0] = fileReader.getData(column.getTitle(), lineNumber);
-					dataColumnsSeparated.add(columnData);
+				String[] columnData = new String[1];
+				columnData[0] = fileReader.getData(column.getTitle(), lineNumber);
+				dataColumnsSeparated.add(columnData);
 			}
 		}
 

@@ -1,13 +1,18 @@
 package br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing;
 
+import java.util.List;
+
 public class ConditionBlock extends Flag {
 	private String id;
-	private TSVColumn column;
-	private Enum<EnumOperationsConditionBlock> operation;
-	public ConditionBlock(String id, TSVColumn column, Enum<EnumOperationsConditionBlock> operation){
+	private List<Condition> conditions;
+	
+	public ConditionBlock(String id, List<Condition> conditions) {
 		this.id = id;
-		this.column = column;
-		this.operation = operation;
+		this.conditions = conditions;
+	}
+	
+	public List<Condition> getConditions(){
+		return this.conditions;
 	}
 
 }

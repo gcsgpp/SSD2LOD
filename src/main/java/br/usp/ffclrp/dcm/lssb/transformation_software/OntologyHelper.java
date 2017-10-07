@@ -2,24 +2,15 @@ package br.usp.ffclrp.dcm.lssb.transformation_software;
 
 import java.io.File;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
-import org.apache.jena.vocabulary.OWL;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.formats.RDFXMLDocumentFormat;
-import org.semanticweb.owlapi.io.SystemOutDocumentTarget;
-import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLAnnotation;
-import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
-import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDataProperty;
@@ -39,7 +30,6 @@ import org.semanticweb.owlapi.util.DefaultPrefixManager;
 import org.semanticweb.owlapi.util.OWLEntityRemover;
 
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.EnumTypeOfProperty;
-import uk.ac.manchester.cs.owl.owlapi.OWLAnnotationAssertionAxiomImpl;
 
 public class OntologyHelper {
 	public OWLOntology o;
@@ -81,12 +71,12 @@ public class OntologyHelper {
 									  mappingPredicatesAnnotations.put(labelFor(p), p);
 									  });
 		
-		for(int i=0; i<mappingPredicatesAnnotations.size(); i++){
+		/*for(int i=0; i<mappingPredicatesAnnotations.size(); i++){
 			System.out.println( mappingPredicatesAnnotations.keySet().toArray()[i] + " -> " +
 								mappingPredicatesAnnotations.values().toArray()[i]);
 		}
 		
-		System.out.println("End");
+		System.out.println("End");*/
 	}
 
 	private void addAllClassesLabelsToMap() {

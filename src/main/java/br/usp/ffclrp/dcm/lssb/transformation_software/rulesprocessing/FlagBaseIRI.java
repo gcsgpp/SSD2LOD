@@ -12,5 +12,9 @@ public class FlagBaseIRI extends Flag {
 	public FlagBaseIRI(String stringIRI) {
 		this.iri = stringIRI; 
 	}
+	
+	public String getIRI(){
+		return this.iri;
+	}
 
 }

@@ -2,7 +2,7 @@ package br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing;
 
 public enum EnumRegexList {
 	SELECTRULEID("\\[\\d+"),
-	SELECTSUBJECTCLASSNAME("\\[\\d+.*\"\\s?"),
+	SELECTSUBJECTCLASSNAME("(\".*\")\\s?="), //old: \\[\\d+.*\"\\s?
 	SELECTSUBJECTLINE(":(\\s*?)\""),
 	SELECTPREDICATESDIVISIONS("(:|,)(\\s*?)\"(.*?)\"\\s?="),
 	SELECTPREDICATE("(.*?)="),

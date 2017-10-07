@@ -18,4 +18,8 @@ public class TSVColumn {
 	public String getTitle() {
 		return title;
 	}
+	
+	public List<Flag> getFlags(){
+		return flags;
+	}
 }

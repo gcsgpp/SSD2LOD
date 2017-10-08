@@ -27,7 +27,9 @@ import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FixedConte
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Flag;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagBaseIRI;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagConditionBlock;
+import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagOWNID;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.NotMetadata;
+import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ObjectAsRule;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Rule;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Separator;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TSVColumn;
@@ -44,14 +46,14 @@ public class App
 {
 	private OntologyHelper ontologyHelper;
 	List<Rule> rulesList;
-	List<ConditionBlock> conditionsBlocks;
+	Map<Integer, ConditionBlock> conditionsBlocks = new HashMap<Integer, ConditionBlock>();
 	public static void main( String[] args ) throws Exception
 	{
 		System.out.println( "Hello World!" );
 
 		App app = new App();
 		app.extractRulesFromFile("c:\\masterSoftwareTestFiles\\testingrules.txt", "enchimentdata.owl");
-		
+
 		TriplesProcessing triplesProcessing = new TriplesProcessing("c:\\masterSoftwareTestFiles\\enrichedData.tsv");
 		triplesProcessing.createTriplesFromRules(app.rulesList, app.conditionsBlocks, "http://purl.org/gabriel/test/");
 	}
@@ -60,11 +62,15 @@ public class App
 		ontologyHelper = new OntologyHelper();
 		ontologyHelper.loadingOntologyFromFile(ontologyRelativePath);
 		String fileContent = readFile(rulesRelativePath);
-		
+
 		fileContent = fileContent.replaceAll("\n", "").replaceAll("\t", "");
 		rulesList = extractRulesFromString(fileContent);
-		conditionsBlocks = extractConditionsBlocksFromString(fileContent);
+		List<ConditionBlock> listConditionBlock = extractConditionsBlocksFromString(fileContent);
 
+		for(ConditionBlock conditionBlock : listConditionBlock){
+			conditionsBlocks.put(conditionBlock.getId(), conditionBlock);
+		}
+		
 		//printRules(rulesList);
 	}
 
@@ -83,22 +89,20 @@ public class App
 		Matcher matcher = matchRegexOnString(EnumRegexList.SELECTSUBJECTLINE.getExpression(), cbAsText);
 		String subjectLine 				=	splitByIndex(cbAsText, matcher.start())[0];
 		String predicatesLinesOneBlock 	= 	splitByIndex(cbAsText, matcher.start())[1];
-		
+
 		String conditionBlockId 	= extractIDFromSentence(subjectLine);
-		
-		
+
+
 		matcher = matchRegexOnString(EnumRegexList.SELECTPREDICATESDIVISIONSCONDITIONBLOCK.getExpression(), predicatesLinesOneBlock);
 		List<Integer> initialOfEachMatch = new ArrayList<Integer>();
 		while(!matcher.hitEnd()){
 			initialOfEachMatch.add(matcher.start());
 			matcher.find();
 		}
-		
-		
+
+
 		List<Condition> conditions = new ArrayList<Condition>();
 		for(int i = 0; i <= initialOfEachMatch.size()-1; i++){
-			
-			
 			int finalChar;
 			if(i == initialOfEachMatch.size()-1) //IF LAST MATCH, GET THE END OF THE SENTENCE
 				finalChar = predicatesLinesOneBlock.length();
@@ -107,25 +111,25 @@ public class App
 
 			String lineFromBlock = predicatesLinesOneBlock.substring(initialOfEachMatch.get(i) + 1, // +1 exists to not include the first character, a comma
 					finalChar);
-			
+
 			EnumOperationsConditionBlock operation = retrieveOperation(lineFromBlock);
-			
+
 			String column = extractDataFromFirstQuotationMarkInsideRegex(lineFromBlock, EnumRegexList.SELECTCOLUMNCONDITIONBLOCK.getExpression());
 			lineFromBlock = removeRegexFromContent(EnumRegexList.SELECTCOLUMNCONDITIONBLOCK.getExpression(), lineFromBlock);
-			String value = extractDataFromFirstQuotationMarkInsideRegex(lineFromBlock, EnumRegexList.SELECTCOLUMNCONDITIONBLOCK.getExpression());
+			String value = extractDataFromFirstQuotationMarkInsideRegex(lineFromBlock, EnumRegexList.SELECTALL.getExpression());
 			conditions.add(new Condition(column, operation, value));
 		}
-		
+
 		return new ConditionBlock(conditionBlockId, conditions);
 	}
 
 	private EnumOperationsConditionBlock retrieveOperation(String lineFromBlock) {
 		String operation = matchRegexOnString(EnumRegexList.SELECTOPERATIONCONDITIONBLOCK.getExpression(), lineFromBlock).group();
 		
-		if(operation == EnumOperationsConditionBlock.DIFFERENT.getOperation()) 		return EnumOperationsConditionBlock.DIFFERENT;
-		if(operation == EnumOperationsConditionBlock.EQUAL.getOperation())			return EnumOperationsConditionBlock.EQUAL;
-		if(operation == EnumOperationsConditionBlock.GREATERTHAN.getOperation()) 	return EnumOperationsConditionBlock.GREATERTHAN;
-		if(operation == EnumOperationsConditionBlock.LESSTHAN.getOperation())		return EnumOperationsConditionBlock.LESSTHAN;
+		if(operation.equals(EnumOperationsConditionBlock.DIFFERENT.getOperation())) 		return EnumOperationsConditionBlock.DIFFERENT;
+		if(operation.equals(EnumOperationsConditionBlock.EQUAL.getOperation()))			return EnumOperationsConditionBlock.EQUAL;
+		if(operation.equals(EnumOperationsConditionBlock.GREATERTHAN.getOperation())) 	return EnumOperationsConditionBlock.GREATERTHAN;
+		if(operation.equals(EnumOperationsConditionBlock.LESSTHAN.getOperation()))		return EnumOperationsConditionBlock.LESSTHAN;
 		return null;
 	}
 
@@ -159,7 +163,7 @@ public class App
 		}
 		System.out.println(outAddedContent);
 	}
-	
+
 	private List<Rule> extractRulesFromString(String fileContent) {
 
 		List<String> rulesListAsText = identifyRulesBlocksFromString(fileContent);		
@@ -218,18 +222,19 @@ public class App
 			if(tripleObjectIsToAnotherRule(lineFromBlock)){
 
 				Integer ruleNumber = extractRuleNumberAsTripleObject(lineFromBlock);
+				List<Flag> flagsFromSentence = extractFlagsFromSentence(lineFromBlock);
 
 				if(predicateObjects.containsKey(propertyFromLine)){
 					@SuppressWarnings("unchecked")
-					List<Integer> ruleObject = (List<Integer>) predicateObjects.get(propertyFromLine).getObject();
-					ruleObject.add(ruleNumber);
+					List<ObjectAsRule> ruleObjects = (List<ObjectAsRule>) predicateObjects.get(propertyFromLine).getObject();
+					ruleObjects.add(new ObjectAsRule(ruleNumber, flagsFromSentence));
 				}else{
-					TripleObjectAsRule ruleObject = (TripleObjectAsRule) TripleObjectBuilder.createObjectToRule(ruleNumber);
+					ObjectAsRule object = new ObjectAsRule(ruleNumber, flagsFromSentence);
+					TripleObjectAsRule ruleObject = (TripleObjectAsRule) TripleObjectBuilder.createObjectToRule(object);
 					predicateObjects.put(propertyFromLine, ruleObject);
 				}
 
 			}else{
-
 				List<TSVColumn> tsvcolumns = extractTSVColumnsFromSentence(lineFromBlock);
 				if(predicateObjects.containsKey(propertyFromLine)){
 					@SuppressWarnings("unchecked")
@@ -299,10 +304,9 @@ public class App
 	private List<Flag> extractFlagsFromSentence(String sentence) {
 		List<Flag> flagsList = new ArrayList<Flag>();
 
-		Matcher matcher = matchRegexOnString("\\/[DR!]|\\/(NM)|\\/(SP)|\\/(CB)|\\/(BASEIRI)", sentence);
+		Matcher matcher = matchRegexOnString("\\/[DR]", sentence);
 
-		if(!matcher.hitEnd()){
-
+		try{
 			if(matcher.group().equals("/R")){
 				flagsList.add(new ContentDirectionTSVColumn(EnumContentDirectionTSVColumn.RIGHT));
 				sentence = removeRegexFromContent("\\/[R]", sentence);
@@ -310,6 +314,14 @@ public class App
 				flagsList.add(new ContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
 				sentence = removeRegexFromContent("\\/[D]", sentence);
 			}
+		}catch(Exception e){
+			flagsList.add(new ContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
+		}
+
+
+		matcher = matchRegexOnString("\\/[!]|\\/(NM)|\\/(SP)|\\/(CB)|\\/(BASEIRI)|\\/(OWNID)", sentence);
+
+		if(!matcher.hitEnd()){
 
 			while(!matcher.hitEnd()){			
 
@@ -339,6 +351,12 @@ public class App
 					flagsList.add(extractDataFromFlagBaseIRIFromSentence(sentence, EnumRegexList.SELECTBASEIRIFLAG.getExpression()));
 					sentence = removeRegexFromContent(EnumRegexList.SELECTBASEIRIFLAG.getExpression(), sentence);
 				}
+				
+				if(matcherString.equals("/OWNID")){
+					flagsList.add(new FlagOWNID(true));
+					sentence = removeRegexFromContent("\\/(OWNID)", sentence);
+				}
+				
 				matcher.find();
 			}
 		}
@@ -361,12 +379,10 @@ public class App
 
 	private Flag extractDataFromFlagConditionFromSentence(String sentence, String regex) {
 
-		Matcher matchedConditionSelected = matchRegexOnString("\\(\\d*\\)", matchRegexOnString(regex, sentence).group());
+		String cbFlagTerm = matchRegexOnString(regex, sentence).group();
+		String matchedConditionSelected = matchRegexOnString("\\d+", cbFlagTerm).group(); 
 
-		int id = Integer.getInteger(matchedConditionSelected.group().substring(
-				1, 											  //remove the first parentheses
-				matchedConditionSelected.group().length() - 1 //remove the last parentheses
-				));
+		int id = Integer.parseInt(matchedConditionSelected);
 
 		return new FlagConditionBlock(id);
 	}
@@ -381,7 +397,7 @@ public class App
 			columnsSelected.add(Integer.parseInt(matchedColumnsSelected.group()));
 			matchedColumnsSelected.find();
 		}
-		
+
 		if(columnsSelected.size() < 1){
 			columnsSelected.add(Integer.MAX_VALUE);
 		}
@@ -426,14 +442,14 @@ public class App
 		String data = null;
 
 		Matcher matcher = matchRegexOnString(regex, content);
-		
+
 		try{
 			data = matcher.group(); 
 			data = data.substring(data.indexOf("\"")+1, data.indexOf("\"", data.indexOf("\"")+1));
 		}catch(IllegalStateException e){
 			//used just to identify when the matcher did not find anything.
-			
-			
+
+
 			//System.out.println("exception");
 		}
 
@@ -451,7 +467,7 @@ public class App
 		}
 		return identifiedRules;
 	}
-	
+
 	private List<String> identifyConditionBlocksFromString(String fileContent) {
 		Pattern patternToFind = Pattern.compile("condition_block\\[(.*?)\\]");
 		Matcher match = patternToFind.matcher(fileContent);

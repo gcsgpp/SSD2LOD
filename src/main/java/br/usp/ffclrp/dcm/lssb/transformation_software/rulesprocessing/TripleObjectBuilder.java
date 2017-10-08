@@ -13,7 +13,7 @@ public class TripleObjectBuilder {
 		return new TripleObjectAsColumns();
 	}
 	
-	public static TripleObject createObjectToRule(Integer param){
+	public static TripleObject createObjectToRule(ObjectAsRule param){
 		return new TripleObjectAsRule(param);
 	}
 	

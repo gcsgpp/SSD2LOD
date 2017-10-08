@@ -4,22 +4,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TripleObjectAsRule implements TripleObject {
-
 	
-	private List<Integer> ruleNumber = null;
+	private List<ObjectAsRule> object;
 	
 	public TripleObjectAsRule() {
 		
 	}
 	
-	public TripleObjectAsRule(Integer ruleNumbers){
-		this.ruleNumber = new ArrayList<Integer>();
-		this.ruleNumber.add(ruleNumbers);
+	public TripleObjectAsRule(ObjectAsRule object){
+		this.object = new ArrayList<ObjectAsRule>();
+		this.object.add(object);
 	}
 	
 	@Override
-	public List<Integer> getObject() {
-		return ruleNumber;
+	public List<ObjectAsRule> getObject() {
+		return this.object;
 	}
 
 }

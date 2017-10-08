@@ -20,7 +20,6 @@ public class TripleObjectAsColumns implements TripleObject {
 		this.columns = obj;
 	}
 	
-	
 	@Override
 	public List<TSVColumn> getObject() {
 		return this.columns;

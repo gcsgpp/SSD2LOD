@@ -52,8 +52,9 @@ public class TriplesProcessing {
 	private Map<Integer, ConditionBlock> conditionBlocks;
 
 
-	public TriplesProcessing(String relativePathDataFile) {
+	public TriplesProcessing(String relativePathDataFile, String relativePathOntologyFile) {
 		model = ModelFactory.createDefaultModel();
+		model.read(relativePathOntologyFile);
 		fileReader = readFile(relativePathDataFile);
 	}
 
@@ -340,6 +341,7 @@ public class TriplesProcessing {
 		for(TSVColumn column : listTSVColumn){
 			for(Flag flag : column.getFlags()){
 				if(flag instanceof FlagBaseIRI){
+					model.setNsPrefix(((FlagBaseIRI) flag).getNamespace(), ((FlagBaseIRI) flag).getIRI());
 					return ((FlagBaseIRI) flag).getIRI();
 				}
 			}
@@ -370,7 +372,7 @@ public class TriplesProcessing {
 			FileOutputStream fos;
 			fos = new FileOutputStream(f);
 			//model.write(fos, "N-TRIPLES");
-			model.write(fos, "RDFXML");
+			model.write(fos, "RDF/XML");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

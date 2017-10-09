@@ -52,9 +52,9 @@ public class App
 		System.out.println( "Hello World!" );
 
 		App app = new App();
-		app.extractRulesFromFile("c:\\masterSoftwareTestFiles\\testingrules.txt", "enchimentdata.owl");
+		app.extractRulesFromFile("testingrules.txt", "enchimentdata.owl");
 
-		TriplesProcessing triplesProcessing = new TriplesProcessing("c:\\masterSoftwareTestFiles\\enrichedData.tsv");
+		TriplesProcessing triplesProcessing = new TriplesProcessing("enrichedData.tsv", "enchimentdata.owl");
 		triplesProcessing.createTriplesFromRules(app.rulesList, app.conditionsBlocks, "http://purl.org/gabriel/test/");
 	}
 
@@ -365,10 +365,13 @@ public class App
 	}
 
 	private Flag extractDataFromFlagBaseIRIFromSentence(String sentence, String regex) {
+		sentence = matchRegexOnString(regex, sentence).group();
+		
 		String iri = extractDataFromFirstQuotationMarkInsideRegex(sentence, regex);
+		String namespace = extractDataFromFirstQuotationMarkInsideRegex(sentence, EnumRegexList.SELECTNAMESPACEBASEIRIFLAG.getExpression());
 
 
-		return new FlagBaseIRI(iri);
+		return new FlagBaseIRI(iri, namespace);
 	}
 
 	private Flag extractDataFromFlagFixedContentFromSentence(String sentence, String regex) {

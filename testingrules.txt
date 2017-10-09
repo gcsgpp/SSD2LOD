@@ -1,0 +1,25 @@
+transformation_rule[1, "Functional Annotation" = "id":
+	"category" = "Category",
+	"has part" = 2 /CB(1),
+	"has part" = 3 /CB(2),
+	"amount" = "Count",
+	"has p-value" = "PValue",
+	"has part" = 4,
+	"has fold enrichment value" = "Fold Enrichment",
+	"has bonferroni value" = "Bonferroni",
+	"has benjamini value" = "Benjamini"
+]
+	
+transformation_rule[2, "biological process" = "Term" /SP("~", 0) /BASEIRI("http://amigo1.geneontology.org/cgi-bin/amigo/term_details?term=", "go") ]
+
+condition_block[1:
+	"Category" ! "KEGG_PATHWAY"
+	]
+
+transformation_rule[3, "biological process" = "Term" /SP(":", 0) /BASEIRI("http://www.kegg.jp/entry/", "kegg") ]
+
+condition_block[2:
+	"Category" = "KEGG_PATHWAY"
+	]
+
+transformation_rule[4, "Gene" = "Genes" /SP(", ") /BASEIRI("http://example.com/gene/#", "ex") ]

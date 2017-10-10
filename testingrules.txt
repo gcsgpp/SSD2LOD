@@ -22,4 +22,4 @@ condition_block[2:
 	"Category" = "KEGG_PATHWAY"
 	]
 
-transformation_rule[4, "Gene" = "Genes" /SP(", ") /BASEIRI("http://example.com/gene/#", "ex") ]
+transformation_rule[4, "Gene" = "Genes" /SP(", ") /BASEIRI("http://www.genecards.org/cgi-bin/carddisp.pl?gene=", "genecard") ]

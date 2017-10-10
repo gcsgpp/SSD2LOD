@@ -15,8 +15,6 @@ import java.util.stream.Stream;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLProperty;
 
-import com.fasterxml.jackson.databind.util.EnumResolver;
-
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Condition;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ConditionBlock;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ContentDirectionTSVColumn;
@@ -52,10 +50,12 @@ public class App
 		System.out.println( "Hello World!" );
 
 		App app = new App();
-		app.extractRulesFromFile("testingrules.txt", "enchimentdata.owl");
+		//app.extractRulesFromFile("testingrules_geo.txt", "ontotestegeo.owl");
+		app.extractRulesFromFile("testes/teste_3/rules_teste_3.txt", "onto_teste_2.owl");
 
-		TriplesProcessing triplesProcessing = new TriplesProcessing("enrichedData.tsv", "enchimentdata.owl");
-		triplesProcessing.createTriplesFromRules(app.rulesList, app.conditionsBlocks, "http://purl.org/gabriel/test/");
+		//TriplesProcessing triplesProcessing = new TriplesProcessing("geoData_teste.tsv", "ontotestegeo.owl");
+		TriplesProcessing triplesProcessing = new TriplesProcessing("testes/teste_3/teste_3.tsv", "testes/teste_3/onto_teste_3.owl");
+		triplesProcessing.createTriplesFromRules(app.rulesList, app.conditionsBlocks, "http:\\example.org/onto/individual#");
 	}
 
 	public void extractRulesFromFile(String rulesRelativePath, String ontologyRelativePath){
@@ -207,7 +207,7 @@ public class App
 		}
 
 		Map<OWLProperty, TripleObject> predicateObjects = new Hashtable<OWLProperty, TripleObject>();
-		for(int i = 0; i <= initialOfEachMatch.size()-1; i++){
+		for(int i = 0; i < initialOfEachMatch.size(); i++){
 			int finalChar;
 			if(i == initialOfEachMatch.size()-1) //IF LAST MATCH, GET THE END OF THE SENTENCE
 				finalChar = predicatesLinesOneBlock.length();
@@ -251,6 +251,7 @@ public class App
 
 		return new Rule(ruleId, ruleSubject, subjectTsvcolumns, predicateObjects);
 	}
+	
 	private Rule exctactRuleFromOneLineRuleBlock(String subjectLine) {
 		String ruleId 						= extractIDFromSentence(subjectLine);
 		OWLClass ruleSubject 				= extractSubjectFromSentence(subjectLine);

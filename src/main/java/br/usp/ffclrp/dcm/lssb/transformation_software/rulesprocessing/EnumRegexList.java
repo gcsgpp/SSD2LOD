@@ -16,7 +16,7 @@ public enum EnumRegexList {
 	//CONDITION BLOCK REGEX:
 	SELECTCOLUMNCONDITIONBLOCK("(\".*\")\\s(=|!|>|<)"),
 	SELECTPREDICATESDIVISIONSCONDITIONBLOCK("(:|,)(\\s*?)\"(.*?)\"\\s?(=|!|>|<)"),
-	SELECTOPERATIONCONDITIONBLOCK("(=|!|>|<)"),
+	SELECTOPERATIONCONDITIONBLOCK("(==|!=|>|<)"),
 	SELECTALL(".+");
 	
 	private final String regexExpressions;

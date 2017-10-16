@@ -4,7 +4,7 @@ public enum EnumRegexList {
 	SELECTRULEID("(transformation_rule|condition_block)\\[\\d+"),
 	SELECTSUBJECTCLASSNAME("(\".*\")\\s?="), //old: \\[\\d+.*\"\\s?
 	SELECTSUBJECTLINE(":(\\s*?)\"(\\w|\\d)"),
-	SELECTPREDICATESDIVISIONS("(:|,)\\s?\"((\\w|\\d)*?)\"\\s*="),
+	SELECTPREDICATESDIVISIONS("(:|,)\\s?\"[^:,]*?\"\\s*="),
 	SELECTPREDICATE("(.*?)="),
 	SELECTCONTENTQUOTATIONMARK("(\"[^\"]*\")"),
 	SELECTFIRSTNUMBERS("(\\d)+"),

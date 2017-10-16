@@ -145,32 +145,34 @@ public class TriplesProcessing {
 	}
 
 	private boolean assertConditionBlock(List<Flag> flags, Integer tsvLineNumber) {
-
 		for(Flag flag : flags){
 			if(flag instanceof FlagConditionBlock){
 				ConditionBlock conditionBlock = conditionBlocks.get(((FlagConditionBlock) flag).getId());
 
 				for(Condition condition : conditionBlock.getConditions()){
 					String contentTSVColumn = fileReader.getData(condition.getColumn(), tsvLineNumber);
-
+					Boolean result = true;
 					if(condition.getOperation() == EnumOperationsConditionBlock.EQUAL){
-						return contentTSVColumn.equals(condition.getConditionValue());
+						result = contentTSVColumn.equals(condition.getConditionValue());
 					}
 
 					if(condition.getOperation() == EnumOperationsConditionBlock.DIFFERENT){
-						return compareDifferent(contentTSVColumn, condition.getConditionValue());
+						result = compareDifferent(contentTSVColumn, condition.getConditionValue());
 					}
 
 					if(condition.getOperation() == EnumOperationsConditionBlock.LESSTHAN){
-						return Long.parseLong(contentTSVColumn) < Long.parseLong(condition.getConditionValue());
+						result = Double.parseDouble(contentTSVColumn) < Double.parseDouble(condition.getConditionValue());
 					}
 
 					if(condition.getOperation() == EnumOperationsConditionBlock.GREATERTHAN){
-						return Long.parseLong(contentTSVColumn) > Long.parseLong(condition.getConditionValue());
+						result = Double.parseDouble(contentTSVColumn) > Double.parseDouble(condition.getConditionValue());
 					}
+					
+					if(!result)
+						return false;
 				}
 			}
-		}
+		}		
 
 		return true;
 	}
@@ -365,8 +367,8 @@ public class TriplesProcessing {
 			File f = new File("teste.rdf");
 			FileOutputStream fos;
 			fos = new FileOutputStream(f);
-			model.write(fos, "N-TRIPLES");
-			//model.write(fos, "RDF/XML");
+			//model.write(fos, "N-TRIPLES");
+			model.write(fos, "RDF/XML");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

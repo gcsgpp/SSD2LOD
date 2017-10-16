@@ -1,0 +1,187 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns="http://example.org/onto/enrichmentdata#"
+     xml:base="http://example.org/onto/enrichmentdata"
+     xmlns:schema="http://schema.org/"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:obo="http://purl.obolibrary.org/obo/"
+     xmlns:onto="http://example.org/onto/enchimentdata#">
+    <owl:Ontology rdf:about="http://example.org/onto/enrichmentdata#"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://purl.obolibrary.org/obo/BFO_0000051 -->
+
+    <owl:ObjectProperty rdf:about="http://purl.obolibrary.org/obo/BFO_0000051">
+        <rdfs:label rdf:datatype="http://www.w3.org/2000/01/rdf-schema#Literal">has part</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://example.org/onto/enchimentdata#has_benjamini_value -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/onto/enchimentdata#has_benjamini_value">
+        <rdfs:label rdf:datatype="http://www.w3.org/2000/01/rdf-schema#Literal">has benjamini value</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.org/onto/enchimentdata#has_bonferroni_value -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/onto/enchimentdata#has_bonferroni_value">
+        <rdfs:label rdf:datatype="http://www.w3.org/2000/01/rdf-schema#Literal">has bonferroni value</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.org/onto/enchimentdata#has_fold_enrichment_value -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/onto/enchimentdata#has_fold_enrichment_value">
+        <rdfs:label rdf:datatype="http://www.w3.org/2000/01/rdf-schema#Literal">has fold enrichment value</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.org/onto/enchimentdata#has_pvalue -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/onto/enchimentdata#has_pvalue">
+        <rdfs:label rdf:datatype="http://www.w3.org/2000/01/rdf-schema#Literal">has p-value</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://purl.obolibrary.org/obo/NCIT_P107 -->
+
+    <owl:DatatypeProperty rdf:about="http://purl.obolibrary.org/obo/NCIT_P107">
+        <rdfs:label rdf:datatype="http://www.w3.org/2000/01/rdf-schema#Literal">display name</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://purl.obolibrary.org/obo/NCIT_P382 -->
+
+    <owl:DatatypeProperty rdf:about="http://purl.obolibrary.org/obo/NCIT_P382">
+        <rdfs:label rdf:datatype="http://www.w3.org/2000/01/rdf-schema#Literal">term name</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://schema.org/amount -->
+
+    <owl:DatatypeProperty rdf:about="http://schema.org/amount">
+        <rdfs:label rdf:datatype="http://www.w3.org/2000/01/rdf-schema#Literal">amount</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://schema.org/category -->
+
+    <owl:DatatypeProperty rdf:about="http://schema.org/category">
+        <rdfs:label rdf:datatype="http://www.w3.org/2000/01/rdf-schema#Literal">category</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://example.org/onto/enchimentdata#Functional_Annotation -->
+
+    <owl:Class rdf:about="http://example.org/onto/enchimentdata#Functional_Annotation">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://purl.obolibrary.org/obo/BFO_0000051"/>
+                <owl:someValuesFrom rdf:resource="http://purl.obolibrary.org/obo/MI_0250"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://example.org/onto/enchimentdata#has_benjamini_value"/>
+                <owl:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://example.org/onto/enchimentdata#has_bonferroni_value"/>
+                <owl:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://example.org/onto/enchimentdata#has_fold_enrichment_value"/>
+                <owl:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://example.org/onto/enchimentdata#has_pvalue"/>
+                <owl:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://schema.org/amount"/>
+                <owl:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://schema.org/category"/>
+                <owl:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:label rdf:datatype="http://www.w3.org/2000/01/rdf-schema#Literal">Functional Annotation</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.obolibrary.org/obo/MI_0250 -->
+
+    <owl:Class rdf:about="http://purl.obolibrary.org/obo/MI_0250">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://purl.obolibrary.org/obo/NCIT_P107"/>
+                <owl:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:label rdf:datatype="http://www.w3.org/2000/01/rdf-schema#Literal">Gene</rdfs:label>
+    </owl:Class>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 4.2.8.20170104-2310) https://github.com/owlcs/owlapi -->
+

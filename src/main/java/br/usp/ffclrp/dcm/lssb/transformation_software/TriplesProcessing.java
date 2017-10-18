@@ -78,11 +78,6 @@ public class TriplesProcessing {
 			}
 		}
 
-		/*for(TriplePool poolElement : triplePoolList){
-			@Nonnull Resource object = retrieveResouce(poolElement.getRuleNumber(), poolElement.getLineNumber());
-			addTripleToModel(poolElement.getSubject(), poolElement.getPredicate(), object);
-		}*/
-
 		writeRDF();
 	}
 
@@ -262,7 +257,6 @@ public class TriplesProcessing {
 
 		for(int i = 0; i < flag.getColumns().size(); i++){
 			int colNumber = flag.getColumns().get(i);
-			Integer t = splitData.length;
 			if(splitData.length - 1 >= colNumber)
 				resultData[i] = splitData[colNumber];
 		}

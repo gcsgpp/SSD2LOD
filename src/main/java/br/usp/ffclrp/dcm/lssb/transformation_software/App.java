@@ -42,7 +42,7 @@ import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TripleObje
  */
 public class App
 {
-	private OntologyHelper ontologyHelper;
+	public OntologyHelper ontologyHelper;
 	List<Rule> rulesList;
 	Map<Integer, ConditionBlock> conditionsBlocks = new HashMap<Integer, ConditionBlock>();
 	public static void main( String[] args ) throws Exception
@@ -50,10 +50,8 @@ public class App
 		System.out.println( "Hello World!" );
 
 		App app = new App();
-		//app.extractRulesFromFile("testingrules_geo.txt", "ontotestegeo.owl");
 		app.extractRulesFromFile("testes/teste_3/rules_teste_3.txt", "onto_teste_2.owl");
 
-		//TriplesProcessing triplesProcessing = new TriplesProcessing("geoData_teste.tsv", "ontotestegeo.owl");
 		TriplesProcessing triplesProcessing = new TriplesProcessing("testes/teste_3/teste_3.tsv", "testes/teste_3/onto_teste_3.owl");
 		triplesProcessing.createTriplesFromRules(app.rulesList, app.conditionsBlocks, "http:\\example.org/onto/individual#");
 	}
@@ -70,11 +68,9 @@ public class App
 		for(ConditionBlock conditionBlock : listConditionBlock){
 			conditionsBlocks.put(conditionBlock.getId(), conditionBlock);
 		}
-		
-		//printRules(rulesList);
 	}
 
-	private List<ConditionBlock> extractConditionsBlocksFromString(String fileContent) {
+	public List<ConditionBlock> extractConditionsBlocksFromString(String fileContent) {
 		List<String> conditionsBlocksListAsText = identifyConditionBlocksFromString(fileContent);
 		List<ConditionBlock> cbList = new ArrayList<ConditionBlock>();
 
@@ -138,7 +134,7 @@ public class App
 			System.out.println("** Rule: **\n");
 			String out = "ID: " + r.getId() + "\t\t" + "Subject: " + r.getSubject().getIRI() + "\t\t";
 			r.getPredicateObjects().forEach( (key, value) -> { printSysoutRules(out, key, value); });
-
+			
 			if(r.getPredicateObjects().size() == 0)
 				System.out.println(out);
 		}
@@ -186,7 +182,7 @@ public class App
 		return splitContent;
 	}
 
-	private Rule createRulesFromBlock(String blockRulesAsText) {
+	public Rule createRulesFromBlock(String blockRulesAsText) {
 		Matcher matcher = matchRegexOnString(EnumRegexList.SELECTSUBJECTLINE.getExpression(), blockRulesAsText);
 		if(matcher.hitEnd()){
 			return exctactRuleFromOneLineRuleBlock(blockRulesAsText);
@@ -252,7 +248,7 @@ public class App
 		return new Rule(ruleId, ruleSubject, subjectTsvcolumns, predicateObjects);
 	}
 	
-	private Rule exctactRuleFromOneLineRuleBlock(String subjectLine) {
+	public Rule exctactRuleFromOneLineRuleBlock(String subjectLine) {
 		String ruleId 						= extractIDFromSentence(subjectLine);
 		OWLClass ruleSubject 				= extractSubjectFromSentence(subjectLine);
 		subjectLine = removeRegexFromContent(EnumRegexList.SELECTSUBJECTCLASSNAME.getExpression(), subjectLine);
@@ -261,13 +257,13 @@ public class App
 		return new Rule(ruleId, ruleSubject, subjectTsvcolumns, new HashMap<OWLProperty, TripleObject>());
 	}
 
-	private Integer extractRuleNumberAsTripleObject(String lineFromBlock) {
+	public Integer extractRuleNumberAsTripleObject(String lineFromBlock) {
 		Matcher matcher = matchRegexOnString(EnumRegexList.SELECTFIRSTNUMBERS.getExpression(), lineFromBlock);
 
 		return Integer.parseInt(matcher.group());
 	}
 
-	private boolean tripleObjectIsToAnotherRule(String lineFromBlock) {
+	public boolean tripleObjectIsToAnotherRule(String lineFromBlock) {
 
 		Matcher matcher = matchRegexOnString(EnumRegexList.SELECTCONTENTQUOTATIONMARK.getExpression(), lineFromBlock);
 
@@ -284,7 +280,7 @@ public class App
 		return ontologyHelper.getProperty(predicateName);
 	}
 
-	private List<TSVColumn> extractTSVColumnsFromSentence(String sentence){
+	public List<TSVColumn> extractTSVColumnsFromSentence(String sentence){
 		List<TSVColumn> listOfColumns = new ArrayList<TSVColumn>();
 		String[] eachTSVColumnWithFlags = sentence.split(";");
 
@@ -302,7 +298,7 @@ public class App
 		return listOfColumns;
 	}
 
-	private List<Flag> extractFlagsFromSentence(String sentence) {
+	public List<Flag> extractFlagsFromSentence(String sentence) {
 		List<Flag> flagsList = new ArrayList<Flag>();
 
 		Matcher matcher = matchRegexOnString("\\/[DR]", sentence);
@@ -452,9 +448,6 @@ public class App
 			data = data.substring(data.indexOf("\"")+1, data.indexOf("\"", data.indexOf("\"")+1));
 		}catch(IllegalStateException e){
 			//used just to identify when the matcher did not find anything.
-
-
-			//System.out.println("exception");
 		}
 
 		return data;

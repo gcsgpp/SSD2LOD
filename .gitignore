@@ -9,6 +9,7 @@ buildNumber.properties
 .mvn/timing.properties
 .settings
 testes
+src/main/java/br/usp/ffclrp/dcm/lssb/transformation_software/ontologies
 
 # Avoid ignoring Maven wrapper jar file (.jar files are usually ignored)
 !/.mvn/wrapper/maven-wrapper.jar

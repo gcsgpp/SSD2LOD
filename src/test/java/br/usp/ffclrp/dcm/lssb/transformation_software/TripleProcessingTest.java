@@ -187,7 +187,7 @@ public class TripleProcessingTest
 	}
 	
 	@Test
-	public void processRule() throws Exception
+	public void processRuleWithConditionblockflagBaseiriflagSeparatorflag() throws Exception
 	{
 		ontologyHelper = new OntologyHelper();
 		String testFolderPath = "testFiles/unitTestsFiles/";
@@ -219,7 +219,7 @@ public class TripleProcessingTest
 	}
 	
 	@Test
-	public void processRuleRuleTwoTest() throws Exception
+	public void processRuleWithColonAsSeparator() throws Exception
 	{
 		ontologyHelper = new OntologyHelper();
 		String testFolderPath = "testFiles/unitTestsFiles/";

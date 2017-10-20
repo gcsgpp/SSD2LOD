@@ -9,4 +9,10 @@ public class ContentDirectionTSVColumn extends Flag {
 		this.direction = direction;
 	}
 
+	public Enum<EnumContentDirectionTSVColumn> getDirection() {
+		return direction;
+	}
+	
+	
+
 }

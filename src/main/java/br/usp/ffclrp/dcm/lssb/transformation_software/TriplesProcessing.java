@@ -26,7 +26,6 @@ import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Rule;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Separator;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TSVColumn;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TripleObject;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TripleObjectAsColumns;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TripleObjectAsRule;
 
 public class TriplesProcessing {
@@ -42,12 +41,12 @@ public class TriplesProcessing {
 
 	public TriplesProcessing(String relativePathDataFile, String relativePathOntologyFile) {
 		model = ModelFactory.createDefaultModel();
-		model.read(relativePathOntologyFile);
-		fileReader = readFile(relativePathDataFile);
+		//model.read(relativePathOntologyFile);
+		fileReader = new SemistructuredFileReader(relativePathDataFile);
 	}
 
 	@SuppressWarnings("unchecked")
-	public void createTriplesFromRules(List<Rule> listRules, Map<Integer, ConditionBlock> conditionBlocks,  String defaultNs) throws Exception{	
+	public void createTriplesFromRules(List<Rule> listRules, Map<Integer, ConditionBlock> conditionBlocks,  String defaultNs){	
 
 		this.regularRuleList = listRules;
 		this.conditionBlocks = conditionBlocks;
@@ -78,15 +77,10 @@ public class TriplesProcessing {
 			}
 		}
 
-		/*for(TriplePool poolElement : triplePoolList){
-			@Nonnull Resource object = retrieveResouce(poolElement.getRuleNumber(), poolElement.getLineNumber());
-			addTripleToModel(poolElement.getSubject(), poolElement.getPredicate(), object);
-		}*/
-
 		writeRDF();
 	}
 
-	private List<Resource> processRule(Rule rule, Integer tsvLineNumber, String defaultNs) throws Exception {
+	private List<Resource> processRule(Rule rule, Integer tsvLineNumber, String defaultNs) {
 
 		for(TSVColumn ruleColumns : rule.getSubjectTSVColumns()){
 			if(!assertConditionBlock(ruleColumns.getFlags(), tsvLineNumber))
@@ -167,7 +161,7 @@ public class TriplesProcessing {
 					if(condition.getOperation() == EnumOperationsConditionBlock.GREATERTHAN){
 						result = Double.parseDouble(contentTSVColumn) > Double.parseDouble(condition.getConditionValue());
 					}
-					
+
 					if(!result)
 						return false;
 				}
@@ -252,7 +246,9 @@ public class TriplesProcessing {
 		try{
 			splitData = rawData.split(flag.getTerm());
 		}catch (Exception e) {
-			return null;
+			System.out.println(	"There is no caractere '" + flag.getTerm() +
+								"' on the field '" + columnTitle + "' to be used as separator");
+			e.printStackTrace();
 		}
 
 		if(flag.getColumns().get(0).equals(Integer.MAX_VALUE))
@@ -262,7 +258,6 @@ public class TriplesProcessing {
 
 		for(int i = 0; i < flag.getColumns().size(); i++){
 			int colNumber = flag.getColumns().get(i);
-			Integer t = splitData.length;
 			if(splitData.length - 1 >= colNumber)
 				resultData[i] = splitData[colNumber];
 		}
@@ -270,7 +265,7 @@ public class TriplesProcessing {
 		return resultData;
 	}
 
-	private List<Resource> getSubject(Rule rule, String defaultNs, Integer lineNumber) throws Exception {
+	private List<Resource> getSubject(Rule rule, String defaultNs, Integer lineNumber) {
 		//Boolean hasOWNIDTag = false;
 		Boolean hasBaseIRITag = false;
 		Resource subjectType = null;
@@ -297,7 +292,7 @@ public class TriplesProcessing {
 
 		List<String> subjectContent = new ArrayList<String>();
 		for(String content : subjectContentRaw){
-			subjectContent.add(content.replace(" ", "_"));
+			subjectContent.add(content.replaceAll(" ", "_"));
 		}
 
 		/*//SUBJECT THAT DO NOT HAVE DATA EXTRACTED FROM TSVCOLUMN MUST HAVE SOME NAME GENERATED
@@ -356,10 +351,6 @@ public class TriplesProcessing {
 		return false;
 	}
 
-	private SemistructuredFileReader readFile(String relativePath) {
-		return new SemistructuredFileReader(relativePath);
-	}
-
 	public void writeRDF(){
 		System.out.println("#####################################\n=== Writing RDF... \n");
 		long startTime = System.currentTimeMillis();
@@ -376,6 +367,10 @@ public class TriplesProcessing {
 		long stopTime = System.currentTimeMillis();
 		long elapsedTime = stopTime - startTime;
 		System.out.println("=== Wrote RDF in " + elapsedTime / 1000 + " secs ===\n#####################################\n\n");
+	}
+	
+	public Model getModel() {
+		return this.model;
 	}
 
 }

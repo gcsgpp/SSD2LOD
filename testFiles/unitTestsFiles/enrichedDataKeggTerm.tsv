@@ -1,0 +1,2 @@
+Category	Term	Count	%	PValue	Genes	List Total	Pop Hits	Pop Total	Fold Enrichment	Bonferroni	Benjamini	FDR
+KEGG_PATHWAY	hsa00190:Oxidative phosphorylation	3	1.414581066	0.020404871	"UQCRC2, UQCRC1, ATP5J"	322	133	6910	2.097557558	0.994341506	0.994341506	23.50836752

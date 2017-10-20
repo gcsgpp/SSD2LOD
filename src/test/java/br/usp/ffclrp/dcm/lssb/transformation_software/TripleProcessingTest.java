@@ -8,7 +8,6 @@ import java.util.Map;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Statement;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLProperty;
@@ -188,7 +187,7 @@ public class TripleProcessingTest
 	}
 	
 	@Test
-	public void processRuleRuleOneTest() throws Exception
+	public void processRule() throws Exception
 	{
 		ontologyHelper = new OntologyHelper();
 		String testFolderPath = "testFiles/unitTestsFiles/";

@@ -33,7 +33,7 @@ import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TripleObje
 public class AppTest
 {
 	@Test
-	public void exctractConditionsBlockTest()
+	public void exctractConditionsFromString()
 	{
 		String content = "condition_block[1: \"Category\" != \"KEGG_PATHWAY\", \"PValue\" < \"0.01\" ]";
 		content += "condition_block[2: \"Category\" == \"KEGG_PATHWAY\",	\"PValue\" < \"0.03\" ]";
@@ -80,7 +80,7 @@ public class AppTest
 	}
 
 	@Test
-	public void createRule1FromBlockTest(){
+	public void creatingRuleFromStringWithBaseIRISeparatorConditionBlock(){
 
 		String 	rule1String = "transformation_rule[1, \"Term\" = \"Term\" /SP(\"~\", 0) /BASEIRI(\"http://amigo1.geneontology.org/cgi-bin/amigo/term_details?term=\", \"go\") /CB(1) :" +
 				" \"has_pvalue\" = \"PValue\", " +
@@ -186,7 +186,7 @@ public class AppTest
 	}
 
 	@Test
-	public void createRule2FromBlockTest(){
+	public void creatingRuleFromStringUsingColonAsSeparator(){
 
 		String 	rule2String = " transformation_rule[2, \"Term\" = \"Term\" /SP(\":\", 0) /BASEIRI(\"http://www.kegg.jp/entry/\", \"kegg\") /CB(2) : " +
 				" \"has_pvalue\" = \"PValue\", " +
@@ -299,7 +299,7 @@ public class AppTest
 	}
 
 	@Test
-	public void createRule3FromBlockTest(){
+	public void creatingRuleFromStringWithNoPredicatesAndObjects(){
 
 		String 	rule3String = " transformation_rule[3, \"Gene\" = \"Genes\" /SP(\", \") /BASEIRI(\"http://www.genecards.org/cgi-bin/carddisp.pl?gene=\", \"genecard\") ] ";
 

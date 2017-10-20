@@ -8,16 +8,12 @@ dependency-reduced-pom.xml
 buildNumber.properties
 .mvn/timing.properties
 .settings
-testes
+
+*.rdf
+testFiles/*
+!testFiles/unitTestsFiles
+
 src/main/java/br/usp/ffclrp/dcm/lssb/transformation_software/ontologies
 
 # Avoid ignoring Maven wrapper jar file (.jar files are usually ignored)
 !/.mvn/wrapper/maven-wrapper.jar
-
-teste\.rdf
-
-testes/
-
-ontotestegeo\.owl
-
-testingrules_geo\.txt

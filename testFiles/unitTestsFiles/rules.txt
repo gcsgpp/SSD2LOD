@@ -1,0 +1,124 @@
+----- IDF
+MAGE-TAB Version
+//Investigation Title
+//Investigation Accession
+Investigation Accession Term Source REF
+//Experimental Design
+//Experimental Design Term Source REF
+//Experimental Design Term Accession Number
+//Experimental Factor Name
+//Experimental Factor Type
+//Experimental Factor Term Source REF
+//Experimental Factor Term Accession Number
+//Person Last Name
+//Person First Name
+//Person Mid Initials
+//Person Email
+//Person Phone
+//Person Fax
+//Person Address
+//Person Affiliation
+//Person Roles
+//Person Roles Term Source REF
+//Person Roles Term Accession Number
+//Quality Control Type
+//Quality Control Term Source REF
+//Quality Control Term Accession Number
+//Replicate Type
+//Replicate Term Source REF
+//Replicate Term Accession Number
+//Normalization Type
+//Normalization Term Source REF
+//Normalization Term Accession Number
+//Date of Experiment
+//Public Release Date
+//PubMed ID
+//Publication DOI
+//Publication Author List 
+//Publication Title
+//Publication Status
+//Publication Status Term Source REF
+//Publication Status Term Accession Number
+//Experiment Description
+//Protocol Name
+//Protocol Type
+//Protocol Term Source REF
+//Protocol Term Accession Number
+//Protocol Description
+//Protocol Parameters
+//Protocol Hardware
+//Protocol Software
+//Protocol Contact
+??SDRF File
+??Term Source Name
+??Term Source File
+??Term Source Version
+??Comment[]
+
+
+----- SDRF
+//Source Name
+//Sample Name
+//Extract Name
+//Labeled Extract Name
+//Assay Name
+??opcional - nao incluido??Scan Name
+??opcional - nao incluido??Normalization Name
+//Array Data File
+//Derived Array Data File
+//Array Data Matrix File
+//Derived Array Data Matrix File
+//Protocol REF
+//Characteristics [ ]
+//Provider
+//Material Type
+//Array Design File/REF
+//Technology Type
+//Label
+//Factor Value [ ] ( )
+//Performer
+//Date
+//Parameter Value [ ]
+Unit [ ]
+//Description
+Term Source REF
+Term Accession Number
+Comment [ ]
+
+
+
+
+
+--- ADF
+//Array Design Name
+Version
+//Provider
+//Printing Protocol
+//Technology Type
+??not mandatory??Technology Type Term Source REF
+??not mandatory??Technology Type Term Accession Number
+//Surface Type
+??not mandatory??Surface Type Term Source REF
+??not mandatory??Surface Type Term Accession Number
+//Substrate Type
+??not mandatory??Substrate Type Term Source REF
+??not mandatory??Substrate Type Term Accession Number
+//Sequence Polymer Type
+??not mandatory??Sequence Polymer Type Term Source REF
+??not mandatory??Sequence Polymer Type Term Accession Number
+//Term Source Name
+//Term Source File
+??not mandatory??Term Source Version
+//Comment []
+//Reporter Name
+??Pode ser colocado mas de forma opcional no GPL??Composite Element Name
+??Block Column
+??Block Row
+??Column
+??Row
+//Reporter Sequence
+//Reporter Group [ ]
+//Control Type
+//Reporter Database Entry [ ]
+??eu não vejo como transformar isso.??Composite Element Database Entry [ ]
+??eu não vejo como transformar isso.??Composite Element Comment

@@ -1,0 +1,2 @@
+Category	Term	Count	%	PValue	Genes	List Total	Pop Hits	Pop Total	Fold Enrichment	Bonferroni	Benjamini	FDR
+GOTERM_BP_FAT	GO:0030001~metal ion transport	4	6.420021763	0.000397262	"SLC5A5, JPH3, SLC5A4, SLC5A12"	754	814	16650	1.600554618	0.914219543	0.914219543	0.770059282

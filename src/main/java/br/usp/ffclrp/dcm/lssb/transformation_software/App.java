@@ -43,16 +43,15 @@ import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TripleObje
 public class App
 {
 	public OntologyHelper ontologyHelper;
-	List<Rule> rulesList;
-	Map<Integer, ConditionBlock> conditionsBlocks = new HashMap<Integer, ConditionBlock>();
-	public static void main( String[] args ) throws Exception
+	public List<Rule> rulesList;
+	public Map<Integer, ConditionBlock> conditionsBlocks = new HashMap<Integer, ConditionBlock>();
+
+	public static void main( String[] args )
 	{
-		System.out.println( "Hello World!" );
-
 		App app = new App();
-		app.extractRulesFromFile("testes/teste_3/rules_teste_3.txt", "onto_teste_2.owl");
+		app.extractRulesFromFile("testFiles/teste_3/rules_teste_3.txt", "testFiles/teste_3/onto_teste_3.owl");
 
-		TriplesProcessing triplesProcessing = new TriplesProcessing("testes/teste_3/teste_3.tsv", "testes/teste_3/onto_teste_3.owl");
+		TriplesProcessing triplesProcessing = new TriplesProcessing("testFiles/teste_3/teste_3.tsv", "testFiles/teste_3/onto_teste_3.owl");
 		triplesProcessing.createTriplesFromRules(app.rulesList, app.conditionsBlocks, "http:\\example.org/onto/individual#");
 	}
 

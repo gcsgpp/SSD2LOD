@@ -1,6 +1,8 @@
 package br.usp.ffclrp.dcm.lssb.transformation_software;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,13 +49,17 @@ public class OntologyHelper {
 	public void loadingOntologyFromFile(String path){
 		OWLOntologyManager m = OWLManager.createOWLOntologyManager();
 
-		InputStream is = OntologyHelper.class.getResourceAsStream(path);
+		//InputStream is = OntologyHelper.class.getResourceAsStream(path);
+
 		try {
+			InputStream is = new FileInputStream(path);
 			o = m.loadOntologyFromOntologyDocument(is);
 			addAllClassesLabelsToMap();			
 			addAllPredicadesToMap();
 
 		} catch (OWLOntologyCreationException e) {
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
 	}

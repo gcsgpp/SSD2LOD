@@ -1,5 +1,17 @@
-package br.usp.dcm.lssb.transformation_software;
+package br.usp.ffclrp.dcm.lssb.transformation_software;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
+import java.util.List;
+import java.util.Map.Entry;
+
+import org.junit.Test;
+import org.semanticweb.owlapi.model.OWLProperty;
+
+import br.usp.ffclrp.dcm.lssb.transformation_software.App;
+import br.usp.ffclrp.dcm.lssb.transformation_software.OntologyHelper;
+import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Condition;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ConditionBlock;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ContentDirectionTSVColumn;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.EnumContentDirectionTSVColumn;
@@ -14,47 +26,14 @@ import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TSVColumn;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TripleObject;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TripleObjectAsColumns;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TripleObjectAsRule;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
-import java.util.List;
-import java.util.Map.Entry;
-
-import org.semanticweb.owlapi.model.OWLProperty;
-
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Condition;
-import br.usp.ffclrp.dcm.lssb.transformation_software.App;
-import br.usp.ffclrp.dcm.lssb.transformation_software.OntologyHelper;
 
 /**
  * Unit test for simple App.
  */
-public class AppTest 
-extends TestCase
+public class AppTest
 {
-	/**
-	 * Create the test case
-	 *
-	 * @param testName name of the test case
-	 */
-	public AppTest( String testName )
-	{
-		super( testName );
-	}
-
-	/**
-	 * @return the suite of tests being tested
-	 */
-	public static Test suite()
-	{
-		return new TestSuite( AppTest.class );
-	}
-
-	/**
-	 * Rigourous Test :-)
-	 */
-	public void testExctractConditionsBlock()
+	@Test
+	public void exctractConditionsBlockTest()
 	{
 		String content = "condition_block[1: \"Category\" != \"KEGG_PATHWAY\", \"PValue\" < \"0.01\" ]";
 		content += "condition_block[2: \"Category\" == \"KEGG_PATHWAY\",	\"PValue\" < \"0.03\" ]";
@@ -100,9 +79,10 @@ extends TestCase
 		}
 	}
 
-	public void testCreateRule1FromBlockTest(){
+	@Test
+	public void createRule1FromBlockTest(){
 
-		String 	rule1String = " transformation_rule[1, \"Term\" = \"Term\" /SP(\"~\", 0) /BASEIRI(\"http://amigo1.geneontology.org/cgi-bin/amigo/term_details?term=\", \"go\") /CB(1) :" +
+		String 	rule1String = "transformation_rule[1, \"Term\" = \"Term\" /SP(\"~\", 0) /BASEIRI(\"http://amigo1.geneontology.org/cgi-bin/amigo/term_details?term=\", \"go\") /CB(1) :" +
 				" \"has_pvalue\" = \"PValue\", " +
 				" \"name\" = \"Term\" /SP(\"~\", 1), " +
 				" \"has participant\" = 3	] ";
@@ -111,7 +91,7 @@ extends TestCase
 
 		App app = new App();
 		app.ontologyHelper = new OntologyHelper();
-		app.ontologyHelper.loadingOntologyFromFile("ontologies/onto_teste_5.owl");
+		app.ontologyHelper.loadingOntologyFromFile("testFiles/unitTestsFiles/ontology.owl");
 
 		Rule rule1Extracted = app.createRulesFromBlock(rule1String);
 
@@ -186,9 +166,6 @@ extends TestCase
 					}
 				}
 
-
-
-
 			}else if(entry.getKey().getIRI().toString().equals("http://purl.org/g/onto/has_participant")){
 				TripleObjectAsRule object = (TripleObjectAsRule) entry.getValue();
 
@@ -202,16 +179,14 @@ extends TestCase
 
 				}
 
-
-
-
 			}else
 				assert(false);
 		}
 
 	}
 
-	public void testCreateRule2FromBlock(){
+	@Test
+	public void createRule2FromBlockTest(){
 
 		String 	rule2String = " transformation_rule[2, \"Term\" = \"Term\" /SP(\":\", 0) /BASEIRI(\"http://www.kegg.jp/entry/\", \"kegg\") /CB(2) : " +
 				" \"has_pvalue\" = \"PValue\", " +
@@ -224,7 +199,7 @@ extends TestCase
 
 		App app = new App();
 		app.ontologyHelper = new OntologyHelper();
-		app.ontologyHelper.loadingOntologyFromFile("ontologies/onto_teste_5.owl");
+		app.ontologyHelper.loadingOntologyFromFile("testFiles/unitTestsFiles/ontology.owl");
 
 		Rule rule2Extracted = app.createRulesFromBlock(rule2String);
 
@@ -323,18 +298,19 @@ extends TestCase
 
 	}
 
-	public void testCreateRule3FromBlock(){
+	@Test
+	public void createRule3FromBlockTest(){
 
 		String 	rule3String = " transformation_rule[3, \"Gene\" = \"Genes\" /SP(\", \") /BASEIRI(\"http://www.genecards.org/cgi-bin/carddisp.pl?gene=\", \"genecard\") ] ";
 
 		rule3String = rule3String.replace("\t", "").replaceAll("\n", "");
-		
+
 		App app = new App();
 		app.ontologyHelper = new OntologyHelper();
-		app.ontologyHelper.loadingOntologyFromFile("ontologies/onto_teste_5.owl");
+		app.ontologyHelper.loadingOntologyFromFile("testFiles/unitTestsFiles/ontology.owl");
 
 		Rule rule3Extracted = app.createRulesFromBlock(rule3String);
-		
+
 		//Assert rule 3
 		assertEquals("3", rule3Extracted.getId());
 		assertEquals("http://purl.org/g/onto/Gene", rule3Extracted.getSubject().getIRI().toString());
@@ -356,7 +332,7 @@ extends TestCase
 					}else if(flag instanceof ContentDirectionTSVColumn){
 						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((ContentDirectionTSVColumn) flag).getDirection());
 					}else{
-						assert(false);
+						fail();
 					}
 				}
 			}else{
@@ -367,4 +343,5 @@ extends TestCase
 		assertEquals(0, rule3Extracted.getPredicateObjects().size());
 
 	}
+
 }

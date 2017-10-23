@@ -25,7 +25,6 @@ import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FixedConte
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Flag;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagBaseIRI;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagConditionBlock;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagOWNID;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.NotMetadata;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ObjectAsRule;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Rule;
@@ -128,7 +127,7 @@ public class App
 		return null;
 	}
 
-	private void printRules(List<Rule> rulesList) {
+/*	private void printRules(List<Rule> rulesList) {
 		for(Rule r : rulesList){
 			System.out.println("** Rule: **\n");
 			String out = "ID: " + r.getId() + "\t\t" + "Subject: " + r.getSubject().getIRI() + "\t\t";
@@ -157,9 +156,9 @@ public class App
 			}
 		}
 		System.out.println(outAddedContent);
-	}
+	}*/
 
-	private List<Rule> extractRulesFromString(String fileContent) {
+	public List<Rule> extractRulesFromString(String fileContent) {
 
 		List<String> rulesListAsText = identifyRulesBlocksFromString(fileContent);		
 
@@ -233,7 +232,7 @@ public class App
 				List<TSVColumn> tsvcolumns = extractTSVColumnsFromSentence(lineFromBlock);
 				if(predicateObjects.containsKey(propertyFromLine)){
 					@SuppressWarnings("unchecked")
-					List<TSVColumn> object = (List<TSVColumn>) predicateObjects.get(propertyFromLine);
+					List<TSVColumn> object = (List<TSVColumn>) predicateObjects.get(propertyFromLine).getObject();
 					for(TSVColumn column : tsvcolumns){
 						object.add(column);
 					}
@@ -346,11 +345,6 @@ public class App
 				if(matcherString.equals("/BASEIRI")){
 					flagsList.add(extractDataFromFlagBaseIRIFromSentence(sentence, EnumRegexList.SELECTBASEIRIFLAG.getExpression()));
 					sentence = removeRegexFromContent(EnumRegexList.SELECTBASEIRIFLAG.getExpression(), sentence);
-				}
-				
-				if(matcherString.equals("/OWNID")){
-					flagsList.add(new FlagOWNID(true));
-					sentence = removeRegexFromContent("\\/(OWNID)", sentence);
 				}
 				
 				matcher.find();

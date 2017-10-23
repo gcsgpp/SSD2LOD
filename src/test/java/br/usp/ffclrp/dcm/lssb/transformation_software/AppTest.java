@@ -16,9 +16,11 @@ import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ConditionB
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ContentDirectionTSVColumn;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.EnumContentDirectionTSVColumn;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.EnumOperationsConditionBlock;
+import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FixedContent;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Flag;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagBaseIRI;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagConditionBlock;
+import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.NotMetadata;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ObjectAsRule;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Rule;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Separator;
@@ -27,9 +29,6 @@ import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TripleObje
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TripleObjectAsColumns;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TripleObjectAsRule;
 
-/**
- * Unit test for simple App.
- */
 public class AppTest
 {
 	@Test
@@ -56,7 +55,7 @@ public class AppTest
 						assertEquals(EnumOperationsConditionBlock.LESSTHAN, condition.getOperation());
 						assertEquals("0.01", condition.getConditionValue());
 					}else{
-						assert(false);
+						fail();
 					}
 
 				}else if(conditionBlock.getId() == 2){
@@ -71,29 +70,29 @@ public class AppTest
 						assertEquals(EnumOperationsConditionBlock.LESSTHAN, condition.getOperation());
 						assertEquals("0.03", condition.getConditionValue());
 					}else{
-						assert(false);
+						fail();
 					}
 
 				}else
-					assert(false);
+					fail();
 		}
 	}
 
 	@Test
 	public void creatingRuleFromStringWithBaseIRISeparatorConditionBlock(){
 
-		String 	rule1String = "transformation_rule[1, \"Term\" = \"Term\" /SP(\"~\", 0) /BASEIRI(\"http://amigo1.geneontology.org/cgi-bin/amigo/term_details?term=\", \"go\") /CB(1) :" +
+		String 	ruleString = "transformation_rule[1, \"Term\" = \"Term\" /SP(\"~\", 0) /BASEIRI(\"http://amigo1.geneontology.org/cgi-bin/amigo/term_details?term=\", \"go\") /CB(1) :" +
 				" \"has_pvalue\" = \"PValue\", " +
 				" \"name\" = \"Term\" /SP(\"~\", 1), " +
 				" \"has participant\" = 3	] ";
 
-		rule1String = rule1String.replace("\t", "").replaceAll("\n", "");
+		ruleString = ruleString.replace("\t", "").replaceAll("\n", "");
 
 		App app = new App();
 		app.ontologyHelper = new OntologyHelper();
 		app.ontologyHelper.loadingOntologyFromFile("testFiles/unitTestsFiles/ontology.owl");
 
-		Rule rule1Extracted = app.createRulesFromBlock(rule1String);
+		Rule rule1Extracted = app.createRulesFromBlock(ruleString);
 
 
 		//Assert rule 1
@@ -122,11 +121,11 @@ public class AppTest
 					}else if(flag instanceof ContentDirectionTSVColumn){
 						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((ContentDirectionTSVColumn) flag).getDirection());
 					}else{
-						assert(false);
+						fail();
 					}
 				}
 			}else{
-				assert(false);
+				fail();
 			}
 		}
 
@@ -162,7 +161,7 @@ public class AppTest
 						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((ContentDirectionTSVColumn) flag).getDirection());
 
 					}else{
-						assert(false);
+						fail();
 					}
 				}
 
@@ -180,7 +179,7 @@ public class AppTest
 				}
 
 			}else
-				assert(false);
+				fail();
 		}
 
 	}
@@ -188,20 +187,20 @@ public class AppTest
 	@Test
 	public void creatingRuleFromStringUsingColonAsSeparator(){
 
-		String 	rule2String = " transformation_rule[2, \"Term\" = \"Term\" /SP(\":\", 0) /BASEIRI(\"http://www.kegg.jp/entry/\", \"kegg\") /CB(2) : " +
+		String 	ruleString = " transformation_rule[2, \"Term\" = \"Term\" /SP(\":\", 0) /BASEIRI(\"http://www.kegg.jp/entry/\", \"kegg\") /CB(2) : " +
 				" \"has_pvalue\" = \"PValue\", " +
 				" \"name\" = \"Term\" /SP(\":\", 1), " +
 				" \"has participant\" = 3 " +
 				"] ";
 
 
-		rule2String = rule2String.replace("\t", "").replaceAll("\n", "");
+		ruleString = ruleString.replace("\t", "").replaceAll("\n", "");
 
 		App app = new App();
 		app.ontologyHelper = new OntologyHelper();
 		app.ontologyHelper.loadingOntologyFromFile("testFiles/unitTestsFiles/ontology.owl");
 
-		Rule rule2Extracted = app.createRulesFromBlock(rule2String);
+		Rule rule2Extracted = app.createRulesFromBlock(ruleString);
 
 		//Assert rule 2
 		assertEquals("2", rule2Extracted.getId());
@@ -227,11 +226,11 @@ public class AppTest
 					}else if(flag instanceof ContentDirectionTSVColumn){
 						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((ContentDirectionTSVColumn) flag).getDirection());
 					}else{
-						assert(false);
+						fail();
 					}
 				}
 			}else{
-				assert(false);
+				fail();
 			}
 		}
 
@@ -267,7 +266,7 @@ public class AppTest
 					}else if(flag instanceof ContentDirectionTSVColumn){
 						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((ContentDirectionTSVColumn) flag).getDirection());
 					}else{
-						assert(false);
+						fail();
 					}
 				}
 
@@ -286,14 +285,14 @@ public class AppTest
 						if(flag instanceof ContentDirectionTSVColumn){
 							assertEquals(EnumContentDirectionTSVColumn.DOWN, ((ContentDirectionTSVColumn) flag).getDirection());
 						}else{
-							assert(false);
+							fail();
 						}
 					}
 				}
 
 
 			}else
-				assert(false);
+				fail();
 		}
 
 	}
@@ -301,15 +300,15 @@ public class AppTest
 	@Test
 	public void creatingRuleFromStringWithNoPredicatesAndObjects(){
 
-		String 	rule3String = " transformation_rule[3, \"Gene\" = \"Genes\" /SP(\", \") /BASEIRI(\"http://www.genecards.org/cgi-bin/carddisp.pl?gene=\", \"genecard\") ] ";
+		String 	ruleString = " transformation_rule[3, \"Gene\" = \"Genes\" /SP(\", \") /BASEIRI(\"http://www.genecards.org/cgi-bin/carddisp.pl?gene=\", \"genecard\") ] ";
 
-		rule3String = rule3String.replace("\t", "").replaceAll("\n", "");
+		ruleString = ruleString.replace("\t", "").replaceAll("\n", "");
 
 		App app = new App();
 		app.ontologyHelper = new OntologyHelper();
 		app.ontologyHelper.loadingOntologyFromFile("testFiles/unitTestsFiles/ontology.owl");
 
-		Rule rule3Extracted = app.createRulesFromBlock(rule3String);
+		Rule rule3Extracted = app.createRulesFromBlock(ruleString);
 
 		//Assert rule 3
 		assertEquals("3", rule3Extracted.getId());
@@ -336,7 +335,7 @@ public class AppTest
 					}
 				}
 			}else{
-				assert(false);
+				fail();
 			}
 		}
 
@@ -345,8 +344,8 @@ public class AppTest
 	}
 
 	@Test
-	public void creatingRuleFromStringWithTwoRulesOnSamePredicate() {
-		String 	rule2String = " transformation_rule[2, \"Term\" = \"Term\" /SP(\":\", 0) /BASEIRI(\"http://www.kegg.jp/entry/\", \"kegg\") /CB(2) : " +
+	public void creatingRuleFromStringWithTwoEqualPredicatesPointingToDifferentRules() {
+		String 	ruleString = " transformation_rule[2, \"Term\" = \"Term\" /SP(\":\", 0) /BASEIRI(\"http://www.kegg.jp/entry/\", \"kegg\") /CB(2) : " +
 				" \"has_pvalue\" = \"PValue\", " +
 				" \"name\" = \"Term\" /SP(\":\", 1), " +
 				" \"has participant\" = 3, " +
@@ -354,13 +353,13 @@ public class AppTest
 				"] ";
 
 
-		rule2String = rule2String.replace("\t", "").replaceAll("\n", "");
+		ruleString = ruleString.replace("\t", "").replaceAll("\n", "");
 
 		App app = new App();
 		app.ontologyHelper = new OntologyHelper();
 		app.ontologyHelper.loadingOntologyFromFile("testFiles/unitTestsFiles/ontology.owl");
 
-		Rule rule2Extracted = app.createRulesFromBlock(rule2String);
+		Rule rule2Extracted = app.extractRulesFromString(ruleString).get(0);
 
 		//Assert rule 2
 		assertEquals("2", rule2Extracted.getId());
@@ -386,11 +385,11 @@ public class AppTest
 					}else if(flag instanceof ContentDirectionTSVColumn){
 						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((ContentDirectionTSVColumn) flag).getDirection());
 					}else{
-						assert(false);
+						fail();
 					}
 				}
 			}else{
-				assert(false);
+				fail();
 			}
 		}
 
@@ -426,7 +425,7 @@ public class AppTest
 					}else if(flag instanceof ContentDirectionTSVColumn){
 						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((ContentDirectionTSVColumn) flag).getDirection());
 					}else{
-						assert(false);
+						fail();
 					}
 				}
 
@@ -437,19 +436,213 @@ public class AppTest
 
 				for(ObjectAsRule objectAsRule : object.getObject()){
 					assert((objectAsRule.getRuleNumber().intValue() == 3) ||
-						   (objectAsRule.getRuleNumber().intValue() == 4));
+							(objectAsRule.getRuleNumber().intValue() == 4));
 					assertEquals(1, objectAsRule.getFlags().size());
 					for(Flag flag : objectAsRule.getFlags()){
 						if(flag instanceof ContentDirectionTSVColumn){
 							assertEquals(EnumContentDirectionTSVColumn.DOWN, ((ContentDirectionTSVColumn) flag).getDirection());
 						}else{
-							assert(false);
+							fail();
 						}
 					}
 				}
 
 			}else
-				assert(false);
+				fail();
 		}
 	}
+
+	@Test
+	public void creatingRuleFromStringWithTwoEqualPredicatesPointingToDifferentTSVColumns() {
+		String 	ruleString = "transformation_rule[1, \"Term\" = \"Term\" /SP(\"~\", 0) /BASEIRI(\"http://amigo1.geneontology.org/cgi-bin/amigo/term_details?term=\", \"go\") /CB(1) :" +
+				" \"has_pvalue\" = \"PValue\", " +
+				" \"name\" = \"Term\" /SP(\"~\", 1), " +
+				" \"has_pvalue\" = \"List Total\", " +
+				" \"has participant\" = 3	] ";
+
+
+		ruleString = ruleString.replace("\t", "").replaceAll("\n", "");
+
+		App app = new App();
+		app.ontologyHelper = new OntologyHelper();
+		app.ontologyHelper.loadingOntologyFromFile("testFiles/unitTestsFiles/ontology.owl");
+
+		Rule ruleExtracted = app.extractRulesFromString(ruleString).get(0);
+
+		//Assert rule 1
+		assertEquals("1", ruleExtracted.getId());
+		assertEquals("http://purl.obolibrary.org/obo/NCIT_P382", ruleExtracted.getSubject().getIRI().toString());
+		for(TSVColumn column : ruleExtracted.getSubjectTSVColumns()){
+			if(column.getTitle().equals("Term")){
+
+				assertEquals(4, column.getFlags().size()); //all from the rule line plus the ContentDirection
+
+				for(Flag flag : column.getFlags()){
+					if(flag instanceof Separator){
+						Separator separator = (Separator) flag;
+						assertEquals("~", separator.getTerm());
+						assertEquals(1, separator.getColumns().size());
+						assertEquals(0, separator.getColumns().get(0).intValue());
+					}else if(flag instanceof FlagBaseIRI){
+						FlagBaseIRI baseiri = (FlagBaseIRI) flag;
+						assertEquals("http://amigo1.geneontology.org/cgi-bin/amigo/term_details?term=", baseiri.getIRI());
+						assertEquals("go", baseiri.getNamespace());
+					}else if(flag instanceof FlagConditionBlock){
+						assertEquals(1, ((FlagConditionBlock) flag).getId().intValue());
+
+					}else if(flag instanceof ContentDirectionTSVColumn){
+						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((ContentDirectionTSVColumn) flag).getDirection());
+					}else{
+						fail();
+					}
+				}
+			}else{
+				fail();
+			}
+		}
+
+		assertEquals(3, ruleExtracted.getPredicateObjects().size());
+
+		for(Entry<OWLProperty, TripleObject> entry : ruleExtracted.getPredicateObjects().entrySet()){
+
+			if(entry.getKey().getIRI().toString().equals("http://purl.org/g/onto/has_pvalue")){
+				TripleObjectAsColumns objects = (TripleObjectAsColumns) entry.getValue();
+
+				assertEquals(2, objects.getObject().size());
+				
+				for(TSVColumn object : objects.getObject()) {
+					if(object.getTitle().equals("PValue")) {
+						assertEquals(1, object.getFlags().size()); //ContentDirection
+					}else if(object.getTitle().equals("List Total")) {
+						assertEquals(1, object.getFlags().size()); //ContentDirection
+					}else {
+						fail();
+					}
+					
+					Flag flag = object.getFlags().get(0);
+					assertEquals(EnumContentDirectionTSVColumn.DOWN, ((ContentDirectionTSVColumn) flag).getDirection());
+				}
+
+			}else if(entry.getKey().getIRI().toString().equals("http://schema.org/name")){
+				TripleObjectAsColumns object = (TripleObjectAsColumns) entry.getValue();
+
+				assertEquals("Term", object.getObject().get(0).getTitle());
+
+				List<Flag> flagsList = object.getObject().get(0).getFlags();
+				assertEquals(2, flagsList.size());
+				for(Flag flag : flagsList){
+					if(flag instanceof Separator){
+						Separator separator = (Separator) flag;
+						assertEquals("~", separator.getTerm());
+						assertEquals(1, separator.getColumns().size());
+						assertEquals(1, separator.getColumns().get(0).intValue());
+					}else if(flag instanceof ContentDirectionTSVColumn){
+						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((ContentDirectionTSVColumn) flag).getDirection());
+					}else{
+						fail();
+					}
+				}
+
+			}else if(entry.getKey().getIRI().toString().equals("http://purl.org/g/onto/has_participant")){
+				TripleObjectAsRule object = (TripleObjectAsRule) entry.getValue();
+
+				assertEquals(1, object.getObject().size());
+
+				for(ObjectAsRule objectAsRule : object.getObject()){
+					assert(objectAsRule.getRuleNumber().intValue() == 3);
+					assertEquals(1, objectAsRule.getFlags().size());
+					for(Flag flag : objectAsRule.getFlags()){
+						if(flag instanceof ContentDirectionTSVColumn){
+							assertEquals(EnumContentDirectionTSVColumn.DOWN, ((ContentDirectionTSVColumn) flag).getDirection());
+						}else{
+							fail();
+						}
+					}
+				}
+
+			}else
+				fail();
+		}
+	}
+	
+	@Test
+	public void extractContentDirectionFlagWithValueDown() {	
+		String sentence = "\\\"name\\\" = \\\"Term\\\" /D, ";
+
+		App app = new App();
+		List<Flag> flagsExtracted = app.extractFlagsFromSentence(sentence);
+		
+		assertEquals(1, flagsExtracted.size());
+		for(Flag flagExtracted : flagsExtracted) {
+			if(flagExtracted instanceof ContentDirectionTSVColumn) {
+				ContentDirectionTSVColumn flag = (ContentDirectionTSVColumn) flagExtracted;
+
+				assertEquals(EnumContentDirectionTSVColumn.DOWN, flag.getDirection());
+			}else{
+				fail();
+			}
+		}
+	}
+	
+	@Test
+	public void extractContentDirectionFlagWithValueRight() {	
+		String sentence = "\\\"name\\\" = \\\"Term\\\" /R, ";
+
+		App app = new App();
+		List<Flag> flagsExtracted = app.extractFlagsFromSentence(sentence);
+		
+		assertEquals(1, flagsExtracted.size());
+		for(Flag flagExtracted : flagsExtracted) {
+			if(flagExtracted instanceof ContentDirectionTSVColumn) {
+				ContentDirectionTSVColumn flag = (ContentDirectionTSVColumn) flagExtracted;
+
+				assertEquals(EnumContentDirectionTSVColumn.RIGHT, flag.getDirection());
+			}else{
+				fail();
+			}
+		}
+	}
+	
+	@Test
+	public void extractFixedContentFlag() {	
+		String sentence = "\\\"name\\\" = \\\"Term\\\" /!(\"fixed content test\"), ";
+
+		App app = new App();
+		List<Flag> flagsExtracted = app.extractFlagsFromSentence(sentence);
+		
+		assertEquals(2, flagsExtracted.size()); //Fixed Content + ContentDirection
+		for(Flag flagExtracted : flagsExtracted) {
+			if(flagExtracted instanceof FixedContent) {
+				FixedContent flag = (FixedContent) flagExtracted;
+
+				assertEquals("fixed content test", flag.getContent());
+			}else if(flagExtracted instanceof ContentDirectionTSVColumn){
+				continue;
+			}else{
+				fail();
+			}
+		}
+	}
+	
+	@Test
+	public void extractNotMetadataFlag() {	
+		String sentence = "\\\"name\\\" = \\\"Term\\\" /NM, ";
+
+		App app = new App();
+		List<Flag> flagsExtracted = app.extractFlagsFromSentence(sentence);
+		
+		assertEquals(2, flagsExtracted.size()); //NotMetadata + ContentDirection
+		for(Flag flagExtracted : flagsExtracted) {
+			if(flagExtracted instanceof NotMetadata) {
+				NotMetadata flag = (NotMetadata) flagExtracted;
+
+				assert(flag.isMetadata());
+			}else if(flagExtracted instanceof ContentDirectionTSVColumn){
+				continue;
+			}else{
+				fail();
+			}
+		}
+	}
+	
 }

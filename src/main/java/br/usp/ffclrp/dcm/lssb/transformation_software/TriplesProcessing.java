@@ -20,7 +20,6 @@ import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.EnumOperat
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Flag;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagBaseIRI;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagConditionBlock;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagOWNID;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ObjectAsRule;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Rule;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Separator;
@@ -338,17 +337,6 @@ public class TriplesProcessing {
 			}
 		}
 		return null;
-	}
-
-	private boolean hasOWNIDTag(List<TSVColumn> listTSVColumn) {
-		for(TSVColumn column : listTSVColumn){
-			for(Flag flag : column.getFlags()){
-				if(flag instanceof FlagOWNID){
-					return ((FlagOWNID) flag).isOwnId();
-				}
-			}
-		}
-		return false;
 	}
 
 	public void writeRDF(){

@@ -10,22 +10,6 @@ public class Condition {
 		this.operation = operation;
 		this.conditionValue = conditionValue;
 	}
-	
-	public Condition(){
-		
-	}
-
-	public void setColumn(String column) {
-		this.column = column;
-	}
-
-	public void setOperation(Enum<EnumOperationsConditionBlock> operation) {
-		this.operation = operation;
-	}
-
-	public void setConditionValue(String conditionValue) {
-		this.conditionValue = conditionValue;
-	}
 
 	public String getColumn() {
 		return column;

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 
 import org.apache.jena.rdf.model.Model;
@@ -40,8 +41,19 @@ public class TriplesProcessing {
 
 	public TriplesProcessing(String relativePathDataFile, String relativePathOntologyFile) {
 		model = ModelFactory.createDefaultModel();
-		//model.read(relativePathOntologyFile);
+		loadNamespacesFromOntology(relativePathOntologyFile);
+		model.read(relativePathOntologyFile);
 		fileReader = new SemistructuredFileReader(relativePathDataFile);
+	}
+	
+	private void loadNamespacesFromOntology(String relativePathOntologyFile) {
+		Model tempModel = ModelFactory.createDefaultModel();
+		tempModel.read(relativePathOntologyFile);
+		tempModel.getNsPrefixMap().forEach((k, v) -> model.setNsPrefix(k, v));
+		
+		for(Entry<String, String> e : model.getNsPrefixMap().entrySet()) {
+			System.out.println(e.getKey() + "-->" + e.getValue());
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -267,7 +279,7 @@ public class TriplesProcessing {
 	private List<Resource> getSubject(Rule rule, String defaultNs, Integer lineNumber) {
 		//Boolean hasOWNIDTag = false;
 		Boolean hasBaseIRITag = false;
-		Resource subjectType = null;
+		Resource subjectType = model.createResource(rule.getSubject().getIRI().toString());
 
 		/*if(hasOWNIDTag(rule.getSubjectTSVColumns())){
 			hasOWNIDTag = true;
@@ -282,8 +294,6 @@ public class TriplesProcessing {
 		if(hasBASEIRITag(rule.getSubjectTSVColumns())){
 			hasBaseIRITag = true;
 			defaultNs = getBASEIRITag(rule.getSubjectTSVColumns());
-		}else{
-			subjectType = model.createResource(rule.getSubject().getIRI().toString());
 		}
 
 
@@ -294,24 +304,21 @@ public class TriplesProcessing {
 			subjectContent.add(content.replaceAll(" ", "_"));
 		}
 
-		/*//SUBJECT THAT DO NOT HAVE DATA EXTRACTED FROM TSVCOLUMN MUST HAVE SOME NAME GENERATED
-		if(subjectContent == null)	{
-			subjectContent = new ArrayList<String>();
-			Random random = new Random(999999);
-			Integer randomNumber = random.nextInt();
-			subjectContent.add(randomNumber.toString());
-		}*/
-
 		List<Resource> subjectList = new ArrayList<Resource>();
-		if(hasBaseIRITag){
-			for(String individualContent : subjectContent){
-				subjectList.add(model.createResource(defaultNs + individualContent));			
-			}
-		}else{
-			for(String individualContent : subjectContent){
-				subjectList.add(model.createResource(defaultNs + individualContent, subjectType));
-			}
+		
+		for(String individualContent : subjectContent){
+			subjectList.add(model.createResource(defaultNs + individualContent, subjectType));
 		}
+		
+//		if(hasBaseIRITag){
+//			for(String individualContent : subjectContent){
+//				subjectList.add(model.createResource(defaultNs + individualContent));			
+//			}
+//		}else{
+//			for(String individualContent : subjectContent){
+//				subjectList.add(model.createResource(defaultNs + individualContent, subjectType));
+//			}
+//		}
 
 		return subjectList;
 	}

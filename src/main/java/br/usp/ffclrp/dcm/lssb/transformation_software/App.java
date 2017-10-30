@@ -48,15 +48,17 @@ public class App
 	public static void main( String[] args )
 	{
 		App app = new App();
-		app.extractRulesFromFile("testFiles/teste_3/rules_teste_3.txt", "testFiles/teste_3/onto_teste_3.owl");
-
-		TriplesProcessing triplesProcessing = new TriplesProcessing("testFiles/teste_3/teste_3.tsv", "testFiles/teste_3/onto_teste_3.owl");
+		List<String> listOfOntologies = new ArrayList<String>();
+		listOfOntologies.add("testFiles/teste_5/onto_teste_5.owl");
+		app.extractRulesFromFile("testFiles/teste_5/rules_teste_5.txt", listOfOntologies);
+		
+		TriplesProcessing triplesProcessing = new TriplesProcessing("testFiles/teste_5/teste_5.tsv", "testFiles/teste_5/onto_teste_5.owl");
 		triplesProcessing.createTriplesFromRules(app.rulesList, app.conditionsBlocks, "http:\\example.org/onto/individual#");
 	}
 
-	public void extractRulesFromFile(String rulesRelativePath, String ontologyRelativePath){
+	public void extractRulesFromFile(String rulesRelativePath, List<String> listOfOntologies){
 		ontologyHelper = new OntologyHelper();
-		ontologyHelper.loadingOntologyFromFile(ontologyRelativePath);
+		ontologyHelper.loadingOntologyFromFile(listOfOntologies);
 		String fileContent = readFile(rulesRelativePath);
 
 		fileContent = fileContent.replaceAll("\n", "").replaceAll("\t", "");
@@ -106,7 +108,12 @@ public class App
 			String lineFromBlock = predicatesLinesOneBlock.substring(initialOfEachMatch.get(i) + 1, // +1 exists to not include the first character, a comma
 					finalChar);
 
-			EnumOperationsConditionBlock operation = retrieveOperation(lineFromBlock);
+			EnumOperationsConditionBlock operation = null;
+			try{
+				operation = retrieveOperation(lineFromBlock);
+			}catch(IllegalStateException e) {
+				throw new IllegalStateException("Condition operation not identified at condition block");
+			}
 
 			String column = extractDataFromFirstQuotationMarkInsideRegex(lineFromBlock, EnumRegexList.SELECTCOLUMNCONDITIONBLOCK.getExpression());
 			lineFromBlock = removeRegexFromContent(EnumRegexList.SELECTCOLUMNCONDITIONBLOCK.getExpression(), lineFromBlock);
@@ -118,7 +125,9 @@ public class App
 	}
 
 	private EnumOperationsConditionBlock retrieveOperation(String lineFromBlock) {
-		String operation = matchRegexOnString(EnumRegexList.SELECTOPERATIONCONDITIONBLOCK.getExpression(), lineFromBlock).group();
+		String operation;
+		operation = matchRegexOnString(EnumRegexList.SELECTOPERATIONCONDITIONBLOCK.getExpression(), lineFromBlock).group();
+
 		
 		if(operation.equals(EnumOperationsConditionBlock.DIFFERENT.getOperation())) 		return EnumOperationsConditionBlock.DIFFERENT;
 		if(operation.equals(EnumOperationsConditionBlock.EQUAL.getOperation()))			return EnumOperationsConditionBlock.EQUAL;

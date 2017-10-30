@@ -3,10 +3,12 @@ package br.usp.ffclrp.dcm.lssb.transformation_software;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.semanticweb.owlapi.model.OWLProperty;
 
 import br.usp.ffclrp.dcm.lssb.transformation_software.App;
@@ -31,6 +33,9 @@ import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TripleObje
 
 public class AppTest
 {
+	@org.junit.Rule
+	public ExpectedException thrown = ExpectedException.none();
+	
 	@Test
 	public void exctractConditionsFromString()
 	{
@@ -94,8 +99,6 @@ public class AppTest
 
 		Rule rule1Extracted = app.createRulesFromBlock(ruleString);
 
-
-		//Assert rule 1
 		assertEquals("1", rule1Extracted.getId());
 		assertEquals("http://purl.obolibrary.org/obo/NCIT_P382", rule1Extracted.getSubject().getIRI().toString());
 		for(TSVColumn column : rule1Extracted.getSubjectTSVColumns()){
@@ -181,7 +184,6 @@ public class AppTest
 			}else
 				fail();
 		}
-
 	}
 
 	@Test
@@ -202,7 +204,6 @@ public class AppTest
 
 		Rule rule2Extracted = app.createRulesFromBlock(ruleString);
 
-		//Assert rule 2
 		assertEquals("2", rule2Extracted.getId());
 		assertEquals("http://purl.obolibrary.org/obo/NCIT_P382", rule2Extracted.getSubject().getIRI().toString());
 		for(TSVColumn column : rule2Extracted.getSubjectTSVColumns()){
@@ -310,7 +311,6 @@ public class AppTest
 
 		Rule rule3Extracted = app.createRulesFromBlock(ruleString);
 
-		//Assert rule 3
 		assertEquals("3", rule3Extracted.getId());
 		assertEquals("http://purl.org/g/onto/Gene", rule3Extracted.getSubject().getIRI().toString());
 		for(TSVColumn column : rule3Extracted.getSubjectTSVColumns()){
@@ -361,7 +361,6 @@ public class AppTest
 
 		Rule rule2Extracted = app.extractRulesFromString(ruleString).get(0);
 
-		//Assert rule 2
 		assertEquals("2", rule2Extracted.getId());
 		assertEquals("http://purl.obolibrary.org/obo/NCIT_P382", rule2Extracted.getSubject().getIRI().toString());
 		for(TSVColumn column : rule2Extracted.getSubjectTSVColumns()){
@@ -469,7 +468,6 @@ public class AppTest
 
 		Rule ruleExtracted = app.extractRulesFromString(ruleString).get(0);
 
-		//Assert rule 1
 		assertEquals("1", ruleExtracted.getId());
 		assertEquals("http://purl.obolibrary.org/obo/NCIT_P382", ruleExtracted.getSubject().getIRI().toString());
 		for(TSVColumn column : ruleExtracted.getSubjectTSVColumns()){
@@ -645,4 +643,116 @@ public class AppTest
 		}
 	}
 	
+	@Test
+	public void operationNotIdentifiedAtConditionBlock() throws IllegalStateException {
+		String content = "condition_block[1: \"Category\" = \"KEGG_PATHWAY\", \"PValue\" < \"0.01\" ]";
+		thrown.expect(IllegalStateException.class);
+		thrown.expectMessage("Condition operation not identified at condition block");
+		List<ConditionBlock> conditionsExtracted = new App().extractConditionsBlocksFromString(content);
+		
+	}
+
+	@Test
+	public void creatingRuleFromMultipleOntologies() {
+		String 	ruleString = "transformation_rule[1, \"Term2\" = \"Term\" /SP(\"~\", 0) /BASEIRI(\"http://amigo1.geneontology.org/cgi-bin/amigo/term_details?term=\", \"go\") /CB(1) :" +
+				" \"has_pvalue\" = \"PValue\", " +
+				" \"name2\" = \"Term\" /SP(\"~\", 1), " +
+				" \"has participant\" = 3	] ";
+
+		ruleString = ruleString.replace("\t", "").replaceAll("\n", "");
+
+		App app = new App();
+		app.ontologyHelper = new OntologyHelper();
+		List<String> ontologiesPaths = new ArrayList<String>();
+		ontologiesPaths.add("testFiles/unitTestsFiles/ontology.owl");
+		ontologiesPaths.add("testFiles/unitTestsFiles/ontology2.owl");
+		app.ontologyHelper.loadingOntologyFromFile(ontologiesPaths);
+
+		Rule rule1Extracted = app.createRulesFromBlock(ruleString);
+
+		assertEquals("1", rule1Extracted.getId());
+		assertEquals("http://purl.obolibrary.org/obo/NCIT_P382_onto2", rule1Extracted.getSubject().getIRI().toString());
+		for(TSVColumn column : rule1Extracted.getSubjectTSVColumns()){
+			if(column.getTitle().equals("Term")){
+
+				assertEquals(4, column.getFlags().size()); //all from the rule line plus the ContentDirection
+
+				for(Flag flag : column.getFlags()){
+					if(flag instanceof Separator){
+						Separator separator = (Separator) flag;
+						assertEquals("~", separator.getTerm());
+						assertEquals(1, separator.getColumns().size());
+						assertEquals(0, separator.getColumns().get(0).intValue());
+
+					}else if(flag instanceof FlagBaseIRI){
+						FlagBaseIRI baseiri = (FlagBaseIRI) flag;
+						assertEquals("http://amigo1.geneontology.org/cgi-bin/amigo/term_details?term=", baseiri.getIRI());
+						assertEquals("go", baseiri.getNamespace());
+
+					}else if(flag instanceof FlagConditionBlock){
+						assertEquals(1, ((FlagConditionBlock) flag).getId().intValue());
+
+					}else if(flag instanceof ContentDirectionTSVColumn){
+						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((ContentDirectionTSVColumn) flag).getDirection());
+					}else{
+						fail();
+					}
+				}
+			}else{
+				fail();
+			}
+		}
+
+		assertEquals(3, rule1Extracted.getPredicateObjects().size());
+
+		for(Entry<OWLProperty, TripleObject> entry : rule1Extracted.getPredicateObjects().entrySet()){
+
+			if(entry.getKey().getIRI().toString().equals("http://purl.org/g/onto/has_pvalue")){
+				TripleObjectAsColumns object = (TripleObjectAsColumns) entry.getValue();
+
+				assertEquals(1, object.getObject().size());
+				assertEquals("PValue", object.getObject().get(0).getTitle());
+				assertEquals(1, object.getObject().get(0).getFlags().size());
+				Flag flag = object.getObject().get(0).getFlags().get(0);
+				assertEquals(EnumContentDirectionTSVColumn.DOWN, ((ContentDirectionTSVColumn) flag).getDirection());
+
+
+
+			}else if(entry.getKey().getIRI().toString().equals("http://schema.org/name2")){
+				TripleObjectAsColumns object = (TripleObjectAsColumns) entry.getValue();
+
+				assertEquals("Term", object.getObject().get(0).getTitle());
+
+				List<Flag> flagsList = object.getObject().get(0).getFlags();
+				assertEquals(2, flagsList.size());
+				for(Flag flag : flagsList){
+					if(flag instanceof Separator){
+						Separator separator = (Separator) flag;
+						assertEquals("~", separator.getTerm());
+						assertEquals(1, separator.getColumns().size());
+						assertEquals(1, separator.getColumns().get(0).intValue());
+					}else if(flag instanceof ContentDirectionTSVColumn){
+						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((ContentDirectionTSVColumn) flag).getDirection());
+
+					}else{
+						fail();
+					}
+				}
+
+			}else if(entry.getKey().getIRI().toString().equals("http://purl.org/g/onto/has_participant")){
+				TripleObjectAsRule object = (TripleObjectAsRule) entry.getValue();
+
+				assertEquals(1, object.getObject().size());
+
+				for(ObjectAsRule objectAsRule : object.getObject()){
+					assertEquals(3, objectAsRule.getRuleNumber().intValue());
+					assertEquals(1, objectAsRule.getFlags().size());
+					Flag flag = objectAsRule.getFlags().get(0);
+					assertEquals(EnumContentDirectionTSVColumn.DOWN, ((ContentDirectionTSVColumn) flag).getDirection());
+				}
+
+			}else
+				fail();
+		}
+	}
 }

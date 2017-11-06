@@ -15,14 +15,14 @@ import br.usp.ffclrp.dcm.lssb.transformation_software.App;
 import br.usp.ffclrp.dcm.lssb.transformation_software.OntologyHelper;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Condition;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ConditionBlock;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ContentDirectionTSVColumn;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.EnumContentDirectionTSVColumn;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.EnumOperationsConditionBlock;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FixedContent;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Flag;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagBaseIRI;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagConditionBlock;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.NotMetadata;
+import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagContentDirectionTSVColumn;
+import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagFixedContent;
+import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagNotMetadata;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ObjectAsRule;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Rule;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Separator;
@@ -121,8 +121,8 @@ public class AppTest
 					}else if(flag instanceof FlagConditionBlock){
 						assertEquals(1, ((FlagConditionBlock) flag).getId().intValue());
 
-					}else if(flag instanceof ContentDirectionTSVColumn){
-						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((ContentDirectionTSVColumn) flag).getDirection());
+					}else if(flag instanceof FlagContentDirectionTSVColumn){
+						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
 					}else{
 						fail();
 					}
@@ -143,7 +143,7 @@ public class AppTest
 				assertEquals("PValue", object.getObject().get(0).getTitle());
 				assertEquals(1, object.getObject().get(0).getFlags().size());
 				Flag flag = object.getObject().get(0).getFlags().get(0);
-				assertEquals(EnumContentDirectionTSVColumn.DOWN, ((ContentDirectionTSVColumn) flag).getDirection());
+				assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
 
 
 
@@ -160,8 +160,8 @@ public class AppTest
 						assertEquals("~", separator.getTerm());
 						assertEquals(1, separator.getColumns().size());
 						assertEquals(1, separator.getColumns().get(0).intValue());
-					}else if(flag instanceof ContentDirectionTSVColumn){
-						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((ContentDirectionTSVColumn) flag).getDirection());
+					}else if(flag instanceof FlagContentDirectionTSVColumn){
+						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
 
 					}else{
 						fail();
@@ -177,7 +177,7 @@ public class AppTest
 					assertEquals(3, objectAsRule.getRuleNumber().intValue());
 					assertEquals(1, objectAsRule.getFlags().size());
 					Flag flag = objectAsRule.getFlags().get(0);
-					assertEquals(EnumContentDirectionTSVColumn.DOWN, ((ContentDirectionTSVColumn) flag).getDirection());
+					assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
 
 				}
 
@@ -224,8 +224,8 @@ public class AppTest
 					}else if(flag instanceof FlagConditionBlock){
 						assertEquals(2, ((FlagConditionBlock) flag).getId().intValue());
 
-					}else if(flag instanceof ContentDirectionTSVColumn){
-						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((ContentDirectionTSVColumn) flag).getDirection());
+					}else if(flag instanceof FlagContentDirectionTSVColumn){
+						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
 					}else{
 						fail();
 					}
@@ -246,7 +246,7 @@ public class AppTest
 				assertEquals("PValue", object.getObject().get(0).getTitle());
 				assertEquals(1, object.getObject().get(0).getFlags().size());
 				Flag flag = object.getObject().get(0).getFlags().get(0);
-				assertEquals(EnumContentDirectionTSVColumn.DOWN, ((ContentDirectionTSVColumn) flag).getDirection());
+				assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
 
 
 
@@ -264,8 +264,8 @@ public class AppTest
 						assertEquals(":", separator.getTerm());
 						assertEquals(1, separator.getColumns().size());
 						assertEquals(1, separator.getColumns().get(0).intValue());
-					}else if(flag instanceof ContentDirectionTSVColumn){
-						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((ContentDirectionTSVColumn) flag).getDirection());
+					}else if(flag instanceof FlagContentDirectionTSVColumn){
+						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
 					}else{
 						fail();
 					}
@@ -283,8 +283,8 @@ public class AppTest
 					assertEquals(3, objectAsRule.getRuleNumber().intValue());
 					assertEquals(1, objectAsRule.getFlags().size());
 					for(Flag flag : objectAsRule.getFlags()){
-						if(flag instanceof ContentDirectionTSVColumn){
-							assertEquals(EnumContentDirectionTSVColumn.DOWN, ((ContentDirectionTSVColumn) flag).getDirection());
+						if(flag instanceof FlagContentDirectionTSVColumn){
+							assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
 						}else{
 							fail();
 						}
@@ -328,8 +328,8 @@ public class AppTest
 						FlagBaseIRI baseiri = (FlagBaseIRI) flag;
 						assertEquals("http://www.genecards.org/cgi-bin/carddisp.pl?gene=", baseiri.getIRI().toString());
 						assertEquals("genecard", baseiri.getNamespace());
-					}else if(flag instanceof ContentDirectionTSVColumn){
-						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((ContentDirectionTSVColumn) flag).getDirection());
+					}else if(flag instanceof FlagContentDirectionTSVColumn){
+						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
 					}else{
 						fail();
 					}
@@ -381,8 +381,8 @@ public class AppTest
 					}else if(flag instanceof FlagConditionBlock){
 						assertEquals(2, ((FlagConditionBlock) flag).getId().intValue());
 
-					}else if(flag instanceof ContentDirectionTSVColumn){
-						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((ContentDirectionTSVColumn) flag).getDirection());
+					}else if(flag instanceof FlagContentDirectionTSVColumn){
+						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
 					}else{
 						fail();
 					}
@@ -403,7 +403,7 @@ public class AppTest
 				assertEquals("PValue", object.getObject().get(0).getTitle());
 				assertEquals(1, object.getObject().get(0).getFlags().size());
 				Flag flag = object.getObject().get(0).getFlags().get(0);
-				assertEquals(EnumContentDirectionTSVColumn.DOWN, ((ContentDirectionTSVColumn) flag).getDirection());
+				assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
 
 
 
@@ -421,8 +421,8 @@ public class AppTest
 						assertEquals(":", separator.getTerm());
 						assertEquals(1, separator.getColumns().size());
 						assertEquals(1, separator.getColumns().get(0).intValue());
-					}else if(flag instanceof ContentDirectionTSVColumn){
-						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((ContentDirectionTSVColumn) flag).getDirection());
+					}else if(flag instanceof FlagContentDirectionTSVColumn){
+						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
 					}else{
 						fail();
 					}
@@ -438,8 +438,8 @@ public class AppTest
 							(objectAsRule.getRuleNumber().intValue() == 4));
 					assertEquals(1, objectAsRule.getFlags().size());
 					for(Flag flag : objectAsRule.getFlags()){
-						if(flag instanceof ContentDirectionTSVColumn){
-							assertEquals(EnumContentDirectionTSVColumn.DOWN, ((ContentDirectionTSVColumn) flag).getDirection());
+						if(flag instanceof FlagContentDirectionTSVColumn){
+							assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
 						}else{
 							fail();
 						}
@@ -488,8 +488,8 @@ public class AppTest
 					}else if(flag instanceof FlagConditionBlock){
 						assertEquals(1, ((FlagConditionBlock) flag).getId().intValue());
 
-					}else if(flag instanceof ContentDirectionTSVColumn){
-						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((ContentDirectionTSVColumn) flag).getDirection());
+					}else if(flag instanceof FlagContentDirectionTSVColumn){
+						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
 					}else{
 						fail();
 					}
@@ -518,7 +518,7 @@ public class AppTest
 					}
 					
 					Flag flag = object.getFlags().get(0);
-					assertEquals(EnumContentDirectionTSVColumn.DOWN, ((ContentDirectionTSVColumn) flag).getDirection());
+					assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
 				}
 
 			}else if(entry.getKey().getIRI().toString().equals("http://schema.org/name")){
@@ -534,8 +534,8 @@ public class AppTest
 						assertEquals("~", separator.getTerm());
 						assertEquals(1, separator.getColumns().size());
 						assertEquals(1, separator.getColumns().get(0).intValue());
-					}else if(flag instanceof ContentDirectionTSVColumn){
-						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((ContentDirectionTSVColumn) flag).getDirection());
+					}else if(flag instanceof FlagContentDirectionTSVColumn){
+						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
 					}else{
 						fail();
 					}
@@ -550,8 +550,8 @@ public class AppTest
 					assert(objectAsRule.getRuleNumber().intValue() == 3);
 					assertEquals(1, objectAsRule.getFlags().size());
 					for(Flag flag : objectAsRule.getFlags()){
-						if(flag instanceof ContentDirectionTSVColumn){
-							assertEquals(EnumContentDirectionTSVColumn.DOWN, ((ContentDirectionTSVColumn) flag).getDirection());
+						if(flag instanceof FlagContentDirectionTSVColumn){
+							assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
 						}else{
 							fail();
 						}
@@ -572,8 +572,8 @@ public class AppTest
 		
 		assertEquals(1, flagsExtracted.size());
 		for(Flag flagExtracted : flagsExtracted) {
-			if(flagExtracted instanceof ContentDirectionTSVColumn) {
-				ContentDirectionTSVColumn flag = (ContentDirectionTSVColumn) flagExtracted;
+			if(flagExtracted instanceof FlagContentDirectionTSVColumn) {
+				FlagContentDirectionTSVColumn flag = (FlagContentDirectionTSVColumn) flagExtracted;
 
 				assertEquals(EnumContentDirectionTSVColumn.DOWN, flag.getDirection());
 			}else{
@@ -591,8 +591,8 @@ public class AppTest
 		
 		assertEquals(1, flagsExtracted.size());
 		for(Flag flagExtracted : flagsExtracted) {
-			if(flagExtracted instanceof ContentDirectionTSVColumn) {
-				ContentDirectionTSVColumn flag = (ContentDirectionTSVColumn) flagExtracted;
+			if(flagExtracted instanceof FlagContentDirectionTSVColumn) {
+				FlagContentDirectionTSVColumn flag = (FlagContentDirectionTSVColumn) flagExtracted;
 
 				assertEquals(EnumContentDirectionTSVColumn.RIGHT, flag.getDirection());
 			}else{
@@ -610,11 +610,11 @@ public class AppTest
 		
 		assertEquals(2, flagsExtracted.size()); //Fixed Content + ContentDirection
 		for(Flag flagExtracted : flagsExtracted) {
-			if(flagExtracted instanceof FixedContent) {
-				FixedContent flag = (FixedContent) flagExtracted;
+			if(flagExtracted instanceof FlagFixedContent) {
+				FlagFixedContent flag = (FlagFixedContent) flagExtracted;
 
 				assertEquals("fixed content test", flag.getContent());
-			}else if(flagExtracted instanceof ContentDirectionTSVColumn){
+			}else if(flagExtracted instanceof FlagContentDirectionTSVColumn){
 				continue;
 			}else{
 				fail();
@@ -631,11 +631,11 @@ public class AppTest
 		
 		assertEquals(2, flagsExtracted.size()); //NotMetadata + ContentDirection
 		for(Flag flagExtracted : flagsExtracted) {
-			if(flagExtracted instanceof NotMetadata) {
-				NotMetadata flag = (NotMetadata) flagExtracted;
+			if(flagExtracted instanceof FlagNotMetadata) {
+				FlagNotMetadata flag = (FlagNotMetadata) flagExtracted;
 
 				assert(flag.isMetadata());
-			}else if(flagExtracted instanceof ContentDirectionTSVColumn){
+			}else if(flagExtracted instanceof FlagContentDirectionTSVColumn){
 				continue;
 			}else{
 				fail();
@@ -692,8 +692,8 @@ public class AppTest
 					}else if(flag instanceof FlagConditionBlock){
 						assertEquals(1, ((FlagConditionBlock) flag).getId().intValue());
 
-					}else if(flag instanceof ContentDirectionTSVColumn){
-						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((ContentDirectionTSVColumn) flag).getDirection());
+					}else if(flag instanceof FlagContentDirectionTSVColumn){
+						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
 					}else{
 						fail();
 					}
@@ -714,7 +714,7 @@ public class AppTest
 				assertEquals("PValue", object.getObject().get(0).getTitle());
 				assertEquals(1, object.getObject().get(0).getFlags().size());
 				Flag flag = object.getObject().get(0).getFlags().get(0);
-				assertEquals(EnumContentDirectionTSVColumn.DOWN, ((ContentDirectionTSVColumn) flag).getDirection());
+				assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
 
 
 
@@ -731,8 +731,8 @@ public class AppTest
 						assertEquals("~", separator.getTerm());
 						assertEquals(1, separator.getColumns().size());
 						assertEquals(1, separator.getColumns().get(0).intValue());
-					}else if(flag instanceof ContentDirectionTSVColumn){
-						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((ContentDirectionTSVColumn) flag).getDirection());
+					}else if(flag instanceof FlagContentDirectionTSVColumn){
+						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
 
 					}else{
 						fail();
@@ -748,7 +748,7 @@ public class AppTest
 					assertEquals(3, objectAsRule.getRuleNumber().intValue());
 					assertEquals(1, objectAsRule.getFlags().size());
 					Flag flag = objectAsRule.getFlags().get(0);
-					assertEquals(EnumContentDirectionTSVColumn.DOWN, ((ContentDirectionTSVColumn) flag).getDirection());
+					assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
 				}
 
 			}else

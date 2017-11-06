@@ -15,12 +15,12 @@ import org.semanticweb.owlapi.model.OWLProperty;
 import br.usp.ffclrp.dcm.lssb.transformation_software.OntologyHelper;
 import br.usp.ffclrp.dcm.lssb.transformation_software.TriplesProcessing;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ConditionBlock;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ContentDirectionTSVColumn;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.EnumContentDirectionTSVColumn;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.EnumOperationsConditionBlock;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Flag;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagBaseIRI;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagConditionBlock;
+import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagContentDirectionTSVColumn;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ObjectAsRule;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Rule;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Separator;
@@ -50,7 +50,7 @@ public class TripleProcessingTest
 		subjectFlags.add(new Separator("~", separatorCols));
 		subjectFlags.add(new FlagBaseIRI("http://amigo1.geneontology.org/cgi-bin/amigo/term_details?term=", "go"));
 		subjectFlags.add(new FlagConditionBlock(1));
-		subjectFlags.add(new ContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
+		subjectFlags.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
 		
 		subject.setFlags(subjectFlags);
 		subjectTSVColumns.add(subject);
@@ -62,7 +62,7 @@ public class TripleProcessingTest
 		pvalueColumn.setTitle("PValue");
 		
 		List<Flag> pvalueFlags = new ArrayList<Flag>();
-		pvalueFlags.add(new ContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
+		pvalueFlags.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
 		pvalueColumn.setFlags(pvalueFlags);
 		
 		predicateObjects.put(ontologyHelper.getProperty("has_pvalue"), new TripleObjectAsColumns(pvalueColumn));
@@ -72,7 +72,7 @@ public class TripleProcessingTest
 		nameColumn.setTitle("Term");
 		
 		List<Flag> nameFlags = new ArrayList<Flag>();
-		nameFlags.add(new ContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
+		nameFlags.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
 		separatorCols = new ArrayList<Integer>();
 		separatorCols.add(1);
 		nameFlags.add(new Separator("~", separatorCols));
@@ -85,7 +85,7 @@ public class TripleProcessingTest
 		participantColumn.setTitle("Term");
 		
 		List<Flag> participantFlags = new ArrayList<Flag>();
-		participantFlags.add(new ContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
+		participantFlags.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
 		participantColumn.setFlags(participantFlags);
 		
 		predicateObjects.put(ontologyHelper.getProperty("has participant"), new TripleObjectAsRule(new ObjectAsRule(3, participantFlags)));
@@ -107,7 +107,7 @@ public class TripleProcessingTest
 		subjectFlags.add(new Separator(":", separatorCols));
 		subjectFlags.add(new FlagBaseIRI("http://www.kegg.jp/entry/", "kegg"));
 		subjectFlags.add(new FlagConditionBlock(2));
-		subjectFlags.add(new ContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
+		subjectFlags.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
 		
 		subject.setFlags(subjectFlags);
 		subjectTSVColumns.add(subject);
@@ -119,7 +119,7 @@ public class TripleProcessingTest
 		pvalueColumn.setTitle("PValue");
 		
 		List<Flag> pvalueFlags = new ArrayList<Flag>();
-		pvalueFlags.add(new ContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
+		pvalueFlags.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
 		pvalueColumn.setFlags(pvalueFlags);
 		
 		predicateObjects.put(ontologyHelper.getProperty("has_pvalue"), new TripleObjectAsColumns(pvalueColumn));
@@ -129,7 +129,7 @@ public class TripleProcessingTest
 		nameColumn.setTitle("Term");
 		
 		List<Flag> nameFlags = new ArrayList<Flag>();
-		nameFlags.add(new ContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
+		nameFlags.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
 		separatorCols = new ArrayList<Integer>();
 		separatorCols.add(1);
 		nameFlags.add(new Separator(":", separatorCols));
@@ -142,7 +142,7 @@ public class TripleProcessingTest
 		participantColumn.setTitle("Term");
 		
 		List<Flag> participantFlags = new ArrayList<Flag>();
-		participantFlags.add(new ContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
+		participantFlags.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
 		participantColumn.setFlags(participantFlags);
 		
 		predicateObjects.put(ontologyHelper.getProperty("has participant"), new TripleObjectAsRule(new ObjectAsRule(3, participantFlags)));

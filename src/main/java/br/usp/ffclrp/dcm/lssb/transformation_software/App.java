@@ -17,15 +17,15 @@ import org.semanticweb.owlapi.model.OWLProperty;
 
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Condition;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ConditionBlock;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ContentDirectionTSVColumn;
+import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagContentDirectionTSVColumn;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.EnumContentDirectionTSVColumn;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.EnumOperationsConditionBlock;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.EnumRegexList;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FixedContent;
+import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagFixedContent;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Flag;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagBaseIRI;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagConditionBlock;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.NotMetadata;
+import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagNotMetadata;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ObjectAsRule;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Rule;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Separator;
@@ -312,14 +312,14 @@ public class App
 
 		try{
 			if(matcher.group().equals("/R")){
-				flagsList.add(new ContentDirectionTSVColumn(EnumContentDirectionTSVColumn.RIGHT));
+				flagsList.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.RIGHT));
 				sentence = removeRegexFromContent("\\/[R]", sentence);
 			}else{
-				flagsList.add(new ContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
+				flagsList.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
 				sentence = removeRegexFromContent("\\/[D]", sentence);
 			}
 		}catch(Exception e){
-			flagsList.add(new ContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
+			flagsList.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
 		}
 
 
@@ -347,7 +347,7 @@ public class App
 				}
 
 				if(matcherString.equals("/NM")){
-					flagsList.add(new NotMetadata(true));
+					flagsList.add(new FlagNotMetadata(true));
 					sentence = removeRegexFromContent("\\/(NM)", sentence);
 				}
 
@@ -376,7 +376,7 @@ public class App
 	private Flag extractDataFromFlagFixedContentFromSentence(String sentence, String regex) {
 		String contentFromQuotationMark = extractDataFromFirstQuotationMarkInsideRegex(sentence, regex);
 
-		return new FixedContent(contentFromQuotationMark);
+		return new FlagFixedContent(contentFromQuotationMark);
 	}
 
 	private Flag extractDataFromFlagConditionFromSentence(String sentence, String regex) {

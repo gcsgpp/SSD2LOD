@@ -1,9 +1,9 @@
 package br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing;
 
-public class ContentDirectionTSVColumn extends Flag {
+public class FlagContentDirectionTSVColumn extends Flag {
 	private Enum<EnumContentDirectionTSVColumn> direction;
 
-	public ContentDirectionTSVColumn(Enum<EnumContentDirectionTSVColumn> direction){
+	public FlagContentDirectionTSVColumn(Enum<EnumContentDirectionTSVColumn> direction){
 		this.direction = direction;
 	}
 

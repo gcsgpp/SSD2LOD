@@ -1,5 +1,8 @@
 package br.usp.ffclrp.dcm.lssb.transformation_software;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,6 +11,7 @@ import java.util.Map;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Statement;
+import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLProperty;
@@ -21,6 +25,8 @@ import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Flag;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagBaseIRI;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagConditionBlock;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagContentDirectionTSVColumn;
+import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagNotMetadata;
+import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagOwnID;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ObjectAsRule;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Rule;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Separator;
@@ -35,8 +41,15 @@ public class TripleProcessingTest
 	private OntologyHelper ontologyHelper;
 	private Map<Integer, ConditionBlock> conditionsBlocks = new HashMap<Integer, ConditionBlock>();
 	private List<Rule> listRules = new ArrayList<Rule>();
+	
+	@Before
+	public void initializer() {
+		ontologyHelper = null;
+		conditionsBlocks = new HashMap<Integer, ConditionBlock>();
+		listRules = new ArrayList<Rule>();
+	}
 
-	public Rule createRuleOne() {
+	private Rule createRuleOne() {
 		String id = "1";
 		OWLClass subjectClass = ontologyHelper.getClass("Term");
 		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
@@ -93,7 +106,7 @@ public class TripleProcessingTest
 		return new Rule(id, subjectClass, subjectTSVColumns, predicateObjects);
 	}
 
-	public Rule createRuleTwo() {
+	private Rule createRuleTwo() {
 		String id = "2";
 		OWLClass subjectClass = ontologyHelper.getClass("Term");
 		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
@@ -150,7 +163,7 @@ public class TripleProcessingTest
 		return new Rule(id, subjectClass, subjectTSVColumns, predicateObjects);
 	}
 	
-	public Rule createRuleThree() {
+	private Rule createRuleThree() {
 		String id = "3";
 		OWLClass subjectClass = ontologyHelper.getClass("Gene");
 		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
@@ -225,7 +238,7 @@ public class TripleProcessingTest
 	}
 	
 	@Test
-	public void processRuleWithColonAsSeparator() // #WIP - tests broken. Handle with different predicates: type, label, range etc.
+	public void processRuleWithColonAsSeparator()
 	{
 		ontologyHelper = new OntologyHelper();
 		String testFolderPath = "testFiles/unitTestsFiles/";
@@ -260,6 +273,47 @@ public class TripleProcessingTest
 			}
 		}
 	}
+
+	private Rule createRuleWithNotMetadataFlag() {
+		String id = "1";
+		OWLClass subjectClass = ontologyHelper.getClass("geo sample");
+		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
+		TSVColumn subject = new TSVColumn();
+		
+		subject.setTitle("GSM1243183");
+		
+		List<Flag> subjectFlags = new ArrayList<Flag>();
+		//subjectFlags.add(new FlagOwnID(true));
+		//subjectFlags.add(new FlagBaseIRI("http://purl.org/g/analysis#", "ana"));
+		subjectFlags.add(new FlagNotMetadata(true));
+		
+		subject.setFlags(subjectFlags);
+		subjectTSVColumns.add(subject);
+		
+		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<OWLProperty, TripleObject>();
+		
+		return new Rule(id, subjectClass, subjectTSVColumns, predicateObjects);
+	}
 	
+	@Test
+	public void processRuleWithNotMetadataFlag() {		
+		ontologyHelper = new OntologyHelper();
+		String testFolderPath = "testFiles/normalizedFile/";
+		
+		ontologyHelper.loadingOntologyFromFile(testFolderPath + "ontology.owl");
+		listRules.add(createRuleWithNotMetadataFlag());
+		
+		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "NormalizedData.txt", testFolderPath + "ontology.owl");
+		processingClass.createTriplesFromRules(listRules, conditionsBlocks, "http://example.org/onto/individual#");
+		
+		Model model = processingClass.getModel();
+		List<Statement> statements = model.listStatements().toList();
+		
+		for(Statement statement : statements) {
+			Triple triple = statement.asTriple();
+
+			assertEquals("http://example.org/onto/individual#GSM1243183", triple.getSubject().getURI());
+		}
+	}
 	
 }

@@ -1,6 +1,7 @@
 package br.usp.ffclrp.dcm.lssb.transformation_software;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagCondit
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagContentDirectionTSVColumn;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagFixedContent;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagNotMetadata;
+import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagOwnID;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ObjectAsRule;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Rule;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Separator;
@@ -35,7 +37,7 @@ public class AppTest
 {
 	@org.junit.Rule
 	public ExpectedException thrown = ExpectedException.none();
-	
+
 	@Test
 	public void exctractConditionsFromString()
 	{
@@ -507,7 +509,7 @@ public class AppTest
 				TripleObjectAsColumns objects = (TripleObjectAsColumns) entry.getValue();
 
 				assertEquals(2, objects.getObject().size());
-				
+
 				for(TSVColumn object : objects.getObject()) {
 					if(object.getTitle().equals("PValue")) {
 						assertEquals(1, object.getFlags().size()); //ContentDirection
@@ -516,7 +518,7 @@ public class AppTest
 					}else {
 						fail();
 					}
-					
+
 					Flag flag = object.getFlags().get(0);
 					assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
 				}
@@ -562,14 +564,14 @@ public class AppTest
 				fail();
 		}
 	}
-	
+
 	@Test
 	public void extractContentDirectionFlagWithValueDown() {	
 		String sentence = "\\\"name\\\" = \\\"Term\\\" /D, ";
 
 		App app = new App();
 		List<Flag> flagsExtracted = app.extractFlagsFromSentence(sentence);
-		
+
 		assertEquals(1, flagsExtracted.size());
 		for(Flag flagExtracted : flagsExtracted) {
 			if(flagExtracted instanceof FlagContentDirectionTSVColumn) {
@@ -581,14 +583,14 @@ public class AppTest
 			}
 		}
 	}
-	
+
 	@Test
 	public void extractContentDirectionFlagWithValueRight() {	
 		String sentence = "\\\"name\\\" = \\\"Term\\\" /R, ";
 
 		App app = new App();
 		List<Flag> flagsExtracted = app.extractFlagsFromSentence(sentence);
-		
+
 		assertEquals(1, flagsExtracted.size());
 		for(Flag flagExtracted : flagsExtracted) {
 			if(flagExtracted instanceof FlagContentDirectionTSVColumn) {
@@ -600,14 +602,14 @@ public class AppTest
 			}
 		}
 	}
-	
+
 	@Test
 	public void extractFixedContentFlag() {	
 		String sentence = "\\\"name\\\" = \\\"Term\\\" /!(\"fixed content test\"), ";
 
 		App app = new App();
 		List<Flag> flagsExtracted = app.extractFlagsFromSentence(sentence);
-		
+
 		assertEquals(2, flagsExtracted.size()); //Fixed Content + ContentDirection
 		for(Flag flagExtracted : flagsExtracted) {
 			if(flagExtracted instanceof FlagFixedContent) {
@@ -621,14 +623,14 @@ public class AppTest
 			}
 		}
 	}
-	
+
 	@Test
 	public void extractNotMetadataFlag() {	
 		String sentence = "\\\"name\\\" = \\\"Term\\\" /NM, ";
 
 		App app = new App();
 		List<Flag> flagsExtracted = app.extractFlagsFromSentence(sentence);
-		
+
 		assertEquals(2, flagsExtracted.size()); //NotMetadata + ContentDirection
 		for(Flag flagExtracted : flagsExtracted) {
 			if(flagExtracted instanceof FlagNotMetadata) {
@@ -642,14 +644,14 @@ public class AppTest
 			}
 		}
 	}
-	
+
 	@Test
 	public void operationNotIdentifiedAtConditionBlock() throws IllegalStateException {
 		String content = "condition_block[1: \"Category\" = \"KEGG_PATHWAY\", \"PValue\" < \"0.01\" ]";
 		thrown.expect(IllegalStateException.class);
 		thrown.expectMessage("Condition operation not identified at condition block");
 		List<ConditionBlock> conditionsExtracted = new App().extractConditionsBlocksFromString(content);
-		
+
 	}
 
 	@Test
@@ -755,4 +757,54 @@ public class AppTest
 				fail();
 		}
 	}
+
+	@Test
+	public void extractMultipleTSVColumnsFromSentence() {
+		String sentence = " \"column1\" ; \"column2\" /R ; \"column3\" /BASEIRI(\"http://teste.com\", \"test\") ";
+
+		App app = new App();
+		List<TSVColumn> tsvColumns = app.extractTSVColumnsFromSentence(sentence);
+
+		assertEquals(3, tsvColumns.size());
+		for(TSVColumn column : tsvColumns) {
+
+			if(column.getTitle().equals("column1")) {
+				assertEquals(1, column.getFlags().size());
+				assertTrue(column.getFlags().get(0) instanceof FlagContentDirectionTSVColumn);
+
+			}else if(column.getTitle().equals("column2")){
+				assertEquals(1, column.getFlags().size());
+				assertTrue(column.getFlags().get(0) instanceof FlagContentDirectionTSVColumn);
+
+			}else if(column.getTitle().equals("column3")){
+				assertEquals(2, column.getFlags().size());
+				for(Flag flag : column.getFlags()) {
+					assertTrue((flag instanceof FlagBaseIRI) || ((flag instanceof FlagContentDirectionTSVColumn)));
+				}
+			}else {
+				fail();
+			}
+		}
+	}
+
+	/*@Test
+	public void extractOwnIDFlag() {
+		String sentence = "\\\"Probe\\\" = \\\"ID\\\" /OWNID, ";
+
+		App app = new App();
+		List<Flag> flagsExtracted = app.extractFlagsFromSentence(sentence);
+
+		assertEquals(2, flagsExtracted.size()); //OWNID + ContentDirection
+		for(Flag flagExtracted : flagsExtracted) {
+			if(flagExtracted instanceof FlagOwnID) {
+				FlagOwnID flag = (FlagOwnID) flagExtracted;
+
+				assert(flag.isOwnID());
+			}else if(flagExtracted instanceof FlagContentDirectionTSVColumn){
+				continue;
+			}else{
+				fail();
+			}
+		}
+	}*/
 }

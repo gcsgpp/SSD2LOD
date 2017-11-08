@@ -13,6 +13,7 @@ public enum EnumRegexList {
 	SELECTFIXEDCONTENTFLAG("\\/\\!\\(\"(.*?)\"\\)"),
 	SELECTCONDITIONBLOCKFLAG("\\/CB\\(\\d*?\\)"),
 	SELECTSEPARATORFLAG("\\/SP\\(\"(.*?)\"((,(.*?)\\))|\\))"),
+	SELECTCUSTOMDIDFLAG("\\/\\ID\\(\"(.*?)\"\\)"),
 	//CONDITION BLOCK REGEX:
 	SELECTCOLUMNCONDITIONBLOCK("(\".*\")\\s(=|!|>|<)"),
 	SELECTPREDICATESDIVISIONSCONDITIONBLOCK("(:|,)(\\s*?)\"(.*?)\"\\s?(=|!|>|<)"),

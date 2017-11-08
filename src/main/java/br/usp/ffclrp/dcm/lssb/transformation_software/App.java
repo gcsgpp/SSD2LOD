@@ -18,6 +18,7 @@ import org.semanticweb.owlapi.model.OWLProperty;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Condition;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ConditionBlock;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagContentDirectionTSVColumn;
+import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagCustomID;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.EnumContentDirectionTSVColumn;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.EnumOperationsConditionBlock;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.EnumRegexList;
@@ -31,7 +32,6 @@ import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Rule;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Separator;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TSVColumn;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TripleObject;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TripleObjectAsColumns;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TripleObjectAsRule;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TripleObjectBuilder;
 
@@ -49,11 +49,11 @@ public class App
 	{
 		App app = new App();
 		List<String> listOfOntologies = new ArrayList<String>();
-		listOfOntologies.add("testFiles/teste_5/onto_teste_5.owl");
-		app.extractRulesFromFile("testFiles/teste_5/rules_teste_5.txt", listOfOntologies);
+		listOfOntologies.add("testFiles/diffExpressedGenes/ontology.owl");
+		app.extractRulesFromFile("testFiles/diffExpressedGenes/rules.txt", listOfOntologies);
 		
-		TriplesProcessing triplesProcessing = new TriplesProcessing("testFiles/teste_5/teste_5.tsv", "testFiles/teste_5/onto_teste_5.owl");
-		triplesProcessing.createTriplesFromRules(app.rulesList, app.conditionsBlocks, "http:\\example.org/onto/individual#");
+		TriplesProcessing triplesProcessing = new TriplesProcessing("testFiles/diffExpressedGenes/diffExpressedGenesFile.txt", "testFiles/diffExpressedGenes/ontology.owl");
+		triplesProcessing.createTriplesFromRules(app.rulesList, app.conditionsBlocks, "http://www.example.org/onto/individual/");
 	}
 
 	public void extractRulesFromFile(String rulesRelativePath, List<String> listOfOntologies){
@@ -323,7 +323,7 @@ public class App
 		}
 
 
-		matcher = matchRegexOnString("\\/[!]|\\/(NM)|\\/(SP)|\\/(CB)|\\/(BASEIRI)|\\/(OWNID)", sentence);
+		matcher = matchRegexOnString("\\/[!]|\\/(NM)|\\/(SP)|\\/(CB)|\\/(BASEIRI)|\\/(ID)", sentence);
 
 		if(!matcher.hitEnd()){
 
@@ -356,11 +356,22 @@ public class App
 					sentence = removeRegexFromContent(EnumRegexList.SELECTBASEIRIFLAG.getExpression(), sentence);
 				}
 				
+				if(matcherString.equals("/ID")){
+					flagsList.add(extractDataFromFlagCustomIDFromSentence(sentence, EnumRegexList.SELECTCUSTOMDIDFLAG.getExpression()));
+					sentence = removeRegexFromContent(EnumRegexList.SELECTCUSTOMDIDFLAG.getExpression(), sentence);
+				}
+				
 				matcher.find();
 			}
 		}
 
 		return flagsList;
+	}
+
+	private Flag extractDataFromFlagCustomIDFromSentence(String sentence, String regex) {
+		String contentFromQuotationMark = extractDataFromFirstQuotationMarkInsideRegex(sentence, regex);
+
+		return new FlagCustomID(contentFromQuotationMark);
 	}
 
 	private Flag extractDataFromFlagBaseIRIFromSentence(String sentence, String regex) {

@@ -155,6 +155,10 @@ public class TriplesProcessing {
 	private boolean assertConditionBlock(List<Flag> flags, Integer tsvLineNumber) {
 		for(Flag flag : flags){
 			if(flag instanceof FlagConditionBlock){
+
+				if(conditionBlocks.isEmpty())
+					throw new NullPointerException("No condition block created");
+
 				ConditionBlock conditionBlock = conditionBlocks.get(((FlagConditionBlock) flag).getId());
 
 				for(Condition condition : conditionBlock.getConditions()){

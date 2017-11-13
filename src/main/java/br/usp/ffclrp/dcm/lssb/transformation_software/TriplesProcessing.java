@@ -7,8 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Random;
-
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
@@ -35,7 +33,6 @@ public class TriplesProcessing {
 
 	private SemistructuredFileReader fileReader;
 	private Model model = null;
-	private List<ResourcesMapping> resourcesMapping = new ArrayList<ResourcesMapping>();
 	private Map<Integer, Rule> allRules = new HashMap<Integer, Rule>();
 	private List<Rule> regularRuleList;
 	private List<Rule> dependencyList = new ArrayList<Rule>();
@@ -108,7 +105,6 @@ public class TriplesProcessing {
 		Property predicate;
 
 		for(Resource subject : subjectList){
-			resourcesMapping.add(new ResourcesMapping(Integer.parseInt(rule.getId()), tsvLineNumber, subject));
 
 			Map<OWLProperty, TripleObject> predicateObjectMAP = rule.getPredicateObjects();
 			for(Map.Entry<OWLProperty, TripleObject> predicateMapEntry : predicateObjectMAP.entrySet()){
@@ -204,12 +200,12 @@ public class TriplesProcessing {
 	}
 
 	private void addTripleToModel(Resource subject, Property predicate, Resource object) {
-		System.out.println("S: " + subject.getURI() + " P: " + predicate.getURI() + " O: " + object.getURI());
+		//System.out.println("S: " + subject.getURI() + " P: " + predicate.getURI() + " O: " + object.getURI());
 		subject.addProperty(predicate, object);		
 	}
 
 	private void addTripleToModel(Resource subject, Property predicate, String contentElement) {
-		System.out.println("S: " + subject.getURI() + " P: " + predicate.getURI() + " O: " + contentElement);
+		//System.out.println("S: " + subject.getURI() + " P: " + predicate.getURI() + " O: " + contentElement);
 		subject.addProperty(predicate, contentElement);
 	}
 
@@ -233,7 +229,7 @@ public class TriplesProcessing {
 					extractedData = true;
 				}else if(flag instanceof FlagFixedContent) {
 					String[] columnData = new String[1];
-					columnData[0] = column.getTitle();
+					columnData[0] = ((FlagFixedContent) flag).getContent();
 					dataColumnsSeparated.add(columnData);
 					extractedData = true;
 				}
@@ -270,7 +266,7 @@ public class TriplesProcessing {
 			}
 			dataColumns.add(list);
 		}
-		
+
 		//MERGE BETWEEN THE DATA ARRAYS EXTRACTED
 		//ONE ITEM FROM EACH ARRAY
 		for(int i = 0; i < biggerColumn; i++){
@@ -312,34 +308,43 @@ public class TriplesProcessing {
 	}
 
 	private List<Resource> getSubject(Rule rule, String defaultNs, Integer lineNumber) {
+		List<Resource> subjectList = new ArrayList<Resource>();
 
 		Resource subjectType = model.createResource(rule.getSubject().getIRI().toString());
 
-		if(hasBASEIRITag(rule.getSubjectTSVColumns())){
-			defaultNs = getBASEIRIFlag(rule.getSubjectTSVColumns());
+		String baseIRIFlag = getBASEIRIFlag(rule.getSubjectTSVColumns());
+		if(baseIRIFlag != null){
+			defaultNs = baseIRIFlag;
 		}
 
-		List<String> subjectContentRaw;
-		/*if(hasCustomIDFlag(rule.getSubjectTSVColumns()))
-			subjectContentRaw = extractDataFromTSVColumn(getCustomIDFlag(rule.getSubjectTSVColumns()), lineNumber);
-		else*/ 
-		subjectContentRaw = extractDataFromTSVColumn(rule.getSubjectTSVColumns(), lineNumber);
+		String customIDFlag = getCustomIDFlag(rule.getSubjectTSVColumns());
+		if(customIDFlag != null) {
+			subjectList.add(model.createResource(defaultNs + customIDFlag, subjectType));
+			
+		
+		}else{
+			String fixedContentFlag = getFixedContentFlag(rule.getSubjectTSVColumns());
+			if(fixedContentFlag != null){
+				subjectList.add(model.createResource(defaultNs + fixedContentFlag, subjectType));
 
-		List<String> subjectContent = new ArrayList<String>();
-		for(String content : subjectContentRaw){
-			subjectContent.add(content.replaceAll(" ", "_"));
-		}
+			}else {
+				List<String> subjectContentRaw = extractDataFromTSVColumn(rule.getSubjectTSVColumns(), lineNumber);
 
-		List<Resource> subjectList = new ArrayList<Resource>();
+				List<String> subjectContent = new ArrayList<String>();
+				for(String content : subjectContentRaw){
+					subjectContent.add(content.replaceAll(" ", "_"));
+				}
 
-		for(String individualContent : subjectContent){
-			subjectList.add(model.createResource(defaultNs + individualContent, subjectType));
+				for(String individualContent : subjectContent){
+					subjectList.add(model.createResource(defaultNs + individualContent, subjectType));
+				}
+			}
 		}
 
 		return subjectList;
 	}
 
-	private List<TSVColumn> getCustomIDFlag(List<TSVColumn> listTSVColumn) {
+	/* private List<TSVColumn> getCustomIDFlag(List<TSVColumn> listTSVColumn) {
 		TSVColumn customID = new TSVColumn();
 		for(TSVColumn column : listTSVColumn){
 			for(Flag flag : column.getFlags()){
@@ -365,27 +370,28 @@ public class TriplesProcessing {
 		}
 		return false;
 	}
+	 */
 
-	private boolean hasNotMetadataFlag(List<TSVColumn> listTSVColumn) {
+	private String getCustomIDFlag(List<TSVColumn> listTSVColumn) {
 		for(TSVColumn column : listTSVColumn){
 			for(Flag flag : column.getFlags()){
-				if(flag instanceof FlagNotMetadata){
-					return true;
+				if(flag instanceof FlagCustomID){
+					return ((FlagCustomID) flag).getContent();
 				}
 			}
 		}
-		return false;
+		return null;
 	}
 
-	private boolean hasBASEIRITag(List<TSVColumn> listTSVColumn) {
+	private String getFixedContentFlag(List<TSVColumn> listTSVColumn) {
 		for(TSVColumn column : listTSVColumn){
 			for(Flag flag : column.getFlags()){
-				if(flag instanceof FlagBaseIRI){
-					return true;
+				if(flag instanceof FlagFixedContent){
+					return ((FlagFixedContent) flag).getContent();
 				}
 			}
 		}
-		return false;
+		return null;
 	}
 
 	private String getBASEIRIFlag(List<TSVColumn> listTSVColumn) {

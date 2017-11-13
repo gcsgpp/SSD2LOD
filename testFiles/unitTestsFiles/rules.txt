@@ -1,6 +1,6 @@
-transformation_rule[1, "Term" = "Term" /SP("~", 0) /BASEIRI("http://amigo1.geneontology.org/cgi-bin/amigo/term_details?term=", "go") /CB(1) :
+transformation_rule[1, "Term" = "Term" /SP("~", 1) /BASEIRI("http://amigo1.geneontology.org/cgi-bin/amigo/term_details?term=", "go") /CB(1) :
 	"has_pvalue" = "PValue",
-	"name" = "Term" /SP("~", 1),
+	"name" = "Term" /SP("~", 2),
 	"has participant" = 3
 ]
 
@@ -9,9 +9,9 @@ condition_block[1:
 	"PValue" < "0.01"
 	]
 
-transformation_rule[2, "Term" = "Term" /SP(":", 0) /BASEIRI("http://www.kegg.jp/entry/", "kegg") /CB(2) :
+transformation_rule[2, "Term" = "Term" /SP(":", 1) /BASEIRI("http://www.kegg.jp/entry/", "kegg") /CB(2) :
 	"has_pvalue" = "PValue",
-	"name" = "Term" /SP(":", 1),
+	"name" = "Term" /SP(":", 2),
 	"has participant" = 3
 ]
 

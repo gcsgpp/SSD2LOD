@@ -1,0 +1,246 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns="http://www.purl.org/g/"
+     xml:base="http://www.purl.org/g/"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:prop="http://www.purl.org/g/properties#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:cls="http://www.purl.org/g/classes#">
+    <owl:Ontology rdf:about="http://www.purl.org/g/"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.purl.org/g/properties#enrichment -->
+
+    <owl:ObjectProperty rdf:about="http://www.purl.org/g/properties#enrichment">
+        <rdfs:domain rdf:resource="http://www.purl.org/g/classes#analysis"/>
+        <rdfs:range rdf:resource="http://www.purl.org/g/classes#enrichment_analysis"/>
+        <rdfs:label rdf:datatype="http://www.w3.org/2000/01/rdf-schema#Literal">has enrichement</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.purl.org/g/properties#geo_identifier -->
+
+    <owl:ObjectProperty rdf:about="http://www.purl.org/g/properties#geo_identifier">
+        <rdfs:domain rdf:resource="http://www.purl.org/g/classes#normalized_sample"/>
+        <rdfs:range rdf:resource="http://www.purl.org/g/classes#geo_sample"/>
+        <rdfs:label rdf:datatype="http://www.w3.org/2000/01/rdf-schema#Literal">geo identifier</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.purl.org/g/properties#has_participant -->
+
+    <owl:ObjectProperty rdf:about="http://www.purl.org/g/properties#has_participant">
+        <rdfs:domain rdf:resource="http://www.purl.org/g/classes#enrichment_analysis"/>
+        <rdfs:range rdf:resource="http://www.purl.org/g/classes#gene"/>
+        <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">has participant</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.purl.org/g/properties#has_probe -->
+
+    <owl:ObjectProperty rdf:about="http://www.purl.org/g/properties#has_probe">
+        <rdfs:domain rdf:resource="http://www.purl.org/g/classes#analysis"/>
+        <rdfs:range rdf:resource="http://www.purl.org/g/classes#probe"/>
+        <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">has probe</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.purl.org/g/properties#has_sample -->
+
+    <owl:ObjectProperty rdf:about="http://www.purl.org/g/properties#has_sample">
+        <rdfs:domain rdf:resource="http://www.purl.org/g/classes#analysis"/>
+        <rdfs:range rdf:resource="http://www.purl.org/g/classes#normalized_sample"/>
+        <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">has sample</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.purl.org/g/properties#has_term -->
+
+    <owl:ObjectProperty rdf:about="http://www.purl.org/g/properties#has_term">
+        <rdfs:domain rdf:resource="http://www.purl.org/g/classes#enrichment_analysis"/>
+        <rdfs:range rdf:resource="http://www.purl.org/g/classes#term"/>
+        <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">has term</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.purl.org/g/properties#entrez_id -->
+
+    <owl:DatatypeProperty rdf:about="http://www.purl.org/g/properties#entrez_id">
+        <rdfs:domain rdf:resource="http://www.purl.org/g/classes#probe"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">entrez id</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.purl.org/g/properties#has_benjamini -->
+
+    <owl:DatatypeProperty rdf:about="http://www.purl.org/g/properties#has_benjamini">
+        <rdfs:domain rdf:resource="http://www.purl.org/g/classes#enrichment_analysis"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#double"/>
+        <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">has benjamini</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.purl.org/g/properties#has_bonferroni -->
+
+    <owl:DatatypeProperty rdf:about="http://www.purl.org/g/properties#has_bonferroni">
+        <rdfs:domain rdf:resource="http://www.purl.org/g/classes#enrichment_analysis"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#double"/>
+        <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">has bonferroni</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.purl.org/g/properties#has_fdr -->
+
+    <owl:DatatypeProperty rdf:about="http://www.purl.org/g/properties#has_fdr">
+        <rdfs:domain rdf:resource="http://www.purl.org/g/classes#enrichment_analysis"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#double"/>
+        <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">has fdr</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.purl.org/g/properties#has_name -->
+
+    <owl:DatatypeProperty rdf:about="http://www.purl.org/g/properties#has_name">
+        <rdfs:domain rdf:resource="http://www.purl.org/g/classes#enrichment_analysis"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#double"/>
+        <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">has name</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.purl.org/g/properties#has_pvalue -->
+
+    <owl:DatatypeProperty rdf:about="http://www.purl.org/g/properties#has_pvalue">
+        <rdfs:domain rdf:resource="http://www.purl.org/g/classes#enrichment_analysis"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#double"/>
+        <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">has pvalue</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.purl.org/g/properties#norm -->
+
+    <owl:DatatypeProperty rdf:about="http://www.purl.org/g/properties#norm">
+        <rdfs:domain rdf:resource="http://www.purl.org/g/classes#normalized_sample"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#double"/>
+        <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">norm</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.purl.org/g/properties#t_statistic -->
+
+    <owl:DatatypeProperty rdf:about="http://www.purl.org/g/properties#t_statistic">
+        <rdfs:domain rdf:resource="http://www.purl.org/g/classes#analysis"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#double"/>
+        <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">t statistic</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.purl.org/g/classes#analysis -->
+
+    <owl:Class rdf:about="http://www.purl.org/g/classes#analysis">
+        <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">analysis</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.purl.org/g/classes#enrichment_analysis -->
+
+    <owl:Class rdf:about="http://www.purl.org/g/classes#enrichment_analysis">
+        <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">enrichment analysis</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.purl.org/g/classes#gene -->
+
+    <owl:Class rdf:about="http://www.purl.org/g/classes#gene">
+        <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">gene</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.purl.org/g/classes#geo_sample -->
+
+    <owl:Class rdf:about="http://www.purl.org/g/classes#geo_sample">
+        <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">geo sample</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.purl.org/g/classes#normalized_sample -->
+
+    <owl:Class rdf:about="http://www.purl.org/g/classes#normalized_sample">
+        <rdfs:label rdf:datatype="http://www.w3.org/2000/01/rdf-schema#Literal">normalized sample</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.purl.org/g/classes#probe -->
+
+    <owl:Class rdf:about="http://www.purl.org/g/classes#probe">
+        <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">probe</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.purl.org/g/classes#term -->
+
+    <owl:Class rdf:about="http://www.purl.org/g/classes#term">
+        <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">term</rdfs:label>
+    </owl:Class>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 4.2.8.20170104-2310) https://github.com/owlcs/owlapi -->
+

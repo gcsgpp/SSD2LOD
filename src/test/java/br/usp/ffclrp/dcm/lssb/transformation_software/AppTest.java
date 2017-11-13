@@ -88,9 +88,9 @@ public class AppTest
 	@Test
 	public void creatingRuleFromStringWithBaseIRISeparatorConditionBlock(){
 
-		String 	ruleString = "transformation_rule[1, \"Term\" = \"Term\" /SP(\"~\", 0) /BASEIRI(\"http://amigo1.geneontology.org/cgi-bin/amigo/term_details?term=\", \"go\") /CB(1) :" +
+		String 	ruleString = "transformation_rule[1, \"Term\" = \"Term\" /SP(\"~\", 1) /BASEIRI(\"http://amigo1.geneontology.org/cgi-bin/amigo/term_details?term=\", \"go\") /CB(1) :" +
 				" \"has_pvalue\" = \"PValue\", " +
-				" \"name\" = \"Term\" /SP(\"~\", 1), " +
+				" \"name\" = \"Term\" /SP(\"~\", 2), " +
 				" \"has participant\" = 3	] ";
 
 		ruleString = ruleString.replace("\t", "").replaceAll("\n", "");
@@ -191,9 +191,9 @@ public class AppTest
 	@Test
 	public void creatingRuleFromStringUsingColonAsSeparator(){
 
-		String 	ruleString = " transformation_rule[2, \"Term\" = \"Term\" /SP(\":\", 0) /BASEIRI(\"http://www.kegg.jp/entry/\", \"kegg\") /CB(2) : " +
+		String 	ruleString = " transformation_rule[2, \"Term\" = \"Term\" /SP(\":\", 1) /BASEIRI(\"http://www.kegg.jp/entry/\", \"kegg\") /CB(2) : " +
 				" \"has_pvalue\" = \"PValue\", " +
-				" \"name\" = \"Term\" /SP(\":\", 1), " +
+				" \"name\" = \"Term\" /SP(\":\", 2), " +
 				" \"has participant\" = 3 " +
 				"] ";
 
@@ -347,9 +347,9 @@ public class AppTest
 
 	@Test
 	public void creatingRuleFromStringWithTwoEqualPredicatesPointingToDifferentRules() {
-		String 	ruleString = " transformation_rule[2, \"Term\" = \"Term\" /SP(\":\", 0) /BASEIRI(\"http://www.kegg.jp/entry/\", \"kegg\") /CB(2) : " +
+		String 	ruleString = " transformation_rule[2, \"Term\" = \"Term\" /SP(\":\", 1) /BASEIRI(\"http://www.kegg.jp/entry/\", \"kegg\") /CB(2) : " +
 				" \"has_pvalue\" = \"PValue\", " +
-				" \"name\" = \"Term\" /SP(\":\", 1), " +
+				" \"name\" = \"Term\" /SP(\":\", 2), " +
 				" \"has participant\" = 3, " +
 				" \"has participant\" = 4, " +
 				"] ";
@@ -455,9 +455,9 @@ public class AppTest
 
 	@Test
 	public void creatingRuleFromStringWithTwoEqualPredicatesPointingToDifferentTSVColumns() {
-		String 	ruleString = "transformation_rule[1, \"Term\" = \"Term\" /SP(\"~\", 0) /BASEIRI(\"http://amigo1.geneontology.org/cgi-bin/amigo/term_details?term=\", \"go\") /CB(1) :" +
+		String 	ruleString = "transformation_rule[1, \"Term\" = \"Term\" /SP(\"~\", 1) /BASEIRI(\"http://amigo1.geneontology.org/cgi-bin/amigo/term_details?term=\", \"go\") /CB(1) :" +
 				" \"has_pvalue\" = \"PValue\", " +
-				" \"name\" = \"Term\" /SP(\"~\", 1), " +
+				" \"name\" = \"Term\" /SP(\"~\", 2), " +
 				" \"has_pvalue\" = \"List Total\", " +
 				" \"has participant\" = 3	] ";
 
@@ -605,7 +605,7 @@ public class AppTest
 
 	@Test
 	public void extractFixedContentFlag() {	
-		String sentence = "\\\"name\\\" = \\\"Term\\\" /!(\"fixed content test\"), ";
+		String sentence = "\\\"name\\\" = \\\"Term\\\" /FX(\"fixed content test\"), ";
 
 		App app = new App();
 		List<Flag> flagsExtracted = app.extractFlagsFromSentence(sentence);
@@ -656,9 +656,9 @@ public class AppTest
 
 	@Test
 	public void creatingRuleFromMultipleOntologies() {
-		String 	ruleString = "transformation_rule[1, \"Term2\" = \"Term\" /SP(\"~\", 0) /BASEIRI(\"http://amigo1.geneontology.org/cgi-bin/amigo/term_details?term=\", \"go\") /CB(1) :" +
+		String 	ruleString = "transformation_rule[1, \"Term2\" = \"Term\" /SP(\"~\", 1) /BASEIRI(\"http://amigo1.geneontology.org/cgi-bin/amigo/term_details?term=\", \"go\") /CB(1) :" +
 				" \"has_pvalue\" = \"PValue\", " +
-				" \"name2\" = \"Term\" /SP(\"~\", 1), " +
+				" \"name2\" = \"Term\" /SP(\"~\", 2), " +
 				" \"has participant\" = 3	] ";
 
 		ruleString = ruleString.replace("\t", "").replaceAll("\n", "");
@@ -806,5 +806,6 @@ public class AppTest
 				fail();
 			}
 		}
-	}*/
+	}
+	*/
 }

@@ -1,0 +1,75 @@
+transformation_rule[1, "analysis" = "ID" /BASEIRI("http://www.purl.org/g/analysis#", "ana") :
+	"has probe" = 7,
+	"has sample" = 8	
+]
+
+transformation_rule[2, "analysis" = "ID" /BASEIRI("http://www.purl.org/g/analysis#", "ana") :
+	"has probe" = 7,
+	"has sample" = 9
+]
+
+transformation_rule[3, "analysis" = "ID" /BASEIRI("http://www.purl.org/g/analysis#", "ana") :
+	"has probe" = 7,
+	"has sample" = 10
+]
+
+transformation_rule[4, "analysis" = "ID" /BASEIRI("http://www.purl.org/g/analysis#", "ana") :
+	"has probe" = 7,
+	"has sample" = 11
+]
+
+transformation_rule[5, "analysis" = "ID" /BASEIRI("http://www.purl.org/g/analysis#", "ana") :
+	"has probe" = 7,
+	"has sample" = 12
+]
+
+transformation_rule[6, "analysis" = "ID" /BASEIRI("http://www.purl.org/g/analysis#", "ana") :
+	"has probe" = 7,
+	"has sample" = 13
+]
+
+transformation_rule[7, "probe" = "ID" :
+	"entrez id" = "ID" ]
+
+transformation_rule[8, "normalized sample" = "ID"; "GSM1243183" /NM :
+	"norm" = "GSM1243183",
+	"geo identifier" = 14
+]
+
+transformation_rule[9, "normalized sample" = "ID"; "GSM1243184" /NM :
+	"norm" = "GSM1243184",
+	"geo identifier" = 15
+]
+
+transformation_rule[10, "normalized sample" = "ID"; "GSM1243185" /NM :
+	"norm" = "GSM1243185",
+	"geo identifier" = 16
+]
+
+transformation_rule[11, "normalized sample" = "ID"; "GSM1243186" /NM :
+	"norm" = "GSM1243186",
+	"geo identifier" = 17
+]
+
+transformation_rule[12, "normalized sample" = "ID"; "GSM1243187" /NM :
+	"norm" = "GSM1243187",
+	"geo identifier" = 18
+]
+
+transformation_rule[13, "normalized sample" = "ID"; "GSM1243188" /NM :
+	"norm" = "GSM1243188",
+	"geo identifier" = 19
+]
+
+
+transformation_rule[14, "geo sample" = "GSM1243183" /NM ]
+
+transformation_rule[15, "geo sample" = "GSM1243184" /NM ]
+
+transformation_rule[16, "geo sample" = "GSM1243185" /NM ]
+
+transformation_rule[17, "geo sample" = "GSM1243186" /NM ]
+
+transformation_rule[18, "geo sample" = "GSM1243187" /NM ]
+
+transformation_rule[19, "geo sample" = "GSM1243188" /NM ]

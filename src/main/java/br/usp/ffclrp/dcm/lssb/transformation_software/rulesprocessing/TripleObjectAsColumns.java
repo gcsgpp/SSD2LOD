@@ -7,10 +7,6 @@ public class TripleObjectAsColumns implements TripleObject {
 	
 	private List<TSVColumn> columns = null;
 	
-	public TripleObjectAsColumns(){
-		
-	}
-	
 	public TripleObjectAsColumns(TSVColumn obj){
 		this.columns = new ArrayList<TSVColumn>();
 		this.columns.add(obj);

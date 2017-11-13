@@ -6,8 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
-
+import java.util.Map.Entry;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
@@ -20,7 +19,9 @@ import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.EnumOperat
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Flag;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagBaseIRI;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagConditionBlock;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagOWNID;
+import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagCustomID;
+import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagFixedContent;
+import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagNotMetadata;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ObjectAsRule;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Rule;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Separator;
@@ -32,7 +33,6 @@ public class TriplesProcessing {
 
 	private SemistructuredFileReader fileReader;
 	private Model model = null;
-	private List<ResourcesMapping> resourcesMapping = new ArrayList<ResourcesMapping>();
 	private Map<Integer, Rule> allRules = new HashMap<Integer, Rule>();
 	private List<Rule> regularRuleList;
 	private List<Rule> dependencyList = new ArrayList<Rule>();
@@ -41,8 +41,19 @@ public class TriplesProcessing {
 
 	public TriplesProcessing(String relativePathDataFile, String relativePathOntologyFile) {
 		model = ModelFactory.createDefaultModel();
-		//model.read(relativePathOntologyFile);
+		loadNamespacesFromOntology(relativePathOntologyFile);
+		//model.read(relativePathOntologyFile); //load ontology and add its axioms to the linked graph
 		fileReader = new SemistructuredFileReader(relativePathDataFile);
+	}
+
+	private void loadNamespacesFromOntology(String relativePathOntologyFile) {
+		Model tempModel = ModelFactory.createDefaultModel();
+		tempModel.read(relativePathOntologyFile);
+		tempModel.getNsPrefixMap().forEach((k, v) -> model.setNsPrefix(k, v));
+
+		for(Entry<String, String> e : model.getNsPrefixMap().entrySet()) {
+			System.out.println(e.getKey() + "-->" + e.getValue());
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -94,7 +105,6 @@ public class TriplesProcessing {
 		Property predicate;
 
 		for(Resource subject : subjectList){
-			resourcesMapping.add(new ResourcesMapping(Integer.parseInt(rule.getId()), tsvLineNumber, subject));
 
 			Map<OWLProperty, TripleObject> predicateObjectMAP = rule.getPredicateObjects();
 			for(Map.Entry<OWLProperty, TripleObject> predicateMapEntry : predicateObjectMAP.entrySet()){
@@ -119,12 +129,12 @@ public class TriplesProcessing {
 					@SuppressWarnings("unchecked")
 					List<String> content = extractDataFromTSVColumn((List<TSVColumn>) predicateMapEntry.getValue().getObject(), tsvLineNumber);
 
-					if(content == null)	{
+					/*if(content == null)	{
 						content = new ArrayList<String>();
 						Random random = new Random(999999);
 						Integer randomNumber = random.nextInt();
 						content.add(randomNumber.toString());
-					}
+					}*/
 
 					for(String contentElement : content){
 						if(contentElement != null && contentElement != "")
@@ -141,6 +151,10 @@ public class TriplesProcessing {
 	private boolean assertConditionBlock(List<Flag> flags, Integer tsvLineNumber) {
 		for(Flag flag : flags){
 			if(flag instanceof FlagConditionBlock){
+
+				if(conditionBlocks.isEmpty())
+					throw new NullPointerException("No condition block created");
+
 				ConditionBlock conditionBlock = conditionBlocks.get(((FlagConditionBlock) flag).getId());
 
 				for(Condition condition : conditionBlock.getConditions()){
@@ -186,28 +200,42 @@ public class TriplesProcessing {
 	}
 
 	private void addTripleToModel(Resource subject, Property predicate, Resource object) {
-		System.out.println("S: " + subject.getURI() + " P: " + predicate.getURI() + " O: " + object.getURI());
+		//System.out.println("S: " + subject.getURI() + " P: " + predicate.getURI() + " O: " + object.getURI());
 		subject.addProperty(predicate, object);		
 	}
 
 	private void addTripleToModel(Resource subject, Property predicate, String contentElement) {
-		System.out.println("S: " + subject.getURI() + " P: " + predicate.getURI() + " O: " + contentElement);
+		//System.out.println("S: " + subject.getURI() + " P: " + predicate.getURI() + " O: " + contentElement);
 		subject.addProperty(predicate, contentElement);
 	}
 
 	private List<String> extractDataFromTSVColumn(List<TSVColumn> listTSVColumn, Integer lineNumber) {
 		List<String> objectContent = new ArrayList<String>();
 
-		//PROCESS THE SEPARATOR FLAG
+
 		List<String[]> dataColumnsSeparated = new ArrayList<String[]>();
 		for(TSVColumn column : listTSVColumn){
 			Boolean extractedData = false;
+
+			//PROCESS THE SEPARATOR FLAG
 			for(Flag flag : column.getFlags()){
 				if(flag instanceof Separator){
 					dataColumnsSeparated.add(separateDataFromTSVColumn((Separator) flag, column.getTitle(), lineNumber));
 					extractedData = true;
+				}else if(flag instanceof FlagNotMetadata) {
+					String[] columnData = new String[1];
+					columnData[0] = fileReader.getData(column.getTitle(), 0);
+					dataColumnsSeparated.add(columnData);
+					extractedData = true;
+				}else if(flag instanceof FlagFixedContent) {
+					String[] columnData = new String[1];
+					columnData[0] = ((FlagFixedContent) flag).getContent();
+					dataColumnsSeparated.add(columnData);
+					extractedData = true;
 				}
 			}
+
+
 			if(!extractedData){
 				String[] columnData = new String[1];
 				columnData[0] = fileReader.getData(column.getTitle(), lineNumber);
@@ -215,22 +243,36 @@ public class TriplesProcessing {
 			}
 		}
 
-		//FINDS THE BIGGER ARRAY OF DATA EXTRACTED AND MAKE THE MERGE BETWEEN THE DATA ARRAYS EXTRACTED
-		//ONE ITEM FROM EACH ARRAY
+		//FINDS THE BIGGER ARRAY OF DATA EXTRACTED
 		Integer biggerColumn = Integer.MIN_VALUE;
 		for(String[] array : dataColumnsSeparated){
 			if(array.length > biggerColumn)
 				biggerColumn = array.length;
 		}
 
+		//MAKES ALL ARRAYS TO BE THE SAME SIZE. 
+		//THE ARRAYS THAT IS SMALLER THAN THE BIGGEST IS COMPLETED WITH 
+		//THE DATA AT THE BEGGINING OF THE ARRAY IT SELF.
+		List<List<String>> dataColumns = new ArrayList<List<String>>();
+		for(String[] array : dataColumnsSeparated){
+			List<String> list = new ArrayList<String>();
+			int oldPosition = 0;
+			while(list.size() != biggerColumn.intValue()) {
+				try {
+					list.add(array[oldPosition]);
+				}catch(ArrayIndexOutOfBoundsException e){
+					oldPosition = 0;
+				}
+			}
+			dataColumns.add(list);
+		}
+
+		//MERGE BETWEEN THE DATA ARRAYS EXTRACTED
+		//ONE ITEM FROM EACH ARRAY
 		for(int i = 0; i < biggerColumn; i++){
 			String content = "";
-			for(String[] array : dataColumnsSeparated){
-				try {
-					content += " " + array[i];
-				} catch (ArrayIndexOutOfBoundsException e) {
-					content += "";
-				}
+			for(List<String> list : dataColumns){
+				content += " " + list.get(i);
 			}
 			content = content.trim();
 			objectContent.add(content);
@@ -247,7 +289,7 @@ public class TriplesProcessing {
 			splitData = rawData.split(flag.getTerm());
 		}catch (Exception e) {
 			System.out.println(	"There is no caractere '" + flag.getTerm() +
-								"' on the field '" + columnTitle + "' to be used as separator");
+					"' on the field '" + columnTitle + "' to be used as separator");
 			e.printStackTrace();
 		}
 
@@ -266,69 +308,93 @@ public class TriplesProcessing {
 	}
 
 	private List<Resource> getSubject(Rule rule, String defaultNs, Integer lineNumber) {
-		//Boolean hasOWNIDTag = false;
-		Boolean hasBaseIRITag = false;
-		Resource subjectType = null;
-
-		/*if(hasOWNIDTag(rule.getSubjectTSVColumns())){
-			hasOWNIDTag = true;
-			defaultNs = getBASEIRITag(rule.getSubjectTSVColumns());
-			if(defaultNs == null){
-				throw new Exception("OWN ID Tag must have a BASEIRI Tag accompanied");
-			}
-		}else{
-			subjectType = model.createResource(rule.getSubject().getIRI().toString());
-		}*/
-
-		if(hasBASEIRITag(rule.getSubjectTSVColumns())){
-			hasBaseIRITag = true;
-			defaultNs = getBASEIRITag(rule.getSubjectTSVColumns());
-		}else{
-			subjectType = model.createResource(rule.getSubject().getIRI().toString());
-		}
-
-
-		List<String> subjectContentRaw = extractDataFromTSVColumn(rule.getSubjectTSVColumns(), lineNumber);
-
-		List<String> subjectContent = new ArrayList<String>();
-		for(String content : subjectContentRaw){
-			subjectContent.add(content.replaceAll(" ", "_"));
-		}
-
-		/*//SUBJECT THAT DO NOT HAVE DATA EXTRACTED FROM TSVCOLUMN MUST HAVE SOME NAME GENERATED
-		if(subjectContent == null)	{
-			subjectContent = new ArrayList<String>();
-			Random random = new Random(999999);
-			Integer randomNumber = random.nextInt();
-			subjectContent.add(randomNumber.toString());
-		}*/
-
 		List<Resource> subjectList = new ArrayList<Resource>();
-		if(hasBaseIRITag){
-			for(String individualContent : subjectContent){
-				subjectList.add(model.createResource(defaultNs + individualContent));			
-			}
+
+		Resource subjectType = model.createResource(rule.getSubject().getIRI().toString());
+
+		String baseIRIFlag = getBASEIRIFlag(rule.getSubjectTSVColumns());
+		if(baseIRIFlag != null){
+			defaultNs = baseIRIFlag;
+		}
+
+		String customIDFlag = getCustomIDFlag(rule.getSubjectTSVColumns());
+		if(customIDFlag != null) {
+			subjectList.add(model.createResource(defaultNs + customIDFlag, subjectType));
+			
+		
 		}else{
-			for(String individualContent : subjectContent){
-				subjectList.add(model.createResource(defaultNs + individualContent, subjectType));
+			String fixedContentFlag = getFixedContentFlag(rule.getSubjectTSVColumns());
+			if(fixedContentFlag != null){
+				subjectList.add(model.createResource(defaultNs + fixedContentFlag, subjectType));
+
+			}else {
+				List<String> subjectContentRaw = extractDataFromTSVColumn(rule.getSubjectTSVColumns(), lineNumber);
+
+				List<String> subjectContent = new ArrayList<String>();
+				for(String content : subjectContentRaw){
+					subjectContent.add(content.replaceAll(" ", "_"));
+				}
+
+				for(String individualContent : subjectContent){
+					subjectList.add(model.createResource(defaultNs + individualContent, subjectType));
+				}
 			}
 		}
 
 		return subjectList;
 	}
 
-	private boolean hasBASEIRITag(List<TSVColumn> listTSVColumn) {
+	/* private List<TSVColumn> getCustomIDFlag(List<TSVColumn> listTSVColumn) {
+		TSVColumn customID = new TSVColumn();
 		for(TSVColumn column : listTSVColumn){
 			for(Flag flag : column.getFlags()){
-				if(flag instanceof FlagBaseIRI){
+				if(flag instanceof FlagCustomID){
+					customID.setTitle(((FlagCustomID) flag).getContent());
+				}
+			}
+		}
+
+		List<TSVColumn> temp = new ArrayList<TSVColumn>();
+		temp.add(customID);
+
+		return temp;
+	}
+
+	private boolean hasCustomIDFlag(List<TSVColumn> listTSVColumn) {
+		for(TSVColumn column : listTSVColumn){
+			for(Flag flag : column.getFlags()){
+				if(flag instanceof FlagCustomID){
 					return true;
 				}
 			}
 		}
 		return false;
 	}
+	 */
 
-	private String getBASEIRITag(List<TSVColumn> listTSVColumn) {
+	private String getCustomIDFlag(List<TSVColumn> listTSVColumn) {
+		for(TSVColumn column : listTSVColumn){
+			for(Flag flag : column.getFlags()){
+				if(flag instanceof FlagCustomID){
+					return ((FlagCustomID) flag).getContent();
+				}
+			}
+		}
+		return null;
+	}
+
+	private String getFixedContentFlag(List<TSVColumn> listTSVColumn) {
+		for(TSVColumn column : listTSVColumn){
+			for(Flag flag : column.getFlags()){
+				if(flag instanceof FlagFixedContent){
+					return ((FlagFixedContent) flag).getContent();
+				}
+			}
+		}
+		return null;
+	}
+
+	private String getBASEIRIFlag(List<TSVColumn> listTSVColumn) {
 		for(TSVColumn column : listTSVColumn){
 			for(Flag flag : column.getFlags()){
 				if(flag instanceof FlagBaseIRI){
@@ -340,17 +406,6 @@ public class TriplesProcessing {
 		return null;
 	}
 
-	private boolean hasOWNIDTag(List<TSVColumn> listTSVColumn) {
-		for(TSVColumn column : listTSVColumn){
-			for(Flag flag : column.getFlags()){
-				if(flag instanceof FlagOWNID){
-					return ((FlagOWNID) flag).isOwnId();
-				}
-			}
-		}
-		return false;
-	}
-
 	public void writeRDF(){
 		System.out.println("#####################################\n=== Writing RDF... \n");
 		long startTime = System.currentTimeMillis();
@@ -360,6 +415,7 @@ public class TriplesProcessing {
 			fos = new FileOutputStream(f);
 			//model.write(fos, "N-TRIPLES");
 			model.write(fos, "RDF/XML");
+			//model.write(fos, "TURTLE");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -368,7 +424,7 @@ public class TriplesProcessing {
 		long elapsedTime = stopTime - startTime;
 		System.out.println("=== Wrote RDF in " + elapsedTime / 1000 + " secs ===\n#####################################\n\n");
 	}
-	
+
 	public Model getModel() {
 		return this.model;
 	}

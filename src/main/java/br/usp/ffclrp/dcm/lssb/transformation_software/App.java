@@ -12,27 +12,28 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import org.apache.jena.shared.PropertyNotFoundException;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLProperty;
 
+import br.usp.ffclrp.dcm.lssb.custom_exceptions.PropertyNotExist;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Condition;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ConditionBlock;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ContentDirectionTSVColumn;
+import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagContentDirectionTSVColumn;
+import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagCustomID;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.EnumContentDirectionTSVColumn;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.EnumOperationsConditionBlock;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.EnumRegexList;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FixedContent;
+import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagFixedContent;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Flag;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagBaseIRI;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagConditionBlock;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagOWNID;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.NotMetadata;
+import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagNotMetadata;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ObjectAsRule;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Rule;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Separator;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TSVColumn;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TripleObject;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TripleObjectAsColumns;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TripleObjectAsRule;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TripleObjectBuilder;
 
@@ -49,15 +50,26 @@ public class App
 	public static void main( String[] args )
 	{
 		App app = new App();
-		app.extractRulesFromFile("testFiles/teste_3/rules_teste_3.txt", "testFiles/teste_3/onto_teste_3.owl");
-
-		TriplesProcessing triplesProcessing = new TriplesProcessing("testFiles/teste_3/teste_3.tsv", "testFiles/teste_3/onto_teste_3.owl");
-		triplesProcessing.createTriplesFromRules(app.rulesList, app.conditionsBlocks, "http:\\example.org/onto/individual#");
+		List<String> listOfOntologies = new ArrayList<String>();
+		listOfOntologies.add("testFiles/normalizedFile/third_attempt/ontology.owl");
+		try {
+			app.extractRulesFromFile("testFiles/normalizedFile/third_attempt/rules.txt", listOfOntologies);
+			TriplesProcessing triplesProcessing = new TriplesProcessing("testFiles/normalizedFile/third_attempt/NormalizedData.txt", "testFiles/normalizedFile/third_attempt/ontology.owl");
+			triplesProcessing.createTriplesFromRules(app.rulesList, app.conditionsBlocks, "http://www.example.org/onto/individual/");
+		} catch (PropertyNotExist e) { 
+			e.getMessage();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			System.out.println("Finished!");
+		}
+		
+		
 	}
 
-	public void extractRulesFromFile(String rulesRelativePath, String ontologyRelativePath){
+	public void extractRulesFromFile(String rulesRelativePath, List<String> listOfOntologies) throws Exception{
 		ontologyHelper = new OntologyHelper();
-		ontologyHelper.loadingOntologyFromFile(ontologyRelativePath);
+		ontologyHelper.loadingOntologyFromFile(listOfOntologies);
 		String fileContent = readFile(rulesRelativePath);
 
 		fileContent = fileContent.replaceAll("\n", "").replaceAll("\t", "");
@@ -107,11 +119,16 @@ public class App
 			String lineFromBlock = predicatesLinesOneBlock.substring(initialOfEachMatch.get(i) + 1, // +1 exists to not include the first character, a comma
 					finalChar);
 
-			EnumOperationsConditionBlock operation = retrieveOperation(lineFromBlock);
+			EnumOperationsConditionBlock operation = null;
+			try{
+				operation = retrieveOperation(lineFromBlock);
+			}catch(IllegalStateException e) {
+				throw new IllegalStateException("Condition operation not identified at condition block");
+			}
 
-			String column = extractDataFromFirstQuotationMarkInsideRegex(lineFromBlock, EnumRegexList.SELECTCOLUMNCONDITIONBLOCK.getExpression());
+			String column = extractDataFromFirstQuotationMarkBlockInsideRegex(lineFromBlock, EnumRegexList.SELECTCOLUMNCONDITIONBLOCK.getExpression());
 			lineFromBlock = removeRegexFromContent(EnumRegexList.SELECTCOLUMNCONDITIONBLOCK.getExpression(), lineFromBlock);
-			String value = extractDataFromFirstQuotationMarkInsideRegex(lineFromBlock, EnumRegexList.SELECTALL.getExpression());
+			String value = extractDataFromFirstQuotationMarkBlockInsideRegex(lineFromBlock, EnumRegexList.SELECTALL.getExpression());
 			conditions.add(new Condition(column, operation, value));
 		}
 
@@ -119,7 +136,9 @@ public class App
 	}
 
 	private EnumOperationsConditionBlock retrieveOperation(String lineFromBlock) {
-		String operation = matchRegexOnString(EnumRegexList.SELECTOPERATIONCONDITIONBLOCK.getExpression(), lineFromBlock).group();
+		String operation;
+		operation = matchRegexOnString(EnumRegexList.SELECTOPERATIONCONDITIONBLOCK.getExpression(), lineFromBlock).group();
+
 		
 		if(operation.equals(EnumOperationsConditionBlock.DIFFERENT.getOperation())) 		return EnumOperationsConditionBlock.DIFFERENT;
 		if(operation.equals(EnumOperationsConditionBlock.EQUAL.getOperation()))			return EnumOperationsConditionBlock.EQUAL;
@@ -128,7 +147,7 @@ public class App
 		return null;
 	}
 
-	private void printRules(List<Rule> rulesList) {
+/*	private void printRules(List<Rule> rulesList) {
 		for(Rule r : rulesList){
 			System.out.println("** Rule: **\n");
 			String out = "ID: " + r.getId() + "\t\t" + "Subject: " + r.getSubject().getIRI() + "\t\t";
@@ -157,9 +176,9 @@ public class App
 			}
 		}
 		System.out.println(outAddedContent);
-	}
+	}*/
 
-	private List<Rule> extractRulesFromString(String fileContent) {
+	public List<Rule> extractRulesFromString(String fileContent) throws Exception {
 
 		List<String> rulesListAsText = identifyRulesBlocksFromString(fileContent);		
 
@@ -181,7 +200,7 @@ public class App
 		return splitContent;
 	}
 
-	public Rule createRulesFromBlock(String blockRulesAsText) {
+	public Rule createRulesFromBlock(String blockRulesAsText) throws Exception {
 		Matcher matcher = matchRegexOnString(EnumRegexList.SELECTSUBJECTLINE.getExpression(), blockRulesAsText);
 		if(matcher.hitEnd()){
 			return exctactRuleFromOneLineRuleBlock(blockRulesAsText);
@@ -233,7 +252,7 @@ public class App
 				List<TSVColumn> tsvcolumns = extractTSVColumnsFromSentence(lineFromBlock);
 				if(predicateObjects.containsKey(propertyFromLine)){
 					@SuppressWarnings("unchecked")
-					List<TSVColumn> object = (List<TSVColumn>) predicateObjects.get(propertyFromLine);
+					List<TSVColumn> object = (List<TSVColumn>) predicateObjects.get(propertyFromLine).getObject();
 					for(TSVColumn column : tsvcolumns){
 						object.add(column);
 					}
@@ -273,10 +292,15 @@ public class App
 		return removeRegexFromContent(EnumRegexList.SELECTPREDICATE.getExpression(), lineFromBlock);
 	}
 
-	private OWLProperty extractPredicateFromBlockLine(String lineFromBlock) {		
-		String predicateName = extractDataFromFirstQuotationMarkInsideRegex(lineFromBlock, EnumRegexList.SELECTPREDICATE.getExpression());		
+	private OWLProperty extractPredicateFromBlockLine(String lineFromBlock) throws Exception {		
+		String predicateName = extractDataFromFirstQuotationMarkBlockInsideRegex(lineFromBlock, EnumRegexList.SELECTPREDICATE.getExpression());		
 
-		return ontologyHelper.getProperty(predicateName);
+		OWLProperty prop = ontologyHelper.getProperty(predicateName);
+		
+		if(prop == null)
+			throw new PropertyNotExist("Property does not exist in ontology. Instruction: " + lineFromBlock);
+		
+		return prop;
 	}
 
 	public List<TSVColumn> extractTSVColumnsFromSentence(String sentence){
@@ -285,7 +309,7 @@ public class App
 
 		for(String s : eachTSVColumnWithFlags){
 
-			String title = extractDataFromFirstQuotationMarkInsideRegex(s, EnumRegexList.SELECTCONTENTQUOTATIONMARK.getExpression());
+			String title = extractDataFromFirstQuotationMarkBlockInsideRegex(s, EnumRegexList.SELECTCONTENTQUOTATIONMARK.getExpression());
 			//s = removeRegexFromContent(EnumRegexList.SELECTCONTENTQUOTATIONMARK.getExpression(), s);
 
 			List<Flag> flags = extractFlagsFromSentence(s);
@@ -304,18 +328,18 @@ public class App
 
 		try{
 			if(matcher.group().equals("/R")){
-				flagsList.add(new ContentDirectionTSVColumn(EnumContentDirectionTSVColumn.RIGHT));
+				flagsList.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.RIGHT));
 				sentence = removeRegexFromContent("\\/[R]", sentence);
 			}else{
-				flagsList.add(new ContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
+				flagsList.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
 				sentence = removeRegexFromContent("\\/[D]", sentence);
 			}
 		}catch(Exception e){
-			flagsList.add(new ContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
+			flagsList.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
 		}
 
 
-		matcher = matchRegexOnString("\\/[!]|\\/(NM)|\\/(SP)|\\/(CB)|\\/(BASEIRI)|\\/(OWNID)", sentence);
+		matcher = matchRegexOnString("\\/[!]|\\/(NM)|\\/(SP)|\\/(CB)|\\/(BASEIRI)|\\/(ID)|\\/(FX)", sentence);
 
 		if(!matcher.hitEnd()){
 
@@ -333,13 +357,13 @@ public class App
 					sentence = removeRegexFromContent(EnumRegexList.SELECTCONDITIONBLOCKFLAG.getExpression(), sentence);
 				}
 
-				if(matcherString.equals("/!")){
+				if(matcherString.equals("/FX")){
 					flagsList.add(extractDataFromFlagFixedContentFromSentence(sentence, EnumRegexList.SELECTFIXEDCONTENTFLAG.getExpression()));
 					sentence = removeRegexFromContent(EnumRegexList.SELECTFIXEDCONTENTFLAG.getExpression(), sentence);
 				}
 
 				if(matcherString.equals("/NM")){
-					flagsList.add(new NotMetadata(true));
+					flagsList.add(new FlagNotMetadata(true));
 					sentence = removeRegexFromContent("\\/(NM)", sentence);
 				}
 
@@ -348,9 +372,9 @@ public class App
 					sentence = removeRegexFromContent(EnumRegexList.SELECTBASEIRIFLAG.getExpression(), sentence);
 				}
 				
-				if(matcherString.equals("/OWNID")){
-					flagsList.add(new FlagOWNID(true));
-					sentence = removeRegexFromContent("\\/(OWNID)", sentence);
+				if(matcherString.equals("/ID")){
+					flagsList.add(extractDataFromFlagCustomIDFromSentence(sentence, EnumRegexList.SELECTCUSTOMDIDFLAG.getExpression()));
+					sentence = removeRegexFromContent(EnumRegexList.SELECTCUSTOMDIDFLAG.getExpression(), sentence);
 				}
 				
 				matcher.find();
@@ -360,20 +384,26 @@ public class App
 		return flagsList;
 	}
 
+	private Flag extractDataFromFlagCustomIDFromSentence(String sentence, String regex) {
+		String contentFromQuotationMark = extractDataFromFirstQuotationMarkBlockInsideRegex(sentence, regex);
+
+		return new FlagCustomID(contentFromQuotationMark);
+	}
+
 	private Flag extractDataFromFlagBaseIRIFromSentence(String sentence, String regex) {
 		sentence = matchRegexOnString(regex, sentence).group();
 		
-		String iri = extractDataFromFirstQuotationMarkInsideRegex(sentence, regex);
-		String namespace = extractDataFromFirstQuotationMarkInsideRegex(sentence, EnumRegexList.SELECTNAMESPACEBASEIRIFLAG.getExpression());
+		String iri = extractDataFromFirstQuotationMarkBlockInsideRegex(sentence, regex);
+		String namespace = extractDataFromFirstQuotationMarkBlockInsideRegex(sentence, EnumRegexList.SELECTNAMESPACEBASEIRIFLAG.getExpression());
 
 
 		return new FlagBaseIRI(iri, namespace);
 	}
 
 	private Flag extractDataFromFlagFixedContentFromSentence(String sentence, String regex) {
-		String contentFromQuotationMark = extractDataFromFirstQuotationMarkInsideRegex(sentence, regex);
+		String contentFromQuotationMark = extractDataFromFirstQuotationMarkBlockInsideRegex(sentence, regex);
 
-		return new FixedContent(contentFromQuotationMark);
+		return new FlagFixedContent(contentFromQuotationMark);
 	}
 
 	private Flag extractDataFromFlagConditionFromSentence(String sentence, String regex) {
@@ -387,13 +417,15 @@ public class App
 	}
 
 	private Flag extractDataFromFlagSeparatorFromSentence(String sentence, String regex) {
-		String contentFromQuotationMark = extractDataFromFirstQuotationMarkInsideRegex(sentence, regex);
+		String contentFromQuotationMark = extractDataFromFirstQuotationMarkBlockInsideRegex(sentence, regex);
+		String contentWithoutQuotationMark = removeDataFromFirstQuotationMarkBlockInsideRegex(sentence, regex);
+		
 
 		List<Integer> columnsSelected = new ArrayList<Integer>();
 		Matcher matchedColumnsSelected = matchRegexOnString("(\\d(\\d)*)",
-				matchRegexOnString(regex, sentence).group());
+				matchRegexOnString(regex, contentWithoutQuotationMark).group());
 		while(!matchedColumnsSelected.hitEnd()){
-			columnsSelected.add(Integer.parseInt(matchedColumnsSelected.group()));
+			columnsSelected.add(Integer.parseInt(matchedColumnsSelected.group()) - 1);
 			matchedColumnsSelected.find();
 		}
 
@@ -425,9 +457,9 @@ public class App
 		return data;
 	}
 
-	private OWLClass extractSubjectFromSentence(String blockRulesAsText) { // (\s|,)"(.*?)":{1}
+	private OWLClass extractSubjectFromSentence(String blockRulesAsText) {
 
-		String subjectString = extractDataFromFirstQuotationMarkInsideRegex(blockRulesAsText, EnumRegexList.SELECTSUBJECTCLASSNAME.getExpression());
+		String subjectString = extractDataFromFirstQuotationMarkBlockInsideRegex(blockRulesAsText, EnumRegexList.SELECTSUBJECTCLASSNAME.getExpression());
 
 		OWLClass subject = ontologyHelper.getClass(subjectString);
 
@@ -437,19 +469,37 @@ public class App
 		return subject;
 	}
 
-	private String extractDataFromFirstQuotationMarkInsideRegex(String content, String regex){
+	private String extractDataFromFirstQuotationMarkBlockInsideRegex(String content, String regex){
 		String data = null;
 
 		Matcher matcher = matchRegexOnString(regex, content);
 
 		try{
 			data = matcher.group(); 
-			data = data.substring(data.indexOf("\"")+1, data.indexOf("\"", data.indexOf("\"")+1));
+			int firstQuotationMark = data.indexOf("\"");
+			data = data.substring(firstQuotationMark +1, data.indexOf("\"", firstQuotationMark +1));
 		}catch(IllegalStateException e){
 			//used just to identify when the matcher did not find anything.
 		}
 
 		return data;
+	}
+	
+	private String removeDataFromFirstQuotationMarkBlockInsideRegex(String content, String regex){
+		String data = null;
+
+		Matcher matcher = matchRegexOnString(regex, content);
+
+		try{
+			data = matcher.group(); 
+			int firstQuotationMark = data.indexOf("\"");
+			String quotationBlock = data.substring(firstQuotationMark + 1, data.indexOf("\"", firstQuotationMark +1));
+			content = content.replace(quotationBlock, "");
+		}catch(IllegalStateException e){
+			//used just to identify when the matcher did not find anything.
+		}
+		
+		return content;
 	}
 
 	private List<String> identifyRulesBlocksFromString(String fileContent) {

@@ -25,7 +25,4 @@ public class ResourcesMapping {
 	public Resource getTripleSubject() {
 		return tripleSubject;
 	}
-	
-	
-
 }

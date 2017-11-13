@@ -32,8 +32,8 @@ public class SemistructuredFileReader {
 
 		TsvParserSettings settings = new TsvParserSettings();
 		settings.getFormat().setLineSeparator("\r\n");
-		settings.setMaxCharsPerColumn(100000);
-		settings.setMaxColumns(2000);
+		settings.setMaxCharsPerColumn(999999);
+		settings.setMaxColumns(99999);
 
 		TsvParser parser = new TsvParser(settings);
 
@@ -51,7 +51,14 @@ public class SemistructuredFileReader {
 		
 		String[] dataRow = allRows.get(lineNumber);
 		
-		return dataRow[header.get(tsvColumn)];
+		try{
+			String str = dataRow[header.get(tsvColumn)];
+			if(str.startsWith("\"") && str.endsWith("\""))
+				str = str.substring(1, str.length() - 1);
+			return str;
+		}catch(NullPointerException ex){
+			throw new NullPointerException("*** Not possible to access the file/content in the file.");
+		}
 	}
 	
 	public List<String[]> getAllDataRows(){

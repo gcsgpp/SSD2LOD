@@ -8,12 +8,4 @@ public enum EnumContentDirectionTSVColumn  {
 	EnumContentDirectionTSVColumn(String directionP) {
 		this.direction = directionP;
 	}
-	
-	
-	public String getDirection() {
-		return direction;
-	}
-	
-	
-
 }

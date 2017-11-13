@@ -11,10 +11,6 @@ public class Rule {
 	private OWLClass subject;
 	private List<TSVColumn> subjectTSVColumns = null;
 	private Map<OWLProperty, TripleObject> predicateObjects;
-	
-	public Rule(){
-		
-	}
 
 	public Rule(String id, OWLClass subject, List<TSVColumn> subjectTSVColumns, Map<OWLProperty, TripleObject> predicateObjects){
 		this.id = id;

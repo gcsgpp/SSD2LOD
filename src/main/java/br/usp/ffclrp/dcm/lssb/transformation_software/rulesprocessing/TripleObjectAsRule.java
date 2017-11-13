@@ -7,10 +7,6 @@ public class TripleObjectAsRule implements TripleObject {
 	
 	private List<ObjectAsRule> object;
 	
-	public TripleObjectAsRule() {
-		
-	}
-	
 	public TripleObjectAsRule(ObjectAsRule object){
 		this.object = new ArrayList<ObjectAsRule>();
 		this.object.add(object);

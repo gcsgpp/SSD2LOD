@@ -1,8 +1,8 @@
 package br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing;
 
-public class NotMetadata extends Flag {
+public class FlagNotMetadata extends Flag {
 	private boolean notmetadata;
-	public NotMetadata(Boolean notmetadata){
+	public FlagNotMetadata(Boolean notmetadata){
 		this.notmetadata = notmetadata;
 	}
 	

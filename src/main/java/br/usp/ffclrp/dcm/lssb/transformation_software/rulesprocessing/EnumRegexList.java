@@ -10,9 +10,10 @@ public enum EnumRegexList {
 	SELECTFIRSTNUMBERS("(\\d)+"),
 	SELECTBASEIRIFLAG("\\/BASEIRI\\(\"(.*?)\"\\)"),
 	SELECTNAMESPACEBASEIRIFLAG(",\\s*\"(.*)\""),
-	SELECTFIXEDCONTENTFLAG("\\/\\!\\(\"(.*?)\"\\)"),
+	SELECTFIXEDCONTENTFLAG("\\/FX\\(\"(.*?)\"\\)"),
 	SELECTCONDITIONBLOCKFLAG("\\/CB\\(\\d*?\\)"),
 	SELECTSEPARATORFLAG("\\/SP\\(\"(.*?)\"((,(.*?)\\))|\\))"),
+	SELECTCUSTOMDIDFLAG("\\/\\ID\\(\"(.*?)\"\\)"),
 	//CONDITION BLOCK REGEX:
 	SELECTCOLUMNCONDITIONBLOCK("(\".*\")\\s(=|!|>|<)"),
 	SELECTPREDICATESDIVISIONSCONDITIONBLOCK("(:|,)(\\s*?)\"(.*?)\"\\s?(=|!|>|<)"),

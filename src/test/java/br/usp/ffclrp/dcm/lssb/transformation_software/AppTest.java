@@ -99,7 +99,12 @@ public class AppTest
 		app.ontologyHelper = new OntologyHelper();
 		app.ontologyHelper.loadingOntologyFromFile("testFiles/unitTestsFiles/ontology.owl");
 
-		Rule rule1Extracted = app.createRulesFromBlock(ruleString);
+		Rule rule1Extracted = null;
+		try {
+			rule1Extracted = app.createRulesFromBlock(ruleString);
+		} catch (Exception e) {
+			fail();
+		}
 
 		assertEquals("1", rule1Extracted.getId());
 		assertEquals("http://purl.obolibrary.org/obo/NCIT_P382", rule1Extracted.getSubject().getIRI().toString());
@@ -157,8 +162,8 @@ public class AppTest
 				List<Flag> flagsList = object.getObject().get(0).getFlags();
 				assertEquals(2, flagsList.size());
 				for(Flag flag : flagsList){
-					if(flag instanceof Separator){
-						Separator separator = (Separator) flag;
+					if(flag instanceof FlagSeparator){
+						FlagSeparator separator = (FlagSeparator) flag;
 						assertEquals("~", separator.getTerm());
 						assertEquals(1, separator.getColumns().size());
 						assertEquals(1, separator.getColumns().get(0).intValue());
@@ -204,7 +209,12 @@ public class AppTest
 		app.ontologyHelper = new OntologyHelper();
 		app.ontologyHelper.loadingOntologyFromFile("testFiles/unitTestsFiles/ontology.owl");
 
-		Rule rule2Extracted = app.createRulesFromBlock(ruleString);
+		Rule rule2Extracted = null;
+		try {
+			rule2Extracted = app.createRulesFromBlock(ruleString);
+		} catch (Exception e) {
+			fail();
+		}
 
 		assertEquals("2", rule2Extracted.getId());
 		assertEquals("http://purl.obolibrary.org/obo/NCIT_P382", rule2Extracted.getSubject().getIRI().toString());
@@ -311,7 +321,12 @@ public class AppTest
 		app.ontologyHelper = new OntologyHelper();
 		app.ontologyHelper.loadingOntologyFromFile("testFiles/unitTestsFiles/ontology.owl");
 
-		Rule rule3Extracted = app.createRulesFromBlock(ruleString);
+		Rule rule3Extracted = null;
+		try {
+			rule3Extracted = app.createRulesFromBlock(ruleString);
+		} catch (Exception e) {
+			fail();
+		}
 
 		assertEquals("3", rule3Extracted.getId());
 		assertEquals("http://purl.org/g/onto/Gene", rule3Extracted.getSubject().getIRI().toString());
@@ -361,7 +376,12 @@ public class AppTest
 		app.ontologyHelper = new OntologyHelper();
 		app.ontologyHelper.loadingOntologyFromFile("testFiles/unitTestsFiles/ontology.owl");
 
-		Rule rule2Extracted = app.extractRulesFromString(ruleString).get(0);
+		Rule rule2Extracted = null;
+		try {
+			rule2Extracted = app.extractRulesFromString(ruleString).get(0);
+		} catch (Exception e) {
+			fail();
+		}
 
 		assertEquals("2", rule2Extracted.getId());
 		assertEquals("http://purl.obolibrary.org/obo/NCIT_P382", rule2Extracted.getSubject().getIRI().toString());
@@ -468,7 +488,12 @@ public class AppTest
 		app.ontologyHelper = new OntologyHelper();
 		app.ontologyHelper.loadingOntologyFromFile("testFiles/unitTestsFiles/ontology.owl");
 
-		Rule ruleExtracted = app.extractRulesFromString(ruleString).get(0);
+		Rule ruleExtracted = null;
+		try {
+			ruleExtracted = app.extractRulesFromString(ruleString).get(0);
+		} catch (Exception e) {
+			fail();
+		}
 
 		assertEquals("1", ruleExtracted.getId());
 		assertEquals("http://purl.obolibrary.org/obo/NCIT_P382", ruleExtracted.getSubject().getIRI().toString());
@@ -570,7 +595,14 @@ public class AppTest
 		String sentence = "\\\"name\\\" = \\\"Term\\\" /D, ";
 
 		App app = new App();
-		List<Flag> flagsExtracted = app.extractFlagsFromSentence(sentence);
+		
+		List<Flag> flagsExtracted = null;
+		try {
+			flagsExtracted = app.extractFlagsFromSentence(sentence);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		assertEquals(1, flagsExtracted.size());
 		for(Flag flagExtracted : flagsExtracted) {
@@ -589,7 +621,13 @@ public class AppTest
 		String sentence = "\\\"name\\\" = \\\"Term\\\" /R, ";
 
 		App app = new App();
-		List<Flag> flagsExtracted = app.extractFlagsFromSentence(sentence);
+		List<Flag> flagsExtracted = null;
+		try {
+			flagsExtracted = app.extractFlagsFromSentence(sentence);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		assertEquals(1, flagsExtracted.size());
 		for(Flag flagExtracted : flagsExtracted) {
@@ -608,7 +646,13 @@ public class AppTest
 		String sentence = "\\\"name\\\" = \\\"Term\\\" /FX(\"fixed content test\"), ";
 
 		App app = new App();
-		List<Flag> flagsExtracted = app.extractFlagsFromSentence(sentence);
+		List<Flag> flagsExtracted = null;
+		try {
+			flagsExtracted = app.extractFlagsFromSentence(sentence);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		assertEquals(2, flagsExtracted.size()); //Fixed Content + ContentDirection
 		for(Flag flagExtracted : flagsExtracted) {
@@ -629,7 +673,13 @@ public class AppTest
 		String sentence = "\\\"name\\\" = \\\"Term\\\" /NM, ";
 
 		App app = new App();
-		List<Flag> flagsExtracted = app.extractFlagsFromSentence(sentence);
+		List<Flag> flagsExtracted = null;
+		try {
+			flagsExtracted = app.extractFlagsFromSentence(sentence);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		assertEquals(2, flagsExtracted.size()); //NotMetadata + ContentDirection
 		for(Flag flagExtracted : flagsExtracted) {
@@ -670,7 +720,12 @@ public class AppTest
 		ontologiesPaths.add("testFiles/unitTestsFiles/ontology2.owl");
 		app.ontologyHelper.loadingOntologyFromFile(ontologiesPaths);
 
-		Rule rule1Extracted = app.createRulesFromBlock(ruleString);
+		Rule rule1Extracted = null;
+		try {
+			rule1Extracted = app.createRulesFromBlock(ruleString);
+		} catch (Exception e) {
+			fail();
+		}
 
 		assertEquals("1", rule1Extracted.getId());
 		assertEquals("http://purl.obolibrary.org/obo/NCIT_P382_onto2", rule1Extracted.getSubject().getIRI().toString());
@@ -763,7 +818,13 @@ public class AppTest
 		String sentence = " \"column1\" ; \"column2\" /R ; \"column3\" /BASEIRI(\"http://teste.com\", \"test\") ";
 
 		App app = new App();
-		List<TSVColumn> tsvColumns = app.extractTSVColumnsFromSentence(sentence);
+		List<TSVColumn> tsvColumns = null;
+		try {
+			tsvColumns = app.extractTSVColumnsFromSentence(sentence);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		assertEquals(3, tsvColumns.size());
 		for(TSVColumn column : tsvColumns) {

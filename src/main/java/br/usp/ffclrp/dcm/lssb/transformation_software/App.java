@@ -63,8 +63,8 @@ public class App
 		} finally {
 			System.out.println("Finished!");
 		}
-		
-		
+
+
 	}
 
 	public void extractRulesFromFile(String rulesRelativePath, List<String> listOfOntologies) throws Exception{
@@ -139,7 +139,7 @@ public class App
 		String operation;
 		operation = matchRegexOnString(EnumRegexList.SELECTOPERATIONCONDITIONBLOCK.getExpression(), lineFromBlock).group();
 
-		
+
 		if(operation.equals(EnumOperationsConditionBlock.DIFFERENT.getOperation())) 		return EnumOperationsConditionBlock.DIFFERENT;
 		if(operation.equals(EnumOperationsConditionBlock.EQUAL.getOperation()))			return EnumOperationsConditionBlock.EQUAL;
 		if(operation.equals(EnumOperationsConditionBlock.GREATERTHAN.getOperation())) 	return EnumOperationsConditionBlock.GREATERTHAN;
@@ -147,12 +147,12 @@ public class App
 		return null;
 	}
 
-/*	private void printRules(List<Rule> rulesList) {
+	/*	private void printRules(List<Rule> rulesList) {
 		for(Rule r : rulesList){
 			System.out.println("** Rule: **\n");
 			String out = "ID: " + r.getId() + "\t\t" + "Subject: " + r.getSubject().getIRI() + "\t\t";
 			r.getPredicateObjects().forEach( (key, value) -> { printSysoutRules(out, key, value); });
-			
+
 			if(r.getPredicateObjects().size() == 0)
 				System.out.println(out);
 		}
@@ -265,8 +265,8 @@ public class App
 
 		return new Rule(ruleId, ruleSubject, subjectTsvcolumns, predicateObjects);
 	}
-	
-	public Rule exctactRuleFromOneLineRuleBlock(String subjectLine) {
+
+	public Rule exctactRuleFromOneLineRuleBlock(String subjectLine) throws Exception {
 		String ruleId 						= extractIDFromSentence(subjectLine);
 		OWLClass ruleSubject 				= extractSubjectFromSentence(subjectLine);
 		subjectLine = removeRegexFromContent(EnumRegexList.SELECTSUBJECTCLASSNAME.getExpression(), subjectLine);
@@ -296,14 +296,14 @@ public class App
 		String predicateName = extractDataFromFirstQuotationMarkBlockInsideRegex(lineFromBlock, EnumRegexList.SELECTPREDICATE.getExpression());		
 
 		OWLProperty prop = ontologyHelper.getProperty(predicateName);
-		
+
 		if(prop == null)
 			throw new PropertyNotExist("Property does not exist in ontology. Instruction: " + lineFromBlock);
-		
+
 		return prop;
 	}
 
-	public List<TSVColumn> extractTSVColumnsFromSentence(String sentence){
+	public List<TSVColumn> extractTSVColumnsFromSentence(String sentence) throws Exception{
 		List<TSVColumn> listOfColumns = new ArrayList<TSVColumn>();
 		String[] eachTSVColumnWithFlags = sentence.split(";");
 
@@ -321,7 +321,7 @@ public class App
 		return listOfColumns;
 	}
 
-	public List<Flag> extractFlagsFromSentence(String sentence) {
+	public List<Flag> extractFlagsFromSentence(String sentence) throws Exception {
 		List<Flag> flagsList = new ArrayList<Flag>();
 
 		Matcher matcher = matchRegexOnString("\\/[DR]", sentence);
@@ -371,12 +371,12 @@ public class App
 					flagsList.add(extractDataFromFlagBaseIRIFromSentence(sentence, EnumRegexList.SELECTBASEIRIFLAG.getExpression()));
 					sentence = removeRegexFromContent(EnumRegexList.SELECTBASEIRIFLAG.getExpression(), sentence);
 				}
-				
+
 				if(matcherString.equals("/ID")){
 					flagsList.add(extractDataFromFlagCustomIDFromSentence(sentence, EnumRegexList.SELECTCUSTOMDIDFLAG.getExpression()));
 					sentence = removeRegexFromContent(EnumRegexList.SELECTCUSTOMDIDFLAG.getExpression(), sentence);
 				}
-				
+
 				matcher.find();
 			}
 		}
@@ -392,7 +392,7 @@ public class App
 
 	private Flag extractDataFromFlagBaseIRIFromSentence(String sentence, String regex) {
 		sentence = matchRegexOnString(regex, sentence).group();
-		
+
 		String iri = extractDataFromFirstQuotationMarkBlockInsideRegex(sentence, regex);
 		String namespace = extractDataFromFirstQuotationMarkBlockInsideRegex(sentence, EnumRegexList.SELECTNAMESPACEBASEIRIFLAG.getExpression());
 
@@ -416,19 +416,45 @@ public class App
 		return new FlagConditionBlock(id);
 	}
 
-	private Flag extractDataFromFlagSeparatorFromSentence(String sentence, String regex) {
+	private Flag extractDataFromFlagSeparatorFromSentence(String sentence, String regex) throws Exception {
+		
+		sentence = matchRegexOnString(regex, sentence).group();
 		String contentFromQuotationMark = extractDataFromFirstQuotationMarkBlockInsideRegex(sentence, regex);
 		String contentWithoutQuotationMark = removeDataFromFirstQuotationMarkBlockInsideRegex(sentence, regex);
-		
+
 
 		List<Integer> columnsSelected = new ArrayList<Integer>();
-		Matcher matchedColumnsSelected = matchRegexOnString("(\\d(\\d)*)",
-				matchRegexOnString(regex, contentWithoutQuotationMark).group());
-		while(!matchedColumnsSelected.hitEnd()){
-			columnsSelected.add(Integer.parseInt(matchedColumnsSelected.group()) - 1);
-			matchedColumnsSelected.find();
+
+
+		//Exctact range
+		Matcher matchedRange = matchRegexOnString(EnumRegexList.SELECTSEPARATORFLAGRANGENUMBERS.getExpression(), contentWithoutQuotationMark);
+		while(!matchedRange.hitEnd()){
+			int start, end = 0;
+			Matcher matchedColumnsSelected = matchRegexOnString("(\\d(\\d)*)", matchedRange.group());
+			try {
+				start = Integer.parseInt(matchedColumnsSelected.group());
+				matchedColumnsSelected.find();
+				end = Integer.parseInt(matchedColumnsSelected.group());
+			}catch (Exception e){
+				throw new Exception("Error trying to extract range numbers from Separator Flag.", e);
+			}
+
+			for(int i = start; i <= end; i++)
+				columnsSelected.add(i - 1);
+			
+			matchedRange.find();
+		}
+		
+		String contentWithoutQuotationAndRange = removeRegexFromContent(EnumRegexList.SELECTSEPARATORFLAGRANGENUMBERS.getExpression(), contentWithoutQuotationMark);
+
+		//Exctact individuals columns
+		Matcher matchedIndividualColumns = matchRegexOnString("\\s*\\d+", contentWithoutQuotationAndRange);
+		while(!matchedIndividualColumns.hitEnd()){
+			columnsSelected.add(Integer.parseInt(matchedIndividualColumns.group().trim()) - 1);
+			matchedIndividualColumns.find();
 		}
 
+		//Case there are no columns specified
 		if(columnsSelected.size() < 1){
 			columnsSelected.add(Integer.MAX_VALUE);
 		}
@@ -484,7 +510,7 @@ public class App
 
 		return data;
 	}
-	
+
 	private String removeDataFromFirstQuotationMarkBlockInsideRegex(String content, String regex){
 		String data = null;
 
@@ -498,7 +524,7 @@ public class App
 		}catch(IllegalStateException e){
 			//used just to identify when the matcher did not find anything.
 		}
-		
+
 		return content;
 	}
 

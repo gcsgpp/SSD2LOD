@@ -848,6 +848,35 @@ public class AppTest
 		}
 	}
 
+	@Test
+	public void separatorFlagColumnsAsRange() {
+		String sentence = "\\\"name\\\" = \\\"Term\\\" /SP(\"teste\", 1:3)";
+
+		App app = new App();
+		List<Flag> flagsExtracted = null;
+		try {
+			flagsExtracted = app.extractFlagsFromSentence(sentence);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		assertEquals(2, flagsExtracted.size()); //Separator Flag + ContentDirection
+		for(Flag flagExtracted : flagsExtracted) {
+			if(flagExtracted instanceof FlagSeparator) {
+				FlagSeparator flag = (FlagSeparator) flagExtracted;
+
+				assertEquals(3, flag.getColumns().size());
+				for(int columnNumber : flag.getColumns()) {
+					assert(columnNumber == 0 | columnNumber == 1 | columnNumber == 2);
+				}
+			}else if(flagExtracted instanceof FlagContentDirectionTSVColumn){
+				continue;
+			}else{
+				fail();
+			}
+		}
+	}
+	
 	/*@Test
 	public void extractOwnIDFlag() {
 		String sentence = "\\\"Probe\\\" = \\\"ID\\\" /OWNID, ";

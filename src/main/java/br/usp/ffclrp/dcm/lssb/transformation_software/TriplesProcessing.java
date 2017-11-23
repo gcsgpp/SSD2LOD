@@ -11,6 +11,8 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.riot.Lang;
+import org.apache.jena.riot.RDFDataMgr;
 import org.semanticweb.owlapi.model.OWLProperty;
 
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Condition;
@@ -413,9 +415,11 @@ public class TriplesProcessing {
 			File f = new File("teste.rdf");
 			FileOutputStream fos;
 			fos = new FileOutputStream(f);
-			//model.write(fos, "N-TRIPLES");
-			model.write(fos, "RDF/XML");
-			//model.write(fos, "TURTLE");
+			//RDFDataMgr.write(fos, model, Lang.TRIG);
+			//RDFDataMgr.write(fos, model, Lang.TURTLE);
+			//RDFDataMgr.write(fos, model, Lang.RDFXML);
+			//RDFDataMgr.write(fos, model, Lang.NTRIPLES);
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -24,7 +24,7 @@ import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagFixedC
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagNotMetadata;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ObjectAsRule;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Rule;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Separator;
+import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagSeparator;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TSVColumn;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TripleObject;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TripleObjectAsRule;
@@ -219,8 +219,8 @@ public class TriplesProcessing {
 
 			//PROCESS THE SEPARATOR FLAG
 			for(Flag flag : column.getFlags()){
-				if(flag instanceof Separator){
-					dataColumnsSeparated.add(separateDataFromTSVColumn((Separator) flag, column.getTitle(), lineNumber));
+				if(flag instanceof FlagSeparator){
+					dataColumnsSeparated.add(separateDataFromTSVColumn((FlagSeparator) flag, column.getTitle(), lineNumber));
 					extractedData = true;
 				}else if(flag instanceof FlagNotMetadata) {
 					String[] columnData = new String[1];
@@ -281,7 +281,7 @@ public class TriplesProcessing {
 		return objectContent;
 	}
 
-	private String[] separateDataFromTSVColumn(Separator flag, String columnTitle, Integer lineNumber) {
+	private String[] separateDataFromTSVColumn(FlagSeparator flag, String columnTitle, Integer lineNumber) {
 		String rawData = fileReader.getData(columnTitle, lineNumber);
 
 		String[] splitData = null;

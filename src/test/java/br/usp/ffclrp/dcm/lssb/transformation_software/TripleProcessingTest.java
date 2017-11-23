@@ -32,7 +32,7 @@ import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagNotMet
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagOwnID;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ObjectAsRule;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Rule;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Separator;
+import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagSeparator;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TSVColumn;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TripleObject;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TripleObjectAsColumns;
@@ -67,7 +67,7 @@ public class TripleProcessingTest
 		List<Flag> subjectFlags = new ArrayList<Flag>();
 		List<Integer> separatorCols = new ArrayList<Integer>();
 		separatorCols.add(0);
-		subjectFlags.add(new Separator("~", separatorCols));
+		subjectFlags.add(new FlagSeparator("~", separatorCols));
 		subjectFlags.add(new FlagBaseIRI("http://amigo1.geneontology.org/cgi-bin/amigo/term_details?term=", "go"));
 		subjectFlags.add(new FlagConditionBlock(1));
 		subjectFlags.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
@@ -95,7 +95,7 @@ public class TripleProcessingTest
 		nameFlags.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
 		separatorCols = new ArrayList<Integer>();
 		separatorCols.add(1);
-		nameFlags.add(new Separator("~", separatorCols));
+		nameFlags.add(new FlagSeparator("~", separatorCols));
 		nameColumn.setFlags(nameFlags);
 		
 		predicateObjects.put(ontologyHelper.getProperty("name"), new TripleObjectAsColumns(nameColumn));
@@ -124,7 +124,7 @@ public class TripleProcessingTest
 		List<Flag> subjectFlags = new ArrayList<Flag>();
 		List<Integer> separatorCols = new ArrayList<Integer>();
 		separatorCols.add(0);
-		subjectFlags.add(new Separator(":", separatorCols));
+		subjectFlags.add(new FlagSeparator(":", separatorCols));
 		subjectFlags.add(new FlagBaseIRI("http://www.kegg.jp/entry/", "kegg"));
 		subjectFlags.add(new FlagConditionBlock(2));
 		subjectFlags.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
@@ -152,7 +152,7 @@ public class TripleProcessingTest
 		nameFlags.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
 		separatorCols = new ArrayList<Integer>();
 		separatorCols.add(1);
-		nameFlags.add(new Separator(":", separatorCols));
+		nameFlags.add(new FlagSeparator(":", separatorCols));
 		nameColumn.setFlags(nameFlags);
 		
 		predicateObjects.put(ontologyHelper.getProperty("name"), new TripleObjectAsColumns(nameColumn));
@@ -181,7 +181,7 @@ public class TripleProcessingTest
 		List<Flag> subjectFlags = new ArrayList<Flag>();
 		List<Integer> separatorCols = new ArrayList<Integer>();
 		separatorCols.add(Integer.MAX_VALUE);
-		subjectFlags.add(new Separator(", ", separatorCols));
+		subjectFlags.add(new FlagSeparator(", ", separatorCols));
 		subjectFlags.add(new FlagBaseIRI("http://www.genecards.org/cgi-bin/carddisp.pl?gene=", "genecard"));
 		
 		subject.setFlags(subjectFlags);

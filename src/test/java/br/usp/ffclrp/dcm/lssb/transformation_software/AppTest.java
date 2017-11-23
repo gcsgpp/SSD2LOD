@@ -27,7 +27,7 @@ import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagNotMet
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagOwnID;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ObjectAsRule;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Rule;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Separator;
+import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagSeparator;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TSVColumn;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TripleObject;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TripleObjectAsColumns;
@@ -114,8 +114,8 @@ public class AppTest
 				assertEquals(4, column.getFlags().size()); //all from the rule line plus the ContentDirection
 
 				for(Flag flag : column.getFlags()){
-					if(flag instanceof Separator){
-						Separator separator = (Separator) flag;
+					if(flag instanceof FlagSeparator){
+						FlagSeparator separator = (FlagSeparator) flag;
 						assertEquals("~", separator.getTerm());
 						assertEquals(1, separator.getColumns().size());
 						assertEquals(0, separator.getColumns().get(0).intValue());
@@ -224,8 +224,8 @@ public class AppTest
 				assertEquals(4, column.getFlags().size()); //all from the rule line plus the ContentDirection
 
 				for(Flag flag : column.getFlags()){
-					if(flag instanceof Separator){
-						Separator separator = (Separator) flag;
+					if(flag instanceof FlagSeparator){
+						FlagSeparator separator = (FlagSeparator) flag;
 						assertEquals(":", separator.getTerm());
 						assertEquals(1, separator.getColumns().size());
 						assertEquals(0, separator.getColumns().get(0).intValue());
@@ -271,8 +271,8 @@ public class AppTest
 				List<Flag> flagsList = object.getObject().get(0).getFlags();
 				assertEquals(2, flagsList.size());
 				for(Flag flag : flagsList){
-					if(flag instanceof Separator){
-						Separator separator = (Separator) flag;
+					if(flag instanceof FlagSeparator){
+						FlagSeparator separator = (FlagSeparator) flag;
 						assertEquals(":", separator.getTerm());
 						assertEquals(1, separator.getColumns().size());
 						assertEquals(1, separator.getColumns().get(0).intValue());
@@ -336,8 +336,8 @@ public class AppTest
 				assertEquals(3, column.getFlags().size()); //all from the rule line plus the ContentDirection
 
 				for(Flag flag : column.getFlags()){
-					if(flag instanceof Separator){
-						Separator separator = (Separator) flag;
+					if(flag instanceof FlagSeparator){
+						FlagSeparator separator = (FlagSeparator) flag;
 						assertEquals(", ", separator.getTerm());
 						assertEquals(1, separator.getColumns().size());
 						assertEquals(Integer.MAX_VALUE, separator.getColumns().get(0).intValue());
@@ -391,8 +391,8 @@ public class AppTest
 				assertEquals(4, column.getFlags().size()); //all from the rule line plus the ContentDirection
 
 				for(Flag flag : column.getFlags()){
-					if(flag instanceof Separator){
-						Separator separator = (Separator) flag;
+					if(flag instanceof FlagSeparator){
+						FlagSeparator separator = (FlagSeparator) flag;
 						assertEquals(":", separator.getTerm());
 						assertEquals(1, separator.getColumns().size());
 						assertEquals(0, separator.getColumns().get(0).intValue());
@@ -438,8 +438,8 @@ public class AppTest
 				List<Flag> flagsList = object.getObject().get(0).getFlags();
 				assertEquals(2, flagsList.size());
 				for(Flag flag : flagsList){
-					if(flag instanceof Separator){
-						Separator separator = (Separator) flag;
+					if(flag instanceof FlagSeparator){
+						FlagSeparator separator = (FlagSeparator) flag;
 						assertEquals(":", separator.getTerm());
 						assertEquals(1, separator.getColumns().size());
 						assertEquals(1, separator.getColumns().get(0).intValue());
@@ -503,8 +503,8 @@ public class AppTest
 				assertEquals(4, column.getFlags().size()); //all from the rule line plus the ContentDirection
 
 				for(Flag flag : column.getFlags()){
-					if(flag instanceof Separator){
-						Separator separator = (Separator) flag;
+					if(flag instanceof FlagSeparator){
+						FlagSeparator separator = (FlagSeparator) flag;
 						assertEquals("~", separator.getTerm());
 						assertEquals(1, separator.getColumns().size());
 						assertEquals(0, separator.getColumns().get(0).intValue());
@@ -556,8 +556,8 @@ public class AppTest
 				List<Flag> flagsList = object.getObject().get(0).getFlags();
 				assertEquals(2, flagsList.size());
 				for(Flag flag : flagsList){
-					if(flag instanceof Separator){
-						Separator separator = (Separator) flag;
+					if(flag instanceof FlagSeparator){
+						FlagSeparator separator = (FlagSeparator) flag;
 						assertEquals("~", separator.getTerm());
 						assertEquals(1, separator.getColumns().size());
 						assertEquals(1, separator.getColumns().get(0).intValue());
@@ -735,8 +735,8 @@ public class AppTest
 				assertEquals(4, column.getFlags().size()); //all from the rule line plus the ContentDirection
 
 				for(Flag flag : column.getFlags()){
-					if(flag instanceof Separator){
-						Separator separator = (Separator) flag;
+					if(flag instanceof FlagSeparator){
+						FlagSeparator separator = (FlagSeparator) flag;
 						assertEquals("~", separator.getTerm());
 						assertEquals(1, separator.getColumns().size());
 						assertEquals(0, separator.getColumns().get(0).intValue());
@@ -783,8 +783,8 @@ public class AppTest
 				List<Flag> flagsList = object.getObject().get(0).getFlags();
 				assertEquals(2, flagsList.size());
 				for(Flag flag : flagsList){
-					if(flag instanceof Separator){
-						Separator separator = (Separator) flag;
+					if(flag instanceof FlagSeparator){
+						FlagSeparator separator = (FlagSeparator) flag;
 						assertEquals("~", separator.getTerm());
 						assertEquals(1, separator.getColumns().size());
 						assertEquals(1, separator.getColumns().get(0).intValue());

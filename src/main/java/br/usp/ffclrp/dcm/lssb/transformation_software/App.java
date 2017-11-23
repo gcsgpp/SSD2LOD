@@ -31,7 +31,7 @@ import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagCondit
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagNotMetadata;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ObjectAsRule;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Rule;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Separator;
+import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagSeparator;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TSVColumn;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TripleObject;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TripleObjectAsRule;
@@ -433,7 +433,7 @@ public class App
 			columnsSelected.add(Integer.MAX_VALUE);
 		}
 
-		return new Separator(contentFromQuotationMark, columnsSelected);
+		return new FlagSeparator(contentFromQuotationMark, columnsSelected);
 	}
 
 	private Matcher matchRegexOnString(String regex, String content){

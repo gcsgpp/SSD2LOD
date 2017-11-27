@@ -435,4 +435,5 @@ public class TripleProcessingTest
 			assertEquals("http://example.org/onto/individual#NormalizedData", triple.getSubject().getURI());
 		}
 	}
+
 }

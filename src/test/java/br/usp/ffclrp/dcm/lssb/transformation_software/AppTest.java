@@ -600,7 +600,6 @@ public class AppTest
 		try {
 			flagsExtracted = app.extractFlagsFromSentence(sentence);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -625,7 +624,6 @@ public class AppTest
 		try {
 			flagsExtracted = app.extractFlagsFromSentence(sentence);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -650,7 +648,6 @@ public class AppTest
 		try {
 			flagsExtracted = app.extractFlagsFromSentence(sentence);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -677,7 +674,6 @@ public class AppTest
 		try {
 			flagsExtracted = app.extractFlagsFromSentence(sentence);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -701,7 +697,6 @@ public class AppTest
 		thrown.expect(IllegalStateException.class);
 		thrown.expectMessage("Condition operation not identified at condition block");
 		List<ConditionBlock> conditionsExtracted = new App().extractConditionsBlocksFromString(content);
-
 	}
 
 	@Test
@@ -822,7 +817,6 @@ public class AppTest
 		try {
 			tsvColumns = app.extractTSVColumnsFromSentence(sentence);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -877,25 +871,5 @@ public class AppTest
 		}
 	}
 	
-	/*@Test
-	public void extractOwnIDFlag() {
-		String sentence = "\\\"Probe\\\" = \\\"ID\\\" /OWNID, ";
-
-		App app = new App();
-		List<Flag> flagsExtracted = app.extractFlagsFromSentence(sentence);
-
-		assertEquals(2, flagsExtracted.size()); //OWNID + ContentDirection
-		for(Flag flagExtracted : flagsExtracted) {
-			if(flagExtracted instanceof FlagOwnID) {
-				FlagOwnID flag = (FlagOwnID) flagExtracted;
-
-				assert(flag.isOwnID());
-			}else if(flagExtracted instanceof FlagContentDirectionTSVColumn){
-				continue;
-			}else{
-				fail();
-			}
-		}
-	}
-	*/
+	
 }

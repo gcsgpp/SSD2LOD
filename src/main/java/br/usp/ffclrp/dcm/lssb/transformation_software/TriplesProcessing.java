@@ -419,6 +419,7 @@ public class TriplesProcessing {
 			//RDFDataMgr.write(fos, model, Lang.TURTLE);
 			//RDFDataMgr.write(fos, model, Lang.RDFXML);
 			//RDFDataMgr.write(fos, model, Lang.NTRIPLES);
+			fos.close();
 			
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -1,6 +1,11 @@
 package br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import br.usp.ffclrp.dcm.lssb.transformation_software.Utils;
 
 public class ConditionBlock extends Flag {
 	private Integer id;
@@ -17,6 +22,92 @@ public class ConditionBlock extends Flag {
 	
 	public Integer getId(){
 		return this.id;
+	}
+	
+	static private String extractConditionBlockIDFromSentence(String blockRulesAsText) {
+		String data = "";
+
+		Matcher matcher = Utils.matchRegexOnString(EnumRegexList.SELECTRULEID.get(), blockRulesAsText);
+		data = matcher.group().replace("transformation_rule[", "").replace("condition_block[", "");
+		return data;
+	}
+	
+	static private List<String> identifyConditionBlocksFromString(String fileContent) {
+		Pattern patternToFind = Pattern.compile("condition_block\\[(.*?)\\]");
+		Matcher match = patternToFind.matcher(fileContent);
+
+		List<String> identifiedCB = new ArrayList<String>();
+
+		while(match.find()){
+			identifiedCB.add(match.group());
+		}
+		return identifiedCB;
+	}
+
+	static private ConditionBlock createConditionBlockFromString(String cbAsText) {
+		Matcher matcher 				=	Utils.matchRegexOnString(EnumRegexList.SELECTSUBJECTLINE.get(), cbAsText);
+		String subjectLine 				=	Utils.splitByIndex(cbAsText, matcher.start())[0];
+		String predicatesLinesOneBlock 	= 	Utils.splitByIndex(cbAsText, matcher.start())[1];
+
+		String conditionBlockId 		= 	extractConditionBlockIDFromSentence(subjectLine);
+
+
+		matcher = Utils.matchRegexOnString(EnumRegexList.SELECTPREDICATESDIVISIONSCONDITIONBLOCK.get(), predicatesLinesOneBlock);
+		List<Integer> initialOfEachMatch = new ArrayList<Integer>();
+		while(!matcher.hitEnd()){
+			initialOfEachMatch.add(matcher.start());
+			matcher.find();
+		}
+
+
+		List<Condition> conditions = new ArrayList<Condition>();
+		for(int i = 0; i <= initialOfEachMatch.size()-1; i++){
+			int finalChar;
+			if(i == initialOfEachMatch.size()-1) //IF LAST MATCH, GET THE END OF THE SENTENCE
+				finalChar = predicatesLinesOneBlock.length();
+			else
+				finalChar = initialOfEachMatch.get(i+1);
+
+			String lineFromBlock = predicatesLinesOneBlock.substring(initialOfEachMatch.get(i) + 1, // +1 exists to not include the first character, a comma
+					finalChar);
+
+			EnumOperationsConditionBlock operation = null;
+			try{
+				operation = retrieveOperation(lineFromBlock);
+			}catch(IllegalStateException e) {
+				throw new IllegalStateException("Condition operation not identified at condition block");
+			}
+
+			String column 	= Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(lineFromBlock, EnumRegexList.SELECTCOLUMNCONDITIONBLOCK.get());
+			lineFromBlock 	= Utils.removeRegexFromContent(EnumRegexList.SELECTCOLUMNCONDITIONBLOCK.get(), lineFromBlock);
+			String value 	= Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(lineFromBlock, EnumRegexList.SELECTALL.get());
+			conditions.add(new Condition(column, operation, value));
+		}
+
+		return new ConditionBlock(conditionBlockId, conditions);
+	}
+	
+	static private EnumOperationsConditionBlock retrieveOperation(String lineFromBlock) {
+		String operation;
+		operation = Utils.matchRegexOnString(EnumRegexList.SELECTOPERATIONCONDITIONBLOCK.get(), lineFromBlock).group();
+
+
+		if(operation.equals(EnumOperationsConditionBlock.DIFFERENT.getOperation())) 		return EnumOperationsConditionBlock.DIFFERENT;
+		if(operation.equals(EnumOperationsConditionBlock.EQUAL.getOperation()))			return EnumOperationsConditionBlock.EQUAL;
+		if(operation.equals(EnumOperationsConditionBlock.GREATERTHAN.getOperation())) 	return EnumOperationsConditionBlock.GREATERTHAN;
+		if(operation.equals(EnumOperationsConditionBlock.LESSTHAN.getOperation()))		return EnumOperationsConditionBlock.LESSTHAN;
+		return null;
+	}
+	
+	static public List<ConditionBlock> extractConditionsBlocksFromString(String fileContent) {
+		List<String> conditionsBlocksListAsText = identifyConditionBlocksFromString(fileContent);
+		List<ConditionBlock> cbList = new ArrayList<ConditionBlock>();
+
+		for(String cb : conditionsBlocksListAsText){
+			cbList.add(createConditionBlockFromString(cb));
+		}
+
+		return cbList;
 	}
 
 }

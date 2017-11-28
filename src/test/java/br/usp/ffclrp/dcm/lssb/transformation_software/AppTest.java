@@ -44,7 +44,7 @@ public class AppTest
 		String content = "condition_block[1: \"Category\" != \"KEGG_PATHWAY\", \"PValue\" < \"0.01\" ]";
 		content += "condition_block[2: \"Category\" == \"KEGG_PATHWAY\",	\"PValue\" < \"0.03\" ]";
 
-		List<ConditionBlock> conditionsExtracted = new App().extractConditionsBlocksFromString(content);
+		List<ConditionBlock> conditionsExtracted = ConditionBlock.extractConditionsBlocksFromString(content);
 
 		assertEquals(2, conditionsExtracted.size());
 
@@ -696,7 +696,8 @@ public class AppTest
 		String content = "condition_block[1: \"Category\" = \"KEGG_PATHWAY\", \"PValue\" < \"0.01\" ]";
 		thrown.expect(IllegalStateException.class);
 		thrown.expectMessage("Condition operation not identified at condition block");
-		List<ConditionBlock> conditionsExtracted = new App().extractConditionsBlocksFromString(content);
+		@SuppressWarnings("unused")
+		List<ConditionBlock> conditionsExtracted = ConditionBlock.extractConditionsBlocksFromString(content);
 	}
 
 	@Test

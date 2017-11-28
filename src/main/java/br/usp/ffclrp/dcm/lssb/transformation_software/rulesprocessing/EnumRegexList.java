@@ -27,7 +27,7 @@ public enum EnumRegexList {
 		this.regexExpressions = regexExpressions;
 	}
 	
-	public String getExpression(){
+	public String get(){
 		return this.regexExpressions;
 	}
 

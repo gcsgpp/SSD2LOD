@@ -74,77 +74,11 @@ public class App
 
 		fileContent = fileContent.replaceAll("\n", "").replaceAll("\t", "");
 		rulesList = extractRulesFromString(fileContent);
-		List<ConditionBlock> listConditionBlock = extractConditionsBlocksFromString(fileContent);
+		List<ConditionBlock> listConditionBlock = ConditionBlock.extractConditionsBlocksFromString(fileContent);
 
 		for(ConditionBlock conditionBlock : listConditionBlock){
 			conditionsBlocks.put(conditionBlock.getId(), conditionBlock);
 		}
-	}
-
-	public List<ConditionBlock> extractConditionsBlocksFromString(String fileContent) {
-		List<String> conditionsBlocksListAsText = identifyConditionBlocksFromString(fileContent);
-		List<ConditionBlock> cbList = new ArrayList<ConditionBlock>();
-
-		for(String cb : conditionsBlocksListAsText){
-			cbList.add(createCBFromString(cb));
-		}
-
-		return cbList;
-	}
-
-	private ConditionBlock createCBFromString(String cbAsText) {
-		Matcher matcher = matchRegexOnString(EnumRegexList.SELECTSUBJECTLINE.getExpression(), cbAsText);
-		String subjectLine 				=	splitByIndex(cbAsText, matcher.start())[0];
-		String predicatesLinesOneBlock 	= 	splitByIndex(cbAsText, matcher.start())[1];
-
-		String conditionBlockId 	= extractIDFromSentence(subjectLine);
-
-
-		matcher = matchRegexOnString(EnumRegexList.SELECTPREDICATESDIVISIONSCONDITIONBLOCK.getExpression(), predicatesLinesOneBlock);
-		List<Integer> initialOfEachMatch = new ArrayList<Integer>();
-		while(!matcher.hitEnd()){
-			initialOfEachMatch.add(matcher.start());
-			matcher.find();
-		}
-
-
-		List<Condition> conditions = new ArrayList<Condition>();
-		for(int i = 0; i <= initialOfEachMatch.size()-1; i++){
-			int finalChar;
-			if(i == initialOfEachMatch.size()-1) //IF LAST MATCH, GET THE END OF THE SENTENCE
-				finalChar = predicatesLinesOneBlock.length();
-			else
-				finalChar = initialOfEachMatch.get(i+1);
-
-			String lineFromBlock = predicatesLinesOneBlock.substring(initialOfEachMatch.get(i) + 1, // +1 exists to not include the first character, a comma
-					finalChar);
-
-			EnumOperationsConditionBlock operation = null;
-			try{
-				operation = retrieveOperation(lineFromBlock);
-			}catch(IllegalStateException e) {
-				throw new IllegalStateException("Condition operation not identified at condition block");
-			}
-
-			String column = extractDataFromFirstQuotationMarkBlockInsideRegex(lineFromBlock, EnumRegexList.SELECTCOLUMNCONDITIONBLOCK.getExpression());
-			lineFromBlock = removeRegexFromContent(EnumRegexList.SELECTCOLUMNCONDITIONBLOCK.getExpression(), lineFromBlock);
-			String value = extractDataFromFirstQuotationMarkBlockInsideRegex(lineFromBlock, EnumRegexList.SELECTALL.getExpression());
-			conditions.add(new Condition(column, operation, value));
-		}
-
-		return new ConditionBlock(conditionBlockId, conditions);
-	}
-
-	private EnumOperationsConditionBlock retrieveOperation(String lineFromBlock) {
-		String operation;
-		operation = matchRegexOnString(EnumRegexList.SELECTOPERATIONCONDITIONBLOCK.getExpression(), lineFromBlock).group();
-
-
-		if(operation.equals(EnumOperationsConditionBlock.DIFFERENT.getOperation())) 		return EnumOperationsConditionBlock.DIFFERENT;
-		if(operation.equals(EnumOperationsConditionBlock.EQUAL.getOperation()))			return EnumOperationsConditionBlock.EQUAL;
-		if(operation.equals(EnumOperationsConditionBlock.GREATERTHAN.getOperation())) 	return EnumOperationsConditionBlock.GREATERTHAN;
-		if(operation.equals(EnumOperationsConditionBlock.LESSTHAN.getOperation()))		return EnumOperationsConditionBlock.LESSTHAN;
-		return null;
 	}
 
 	/*	private void printRules(List<Rule> rulesList) {
@@ -191,29 +125,22 @@ public class App
 		return ruleList;
 	}
 
-	private String[] splitByIndex(String content, int index){
-
-		String[] splitContent = new String[2];
-		splitContent[0] = content.substring(0, index);
-		splitContent[1] = content.substring(index, content.length()); // index not included
-
-		return splitContent;
-	}
+	
 
 	public Rule createRulesFromBlock(String blockRulesAsText) throws Exception {
-		Matcher matcher = matchRegexOnString(EnumRegexList.SELECTSUBJECTLINE.getExpression(), blockRulesAsText);
+		Matcher matcher = Utils.matchRegexOnString(EnumRegexList.SELECTSUBJECTLINE.get(), blockRulesAsText);
 		if(matcher.hitEnd()){
 			return exctactRuleFromOneLineRuleBlock(blockRulesAsText);
 		}
-		String subjectLine 				=	splitByIndex(blockRulesAsText, matcher.start())[0];
-		String predicatesLinesOneBlock 	= 	splitByIndex(blockRulesAsText, matcher.start())[1];
+		String subjectLine 				=	Utils.splitByIndex(blockRulesAsText, matcher.start())[0];
+		String predicatesLinesOneBlock 	= 	Utils.splitByIndex(blockRulesAsText, matcher.start())[1];
 
-		String ruleId 						= extractIDFromSentence(subjectLine);
+		String ruleId 						= extractRuleIDFromSentence(subjectLine);
 		OWLClass ruleSubject 				= extractSubjectFromSentence(subjectLine);
-		subjectLine = removeRegexFromContent(EnumRegexList.SELECTSUBJECTCLASSNAME.getExpression(), subjectLine);
+		subjectLine = Utils.removeRegexFromContent(EnumRegexList.SELECTSUBJECTCLASSNAME.get(), subjectLine);
 		List<TSVColumn> subjectTsvcolumns 	= extractTSVColumnsFromSentence(subjectLine);
 
-		matcher = matchRegexOnString(EnumRegexList.SELECTPREDICATESDIVISIONS.getExpression(), predicatesLinesOneBlock);
+		matcher = Utils.matchRegexOnString(EnumRegexList.SELECTPREDICATESDIVISIONS.get(), predicatesLinesOneBlock);
 		List<Integer> initialOfEachMatch = new ArrayList<Integer>();
 		while(!matcher.hitEnd()){
 			initialOfEachMatch.add(matcher.start());
@@ -267,33 +194,33 @@ public class App
 	}
 
 	public Rule exctactRuleFromOneLineRuleBlock(String subjectLine) throws Exception {
-		String ruleId 						= extractIDFromSentence(subjectLine);
+		String ruleId 						= extractRuleIDFromSentence(subjectLine);
 		OWLClass ruleSubject 				= extractSubjectFromSentence(subjectLine);
-		subjectLine = removeRegexFromContent(EnumRegexList.SELECTSUBJECTCLASSNAME.getExpression(), subjectLine);
+		subjectLine = Utils.removeRegexFromContent(EnumRegexList.SELECTSUBJECTCLASSNAME.get(), subjectLine);
 		List<TSVColumn> subjectTsvcolumns 	= extractTSVColumnsFromSentence(subjectLine);
 
 		return new Rule(ruleId, ruleSubject, subjectTsvcolumns, new HashMap<OWLProperty, TripleObject>());
 	}
 
 	public Integer extractRuleNumberAsTripleObject(String lineFromBlock) {
-		Matcher matcher = matchRegexOnString(EnumRegexList.SELECTFIRSTNUMBERS.getExpression(), lineFromBlock);
+		Matcher matcher = Utils.matchRegexOnString(EnumRegexList.SELECTFIRSTNUMBERS.get(), lineFromBlock);
 
 		return Integer.parseInt(matcher.group());
 	}
 
 	public boolean tripleObjectIsToAnotherRule(String lineFromBlock) {
 
-		Matcher matcher = matchRegexOnString(EnumRegexList.SELECTCONTENTQUOTATIONMARK.getExpression(), lineFromBlock);
+		Matcher matcher = Utils.matchRegexOnString(EnumRegexList.SELECTCONTENTQUOTATIONMARK.get(), lineFromBlock);
 
 		return matcher.hitEnd();
 	}
 
 	private String removePredicateFromBlockLine(String lineFromBlock) {
-		return removeRegexFromContent(EnumRegexList.SELECTPREDICATE.getExpression(), lineFromBlock);
+		return Utils.removeRegexFromContent(EnumRegexList.SELECTPREDICATE.get(), lineFromBlock);
 	}
 
 	private OWLProperty extractPredicateFromBlockLine(String lineFromBlock) throws Exception {		
-		String predicateName = extractDataFromFirstQuotationMarkBlockInsideRegex(lineFromBlock, EnumRegexList.SELECTPREDICATE.getExpression());		
+		String predicateName = Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(lineFromBlock, EnumRegexList.SELECTPREDICATE.get());		
 
 		OWLProperty prop = ontologyHelper.getProperty(predicateName);
 
@@ -309,8 +236,8 @@ public class App
 
 		for(String s : eachTSVColumnWithFlags){
 
-			String title = extractDataFromFirstQuotationMarkBlockInsideRegex(s, EnumRegexList.SELECTCONTENTQUOTATIONMARK.getExpression());
-			//s = removeRegexFromContent(EnumRegexList.SELECTCONTENTQUOTATIONMARK.getExpression(), s);
+			String title = Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(s, EnumRegexList.SELECTCONTENTQUOTATIONMARK.get());
+			//s = Utils.removeRegexFromContent(EnumRegexList.SELECTCONTENTQUOTATIONMARK.getExpression(), s);
 
 			List<Flag> flags = extractFlagsFromSentence(s);
 
@@ -324,22 +251,22 @@ public class App
 	public List<Flag> extractFlagsFromSentence(String sentence) throws Exception {
 		List<Flag> flagsList = new ArrayList<Flag>();
 
-		Matcher matcher = matchRegexOnString("\\/[DR]", sentence);
+		Matcher matcher = Utils.matchRegexOnString("\\/[DR]", sentence);
 
 		try{
 			if(matcher.group().equals("/R")){
 				flagsList.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.RIGHT));
-				sentence = removeRegexFromContent("\\/[R]", sentence);
+				sentence = Utils.removeRegexFromContent("\\/[R]", sentence);
 			}else{
 				flagsList.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
-				sentence = removeRegexFromContent("\\/[D]", sentence);
+				sentence = Utils.removeRegexFromContent("\\/[D]", sentence);
 			}
 		}catch(Exception e){
 			flagsList.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
 		}
 
 
-		matcher = matchRegexOnString("\\/[!]|\\/(NM)|\\/(SP)|\\/(CB)|\\/(BASEIRI)|\\/(ID)|\\/(FX)", sentence);
+		matcher = Utils.matchRegexOnString("\\/[!]|\\/(NM)|\\/(SP)|\\/(CB)|\\/(BASEIRI)|\\/(ID)|\\/(FX)", sentence);
 
 		if(!matcher.hitEnd()){
 
@@ -348,33 +275,33 @@ public class App
 				String matcherString = matcher.group();
 
 				if(matcherString.equals("/SP")){
-					flagsList.add(extractDataFromFlagSeparatorFromSentence(sentence, EnumRegexList.SELECTSEPARATORFLAG.getExpression()));
-					sentence = removeRegexFromContent(EnumRegexList.SELECTSEPARATORFLAG.getExpression(), sentence);
+					flagsList.add(extractDataFromFlagSeparatorFromSentence(sentence, EnumRegexList.SELECTSEPARATORFLAG.get()));
+					sentence = Utils.removeRegexFromContent(EnumRegexList.SELECTSEPARATORFLAG.get(), sentence);
 				}
 
 				if(matcherString.equals("/CB")){
-					flagsList.add(extractDataFromFlagConditionFromSentence(sentence, EnumRegexList.SELECTCONDITIONBLOCKFLAG.getExpression()));
-					sentence = removeRegexFromContent(EnumRegexList.SELECTCONDITIONBLOCKFLAG.getExpression(), sentence);
+					flagsList.add(extractDataFromFlagConditionFromSentence(sentence, EnumRegexList.SELECTCONDITIONBLOCKFLAG.get()));
+					sentence = Utils.removeRegexFromContent(EnumRegexList.SELECTCONDITIONBLOCKFLAG.get(), sentence);
 				}
 
 				if(matcherString.equals("/FX")){
-					flagsList.add(extractDataFromFlagFixedContentFromSentence(sentence, EnumRegexList.SELECTFIXEDCONTENTFLAG.getExpression()));
-					sentence = removeRegexFromContent(EnumRegexList.SELECTFIXEDCONTENTFLAG.getExpression(), sentence);
+					flagsList.add(extractDataFromFlagFixedContentFromSentence(sentence, EnumRegexList.SELECTFIXEDCONTENTFLAG.get()));
+					sentence = Utils.removeRegexFromContent(EnumRegexList.SELECTFIXEDCONTENTFLAG.get(), sentence);
 				}
 
 				if(matcherString.equals("/NM")){
 					flagsList.add(new FlagNotMetadata(true));
-					sentence = removeRegexFromContent("\\/(NM)", sentence);
+					sentence = Utils.removeRegexFromContent("\\/(NM)", sentence);
 				}
 
 				if(matcherString.equals("/BASEIRI")){
-					flagsList.add(extractDataFromFlagBaseIRIFromSentence(sentence, EnumRegexList.SELECTBASEIRIFLAG.getExpression()));
-					sentence = removeRegexFromContent(EnumRegexList.SELECTBASEIRIFLAG.getExpression(), sentence);
+					flagsList.add(extractDataFromFlagBaseIRIFromSentence(sentence, EnumRegexList.SELECTBASEIRIFLAG.get()));
+					sentence = Utils.removeRegexFromContent(EnumRegexList.SELECTBASEIRIFLAG.get(), sentence);
 				}
 
 				if(matcherString.equals("/ID")){
-					flagsList.add(extractDataFromFlagCustomIDFromSentence(sentence, EnumRegexList.SELECTCUSTOMDIDFLAG.getExpression()));
-					sentence = removeRegexFromContent(EnumRegexList.SELECTCUSTOMDIDFLAG.getExpression(), sentence);
+					flagsList.add(extractDataFromFlagCustomIDFromSentence(sentence, EnumRegexList.SELECTCUSTOMDIDFLAG.get()));
+					sentence = Utils.removeRegexFromContent(EnumRegexList.SELECTCUSTOMDIDFLAG.get(), sentence);
 				}
 
 				matcher.find();
@@ -385,31 +312,31 @@ public class App
 	}
 
 	private Flag extractDataFromFlagCustomIDFromSentence(String sentence, String regex) {
-		String contentFromQuotationMark = extractDataFromFirstQuotationMarkBlockInsideRegex(sentence, regex);
+		String contentFromQuotationMark = Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(sentence, regex);
 
 		return new FlagCustomID(contentFromQuotationMark);
 	}
 
 	private Flag extractDataFromFlagBaseIRIFromSentence(String sentence, String regex) {
-		sentence = matchRegexOnString(regex, sentence).group();
+		sentence = Utils.matchRegexOnString(regex, sentence).group();
 
-		String iri = extractDataFromFirstQuotationMarkBlockInsideRegex(sentence, regex);
-		String namespace = extractDataFromFirstQuotationMarkBlockInsideRegex(sentence, EnumRegexList.SELECTNAMESPACEBASEIRIFLAG.getExpression());
+		String iri = Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(sentence, regex);
+		String namespace = Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(sentence, EnumRegexList.SELECTNAMESPACEBASEIRIFLAG.get());
 
 
 		return new FlagBaseIRI(iri, namespace);
 	}
 
 	private Flag extractDataFromFlagFixedContentFromSentence(String sentence, String regex) {
-		String contentFromQuotationMark = extractDataFromFirstQuotationMarkBlockInsideRegex(sentence, regex);
+		String contentFromQuotationMark = Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(sentence, regex);
 
 		return new FlagFixedContent(contentFromQuotationMark);
 	}
 
 	private Flag extractDataFromFlagConditionFromSentence(String sentence, String regex) {
 
-		String cbFlagTerm = matchRegexOnString(regex, sentence).group();
-		String matchedConditionSelected = matchRegexOnString("\\d+", cbFlagTerm).group(); 
+		String cbFlagTerm = Utils.matchRegexOnString(regex, sentence).group();
+		String matchedConditionSelected = Utils.matchRegexOnString("\\d+", cbFlagTerm).group(); 
 
 		int id = Integer.parseInt(matchedConditionSelected);
 
@@ -418,8 +345,8 @@ public class App
 
 	private Flag extractDataFromFlagSeparatorFromSentence(String sentence, String regex) throws Exception {
 		
-		sentence = matchRegexOnString(regex, sentence).group();
-		String contentFromQuotationMark = extractDataFromFirstQuotationMarkBlockInsideRegex(sentence, regex);
+		sentence = Utils.matchRegexOnString(regex, sentence).group();
+		String contentFromQuotationMark = Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(sentence, regex);
 		String contentWithoutQuotationMark = removeDataFromFirstQuotationMarkBlockInsideRegex(sentence, regex);
 
 
@@ -427,10 +354,10 @@ public class App
 
 
 		//Exctact range
-		Matcher matchedRange = matchRegexOnString(EnumRegexList.SELECTSEPARATORFLAGRANGENUMBERS.getExpression(), contentWithoutQuotationMark);
+		Matcher matchedRange = Utils.matchRegexOnString(EnumRegexList.SELECTSEPARATORFLAGRANGENUMBERS.get(), contentWithoutQuotationMark);
 		while(!matchedRange.hitEnd()){
 			int start, end = 0;
-			Matcher matchedColumnsSelected = matchRegexOnString("(\\d(\\d)*)", matchedRange.group());
+			Matcher matchedColumnsSelected = Utils.matchRegexOnString("(\\d(\\d)*)", matchedRange.group());
 			try {
 				start = Integer.parseInt(matchedColumnsSelected.group());
 				matchedColumnsSelected.find();
@@ -445,10 +372,10 @@ public class App
 			matchedRange.find();
 		}
 		
-		String contentWithoutQuotationAndRange = removeRegexFromContent(EnumRegexList.SELECTSEPARATORFLAGRANGENUMBERS.getExpression(), contentWithoutQuotationMark);
+		String contentWithoutQuotationAndRange = Utils.removeRegexFromContent(EnumRegexList.SELECTSEPARATORFLAGRANGENUMBERS.get(), contentWithoutQuotationMark);
 
 		//Exctact individuals columns
-		Matcher matchedIndividualColumns = matchRegexOnString("\\s*\\d+", contentWithoutQuotationAndRange);
+		Matcher matchedIndividualColumns = Utils.matchRegexOnString("\\s*\\d+", contentWithoutQuotationAndRange);
 		while(!matchedIndividualColumns.hitEnd()){
 			columnsSelected.add(Integer.parseInt(matchedIndividualColumns.group().trim()) - 1);
 			matchedIndividualColumns.find();
@@ -462,30 +389,17 @@ public class App
 		return new FlagSeparator(contentFromQuotationMark, columnsSelected);
 	}
 
-	private Matcher matchRegexOnString(String regex, String content){
-		Pattern pattern = Pattern.compile(regex);
-		Matcher m = pattern.matcher(content);
-		m.find();
-		return m;
-	}
-
-	private String removeRegexFromContent(String regex, String content){
-		Matcher matcher = matchRegexOnString(regex, content);
-
-		return matcher.replaceAll("").trim(); 
-	}
-
-	private String extractIDFromSentence(String blockRulesAsText) {
+	private String extractRuleIDFromSentence(String blockRulesAsText) {
 		String data = "";
 
-		Matcher matcher = matchRegexOnString(EnumRegexList.SELECTRULEID.getExpression(), blockRulesAsText);
+		Matcher matcher = Utils.matchRegexOnString(EnumRegexList.SELECTRULEID.get(), blockRulesAsText);
 		data = matcher.group().replace("transformation_rule[", "").replace("condition_block[", "");
 		return data;
 	}
 
 	private OWLClass extractSubjectFromSentence(String blockRulesAsText) {
 
-		String subjectString = extractDataFromFirstQuotationMarkBlockInsideRegex(blockRulesAsText, EnumRegexList.SELECTSUBJECTCLASSNAME.getExpression());
+		String subjectString = Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(blockRulesAsText, EnumRegexList.SELECTSUBJECTCLASSNAME.get());
 
 		OWLClass subject = ontologyHelper.getClass(subjectString);
 
@@ -495,26 +409,10 @@ public class App
 		return subject;
 	}
 
-	private String extractDataFromFirstQuotationMarkBlockInsideRegex(String content, String regex){
-		String data = null;
-
-		Matcher matcher = matchRegexOnString(regex, content);
-
-		try{
-			data = matcher.group(); 
-			int firstQuotationMark = data.indexOf("\"");
-			data = data.substring(firstQuotationMark +1, data.indexOf("\"", firstQuotationMark +1));
-		}catch(IllegalStateException e){
-			//used just to identify when the matcher did not find anything.
-		}
-
-		return data;
-	}
-
 	private String removeDataFromFirstQuotationMarkBlockInsideRegex(String content, String regex){
 		String data = null;
 
-		Matcher matcher = matchRegexOnString(regex, content);
+		Matcher matcher = Utils.matchRegexOnString(regex, content);
 
 		try{
 			data = matcher.group(); 
@@ -538,18 +436,6 @@ public class App
 			identifiedRules.add(match.group());
 		}
 		return identifiedRules;
-	}
-
-	private List<String> identifyConditionBlocksFromString(String fileContent) {
-		Pattern patternToFind = Pattern.compile("condition_block\\[(.*?)\\]");
-		Matcher match = patternToFind.matcher(fileContent);
-
-		List<String> identifiedCB = new ArrayList<String>();
-
-		while(match.find()){
-			identifiedCB.add(match.group());
-		}
-		return identifiedCB;
 	}
 
 	private String readFile(String pathfile){

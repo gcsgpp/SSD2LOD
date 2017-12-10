@@ -12,17 +12,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import org.apache.jena.shared.PropertyNotFoundException;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLProperty;
 
+import br.usp.ffclrp.dcm.lssb.custom_exceptions.ClassNotFoundInOntology;
+import br.usp.ffclrp.dcm.lssb.custom_exceptions.CustomExceptions;
 import br.usp.ffclrp.dcm.lssb.custom_exceptions.PropertyNotExist;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Condition;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ConditionBlock;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagContentDirectionTSVColumn;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagCustomID;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.EnumContentDirectionTSVColumn;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.EnumOperationsConditionBlock;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.EnumRegexList;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagFixedContent;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Flag;
@@ -51,13 +50,14 @@ public class App
 	{
 		App app = new App();
 		List<String> listOfOntologies = new ArrayList<String>();
-		listOfOntologies.add("testFiles/normalizedFile/third_attempt/ontology.owl");
+		listOfOntologies.add("testFiles/normalizedFile/fourth_attempt/ontology-imported.owl");
 		try {
-			app.extractRulesFromFile("testFiles/normalizedFile/third_attempt/rules.txt", listOfOntologies);
-			TriplesProcessing triplesProcessing = new TriplesProcessing("testFiles/normalizedFile/third_attempt/NormalizedData.txt", "testFiles/normalizedFile/third_attempt/ontology.owl");
+			app.extractRulesFromFile("testFiles/normalizedFile/fourth_attempt/rules.txt", listOfOntologies);
+			TriplesProcessing triplesProcessing = new TriplesProcessing("testFiles/normalizedFile/fourth_attempt/NormalizedData.txt", "testFiles/normalizedFile/fourth_attempt/ontology-imported.owl");
 			triplesProcessing.createTriplesFromRules(app.rulesList, app.conditionsBlocks, "http://www.example.org/onto/individual/");
-		} catch (PropertyNotExist e) { 
+		} catch (CustomExceptions e) { 
 			e.getMessage();
+			System.out.println(e);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -124,8 +124,6 @@ public class App
 
 		return ruleList;
 	}
-
-	
 
 	public Rule createRulesFromBlock(String blockRulesAsText) throws Exception {
 		Matcher matcher = Utils.matchRegexOnString(EnumRegexList.SELECTSUBJECTLINE.get(), blockRulesAsText);
@@ -344,7 +342,7 @@ public class App
 	}
 
 	private Flag extractDataFromFlagSeparatorFromSentence(String sentence, String regex) throws Exception {
-		
+
 		sentence = Utils.matchRegexOnString(regex, sentence).group();
 		String contentFromQuotationMark = Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(sentence, regex);
 		String contentWithoutQuotationMark = removeDataFromFirstQuotationMarkBlockInsideRegex(sentence, regex);
@@ -368,10 +366,10 @@ public class App
 
 			for(int i = start; i <= end; i++)
 				columnsSelected.add(i - 1);
-			
+
 			matchedRange.find();
 		}
-		
+
 		String contentWithoutQuotationAndRange = Utils.removeRegexFromContent(EnumRegexList.SELECTSEPARATORFLAGRANGENUMBERS.get(), contentWithoutQuotationMark);
 
 		//Exctact individuals columns
@@ -397,14 +395,14 @@ public class App
 		return data;
 	}
 
-	private OWLClass extractSubjectFromSentence(String blockRulesAsText) {
+	private OWLClass extractSubjectFromSentence(String blockRulesAsText) throws Exception {
 
 		String subjectString = Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(blockRulesAsText, EnumRegexList.SELECTSUBJECTCLASSNAME.get());
 
 		OWLClass subject = ontologyHelper.getClass(subjectString);
 
 		if(subject == null)
-			subject = ontologyHelper.factory.getOWLClass("", subjectString);
+			throw new ClassNotFoundInOntology("Not found any ontology class with label '" + subjectString + "'");
 
 		return subject;
 	}

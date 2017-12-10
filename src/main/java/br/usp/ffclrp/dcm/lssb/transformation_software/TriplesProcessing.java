@@ -4,17 +4,27 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Set;
+
+import org.apache.jena.graph.Triple;
+import org.apache.jena.rdf.model.InfModel;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.reasoner.Reasoner;
+import org.apache.jena.reasoner.ReasonerRegistry;
+import org.apache.jena.reasoner.ValidityReport;
+import org.apache.jena.reasoner.ValidityReport.Report;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.semanticweb.owlapi.model.OWLProperty;
 
+import br.usp.ffclrp.dcm.lssb.custom_exceptions.BaseIRIException;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Condition;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ConditionBlock;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.EnumOperationsConditionBlock;
@@ -39,27 +49,21 @@ public class TriplesProcessing {
 	private List<Rule> regularRuleList;
 	private List<Rule> dependencyList = new ArrayList<Rule>();
 	private Map<Integer, ConditionBlock> conditionBlocks;
-
+	private Model ontology = null;
+	String relativePathOntologyFile = null;
 
 	public TriplesProcessing(String relativePathDataFile, String relativePathOntologyFile) {
-		model = ModelFactory.createDefaultModel();
-		loadNamespacesFromOntology(relativePathOntologyFile);
+		this.relativePathOntologyFile = relativePathOntologyFile;
+		
+		this.model = ModelFactory.createDefaultModel();
 		//model.read(relativePathOntologyFile); //load ontology and add its axioms to the linked graph
 		fileReader = new SemistructuredFileReader(relativePathDataFile);
-	}
 
-	private void loadNamespacesFromOntology(String relativePathOntologyFile) {
-		Model tempModel = ModelFactory.createDefaultModel();
-		tempModel.read(relativePathOntologyFile);
-		tempModel.getNsPrefixMap().forEach((k, v) -> model.setNsPrefix(k, v));
-
-		for(Entry<String, String> e : model.getNsPrefixMap().entrySet()) {
-			System.out.println(e.getKey() + "-->" + e.getValue());
-		}
+		this.ontology = ModelFactory.createDefaultModel().read(relativePathOntologyFile);
 	}
 
 	@SuppressWarnings("unchecked")
-	public void createTriplesFromRules(List<Rule> listRules, Map<Integer, ConditionBlock> conditionBlocks,  String defaultNs){	
+	public void createTriplesFromRules(List<Rule> listRules, Map<Integer, ConditionBlock> conditionBlocks,  String defaultNs) throws Exception{	
 
 		this.regularRuleList = listRules;
 		this.conditionBlocks = conditionBlocks;
@@ -89,11 +93,13 @@ public class TriplesProcessing {
 				processRule(rule, tsvLineNumber, defaultNs);
 			}
 		}
-
-		writeRDF();
+		
+		loadNamespacesFromOntology();
+		writeRDF(model, "RDFtriples.rdf");
+		checkConsistency();
 	}
 
-	private List<Resource> processRule(Rule rule, Integer tsvLineNumber, String defaultNs) {
+	private List<Resource> processRule(Rule rule, Integer tsvLineNumber, String defaultNs) throws Exception {
 
 		for(TSVColumn ruleColumns : rule.getSubjectTSVColumns()){
 			if(!assertConditionBlock(ruleColumns.getFlags(), tsvLineNumber))
@@ -130,13 +136,6 @@ public class TriplesProcessing {
 				}else{
 					@SuppressWarnings("unchecked")
 					List<String> content = extractDataFromTSVColumn((List<TSVColumn>) predicateMapEntry.getValue().getObject(), tsvLineNumber);
-
-					/*if(content == null)	{
-						content = new ArrayList<String>();
-						Random random = new Random(999999);
-						Integer randomNumber = random.nextInt();
-						content.add(randomNumber.toString());
-					}*/
 
 					for(String contentElement : content){
 						if(contentElement != null && contentElement != "")
@@ -309,7 +308,7 @@ public class TriplesProcessing {
 		return resultData;
 	}
 
-	private List<Resource> getSubject(Rule rule, String defaultNs, Integer lineNumber) {
+	private List<Resource> getSubject(Rule rule, String defaultNs, Integer lineNumber) throws Exception {
 		List<Resource> subjectList = new ArrayList<Resource>();
 
 		Resource subjectType = model.createResource(rule.getSubject().getIRI().toString());
@@ -322,8 +321,8 @@ public class TriplesProcessing {
 		String customIDFlag = getCustomIDFlag(rule.getSubjectTSVColumns());
 		if(customIDFlag != null) {
 			subjectList.add(model.createResource(defaultNs + customIDFlag, subjectType));
-			
-		
+
+
 		}else{
 			String fixedContentFlag = getFixedContentFlag(rule.getSubjectTSVColumns());
 			if(fixedContentFlag != null){
@@ -345,34 +344,6 @@ public class TriplesProcessing {
 
 		return subjectList;
 	}
-
-	/* private List<TSVColumn> getCustomIDFlag(List<TSVColumn> listTSVColumn) {
-		TSVColumn customID = new TSVColumn();
-		for(TSVColumn column : listTSVColumn){
-			for(Flag flag : column.getFlags()){
-				if(flag instanceof FlagCustomID){
-					customID.setTitle(((FlagCustomID) flag).getContent());
-				}
-			}
-		}
-
-		List<TSVColumn> temp = new ArrayList<TSVColumn>();
-		temp.add(customID);
-
-		return temp;
-	}
-
-	private boolean hasCustomIDFlag(List<TSVColumn> listTSVColumn) {
-		for(TSVColumn column : listTSVColumn){
-			for(Flag flag : column.getFlags()){
-				if(flag instanceof FlagCustomID){
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-	 */
 
 	private String getCustomIDFlag(List<TSVColumn> listTSVColumn) {
 		for(TSVColumn column : listTSVColumn){
@@ -396,11 +367,17 @@ public class TriplesProcessing {
 		return null;
 	}
 
-	private String getBASEIRIFlag(List<TSVColumn> listTSVColumn) {
+	private String getBASEIRIFlag(List<TSVColumn> listTSVColumn) throws BaseIRIException {
 		for(TSVColumn column : listTSVColumn){
 			for(Flag flag : column.getFlags()){
 				if(flag instanceof FlagBaseIRI){
-					model.setNsPrefix(((FlagBaseIRI) flag).getNamespace(), ((FlagBaseIRI) flag).getIRI());
+					FlagBaseIRI flagBase = (FlagBaseIRI) flag;
+
+					if(flagBase.getNamespace() == null)
+						throw new BaseIRIException("Some BaseIRI flag has an empty namespace field.");
+					if(flagBase.getIRI() == null)
+						throw new BaseIRIException("Some BaseIRI flag has an empty IRI field.");
+
 					return ((FlagBaseIRI) flag).getIRI();
 				}
 			}
@@ -408,26 +385,68 @@ public class TriplesProcessing {
 		return null;
 	}
 
-	public void writeRDF(){
-		System.out.println("#####################################\n=== Writing RDF... \n");
+	private void loadNamespacesFromOntology() {
+		Set<String> namespacesUsed = new HashSet<String>();
+		
+		model.listStatements().forEachRemaining(s -> { 
+			Triple triple = s.asTriple();
+			namespacesUsed.add(triple.getSubject().getNameSpace());
+			namespacesUsed.add(triple.getPredicate().getNameSpace());
+			if(triple.getObject().isURI())
+					namespacesUsed.add(triple.getObject().getNameSpace());
+		});
+		
+		namespacesUsed.forEach(n -> System.out.println(n));
+		
+		
+		
+		Model tempModel = ModelFactory.createDefaultModel();
+		tempModel.read(relativePathOntologyFile);
+		
+		tempModel.getNsPrefixMap().forEach((k, v) -> {
+			if(namespacesUsed.contains(v))
+				model.setNsPrefix(k, v);
+		});
+	}
+	
+	public void writeRDF(Model modelToPrint, String filename){
+		System.out.println("#####################################\nWriting RDF...");
 		long startTime = System.currentTimeMillis();
 		try{
-			File f = new File("teste.rdf");
-			FileOutputStream fos;
-			fos = new FileOutputStream(f);
-			//RDFDataMgr.write(fos, model, Lang.TRIG);
-			//RDFDataMgr.write(fos, model, Lang.TURTLE);
-			//RDFDataMgr.write(fos, model, Lang.RDFXML);
-			//RDFDataMgr.write(fos, model, Lang.NTRIPLES);
+			File f = new File(filename);
+			FileOutputStream fos = new FileOutputStream(f);
+			//RDFDataMgr.write(fos, modelToPrint, Lang.TRIG);
+			//RDFDataMgr.write(fos, modelToPrint, Lang.TURTLE);
+			RDFDataMgr.write(fos, modelToPrint, Lang.RDFXML);
+			//RDFDataMgr.write(fos, modelToPrint, Lang.NTRIPLES);
 			fos.close();
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
 		long stopTime = System.currentTimeMillis();
 		long elapsedTime = stopTime - startTime;
-		System.out.println("=== Wrote RDF in " + elapsedTime / 1000 + " secs ===\n#####################################\n\n");
+		System.out.println("Wrote RDF in " + elapsedTime / 1000 + " secs");
+	}
+
+	private void checkConsistency() {
+		System.out.println("\"#####################################\nChecking consistency...");
+		Reasoner reasoner = ReasonerRegistry.getOWLReasoner().bindSchema(ontology);
+		InfModel inf = ModelFactory.createInfModel(reasoner, model);
+
+		ValidityReport report = inf.validate();
+		System.out.println("Is valid?:" + report.isValid());
+
+		if(!report.isValid()) {
+			System.out.println("--------> Conflicts:");
+			for(Iterator<Report> i = report.getReports(); i.hasNext(); ) {
+				System.out.println("-> "+ i.next());
+			}
+		}
+		System.out.println("Is Clean?:" + report.isClean());
+
+		System.out.println("\n ----- \n");
 	}
 
 	public Model getModel() {

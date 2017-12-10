@@ -13,6 +13,7 @@ public enum EnumRegexList {
 	SELECTFIXEDCONTENTFLAG("\\/FX\\(\"(.*?)\"\\)"),
 	SELECTCONDITIONBLOCKFLAG("\\/CB\\(\\d*?\\)"),
 	SELECTSEPARATORFLAG("\\/SP\\(\"(.*?)\"((,(.*?)\\))|\\))"),
+	SELECTSEPARATORFLAGRANGENUMBERS("(\\d+\\s*:\\s*\\d+)"),
 	SELECTCUSTOMDIDFLAG("\\/\\ID\\(\"(.*?)\"\\)"),
 	//CONDITION BLOCK REGEX:
 	SELECTCOLUMNCONDITIONBLOCK("(\".*\")\\s(=|!|>|<)"),
@@ -26,7 +27,7 @@ public enum EnumRegexList {
 		this.regexExpressions = regexExpressions;
 	}
 	
-	public String getExpression(){
+	public String get(){
 		return this.regexExpressions;
 	}
 

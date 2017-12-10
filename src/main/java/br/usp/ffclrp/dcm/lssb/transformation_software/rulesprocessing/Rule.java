@@ -34,7 +34,4 @@ public class Rule {
 	public Map<OWLProperty, TripleObject> getPredicateObjects() {
 		return this.predicateObjects;
 	}
-	
-	
-
 }

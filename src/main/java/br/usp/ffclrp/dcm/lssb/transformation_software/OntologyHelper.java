@@ -1,6 +1,5 @@
 package br.usp.ffclrp.dcm.lssb.transformation_software;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -54,8 +53,12 @@ public class OntologyHelper {
 
 	private void loadOntology(String path) {
 		try {
+			
 			InputStream is = new FileInputStream(path);
-			ontologies.add(m.loadOntologyFromOntologyDocument(is));
+			OWLOntology ontology = m.loadOntologyFromOntologyDocument(is);
+			
+			m.directImports(ontology).forEach(o -> ontologies.add(o));
+			ontologies.add(ontology);
 
 		} catch (OWLOntologyCreationException e) {
 			e.printStackTrace();

@@ -103,6 +103,7 @@ public class AppTest
 		try {
 			rule1Extracted = app.createRulesFromBlock(ruleString);
 		} catch (Exception e) {
+			e.printStackTrace();
 			fail();
 		}
 
@@ -213,6 +214,7 @@ public class AppTest
 		try {
 			rule2Extracted = app.createRulesFromBlock(ruleString);
 		} catch (Exception e) {
+			e.printStackTrace();
 			fail();
 		}
 
@@ -325,6 +327,7 @@ public class AppTest
 		try {
 			rule3Extracted = app.createRulesFromBlock(ruleString);
 		} catch (Exception e) {
+			e.printStackTrace();
 			fail();
 		}
 
@@ -380,6 +383,7 @@ public class AppTest
 		try {
 			rule2Extracted = app.extractRulesFromString(ruleString).get(0);
 		} catch (Exception e) {
+			e.printStackTrace();
 			fail();
 		}
 
@@ -492,6 +496,7 @@ public class AppTest
 		try {
 			ruleExtracted = app.extractRulesFromString(ruleString).get(0);
 		} catch (Exception e) {
+			e.printStackTrace();
 			fail();
 		}
 
@@ -720,6 +725,7 @@ public class AppTest
 		try {
 			rule1Extracted = app.createRulesFromBlock(ruleString);
 		} catch (Exception e) {
+			e.printStackTrace();
 			fail();
 		}
 

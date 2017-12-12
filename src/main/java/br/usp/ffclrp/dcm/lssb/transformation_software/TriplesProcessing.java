@@ -451,7 +451,7 @@ public class TriplesProcessing {
 	}
 
 	private void checkConsistency() {
-		System.out.println("\"#####################################\nChecking consistency...");
+		System.out.println("\#####################################\nChecking consistency...");
 		Reasoner reasoner = ReasonerRegistry.getOWLReasoner().bindSchema(ontology);
 		InfModel inf = ModelFactory.createInfModel(reasoner, model);
 

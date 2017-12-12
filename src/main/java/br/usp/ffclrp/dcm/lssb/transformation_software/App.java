@@ -265,51 +265,47 @@ public class App
 		}
 
 
-		matcher = Utils.matchRegexOnString("\\/[!]|\\/(NM)|\\/(SP)|\\/(CB)|\\/(BASEIRI)|\\/(ID)|\\/(FX)|\\/(DT)", sentence);
+		matcher = Utils.matchRegexOnString("\\/(NM)|\\/(SP)|\\/(CB)|\\/(BASEIRI)|\\/(ID)|\\/(FX)|\\/(DT)", sentence);
+		while(!matcher.hitEnd()){			
 
-		if(!matcher.hitEnd()){
+			String matcherString = matcher.group();
 
-			while(!matcher.hitEnd()){			
-
-				String matcherString = matcher.group();
-
-				if(matcherString.equals("/SP")){
-					flagsList.add(extractDataFromFlagSeparatorFromSentence(sentence, EnumRegexList.SELECTSEPARATORFLAG.get()));
-					sentence = Utils.removeRegexFromContent(EnumRegexList.SELECTSEPARATORFLAG.get(), sentence);
-				}
-
-				if(matcherString.equals("/CB")){
-					flagsList.add(extractDataFromFlagConditionFromSentence(sentence, EnumRegexList.SELECTCONDITIONBLOCKFLAG.get()));
-					sentence = Utils.removeRegexFromContent(EnumRegexList.SELECTCONDITIONBLOCKFLAG.get(), sentence);
-				}
-
-				if(matcherString.equals("/FX")){
-					flagsList.add(extractDataFromFlagFixedContentFromSentence(sentence, EnumRegexList.SELECTFIXEDCONTENTFLAG.get()));
-					sentence = Utils.removeRegexFromContent(EnumRegexList.SELECTFIXEDCONTENTFLAG.get(), sentence);
-				}
-
-				if(matcherString.equals("/NM")){
-					flagsList.add(new FlagNotMetadata(true));
-					sentence = Utils.removeRegexFromContent("\\/(NM)", sentence);
-				}
-
-				if(matcherString.equals("/BASEIRI")){
-					flagsList.add(extractDataFromFlagBaseIRIFromSentence(sentence, EnumRegexList.SELECTBASEIRIFLAG.get()));
-					sentence = Utils.removeRegexFromContent(EnumRegexList.SELECTBASEIRIFLAG.get(), sentence);
-				}
-
-				if(matcherString.equals("/ID")){
-					flagsList.add(extractDataFromFlagCustomIDFromSentence(sentence, EnumRegexList.SELECTCUSTOMDIDFLAG.get()));
-					sentence = Utils.removeRegexFromContent(EnumRegexList.SELECTCUSTOMDIDFLAG.get(), sentence);
-				}
-				
-				if(matcherString.equals("/DT")){
-					flagsList.add(extractDataFromFlagDataTypeFromSentence(sentence, EnumRegexList.SELECTDATATYPEFLAG.get()));
-					sentence = Utils.removeRegexFromContent(EnumRegexList.SELECTDATATYPEFLAG.get(), sentence);
-				}
-
-				matcher.find();
+			if(matcherString.equals("/SP")){
+				flagsList.add(extractDataFromFlagSeparatorFromSentence(sentence, EnumRegexList.SELECTSEPARATORFLAG.get()));
+				sentence = Utils.removeRegexFromContent(EnumRegexList.SELECTSEPARATORFLAG.get(), sentence);
 			}
+
+			if(matcherString.equals("/CB")){
+				flagsList.add(extractDataFromFlagConditionFromSentence(sentence, EnumRegexList.SELECTCONDITIONBLOCKFLAG.get()));
+				sentence = Utils.removeRegexFromContent(EnumRegexList.SELECTCONDITIONBLOCKFLAG.get(), sentence);
+			}
+
+			if(matcherString.equals("/FX")){
+				flagsList.add(extractDataFromFlagFixedContentFromSentence(sentence, EnumRegexList.SELECTFIXEDCONTENTFLAG.get()));
+				sentence = Utils.removeRegexFromContent(EnumRegexList.SELECTFIXEDCONTENTFLAG.get(), sentence);
+			}
+
+			if(matcherString.equals("/NM")){
+				flagsList.add(new FlagNotMetadata(true));
+				sentence = Utils.removeRegexFromContent("\\/(NM)", sentence);
+			}
+
+			if(matcherString.equals("/BASEIRI")){
+				flagsList.add(extractDataFromFlagBaseIRIFromSentence(sentence, EnumRegexList.SELECTBASEIRIFLAG.get()));
+				sentence = Utils.removeRegexFromContent(EnumRegexList.SELECTBASEIRIFLAG.get(), sentence);
+			}
+
+			if(matcherString.equals("/ID")){
+				flagsList.add(extractDataFromFlagCustomIDFromSentence(sentence, EnumRegexList.SELECTCUSTOMDIDFLAG.get()));
+				sentence = Utils.removeRegexFromContent(EnumRegexList.SELECTCUSTOMDIDFLAG.get(), sentence);
+			}
+
+			if(matcherString.equals("/DT")){
+				flagsList.add(extractDataFromFlagDataTypeFromSentence(sentence, EnumRegexList.SELECTDATATYPEFLAG.get()));
+				sentence = Utils.removeRegexFromContent(EnumRegexList.SELECTDATATYPEFLAG.get(), sentence);
+			}
+
+			matcher.find();
 		}
 
 		return flagsList;

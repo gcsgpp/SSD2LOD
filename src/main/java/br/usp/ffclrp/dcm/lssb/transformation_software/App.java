@@ -21,6 +21,7 @@ import br.usp.ffclrp.dcm.lssb.custom_exceptions.PropertyNotExist;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ConditionBlock;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagContentDirectionTSVColumn;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagCustomID;
+import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagDataType;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.EnumContentDirectionTSVColumn;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.EnumRegexList;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagFixedContent;
@@ -249,7 +250,7 @@ public class App
 	public List<Flag> extractFlagsFromSentence(String sentence) throws Exception {
 		List<Flag> flagsList = new ArrayList<Flag>();
 
-		Matcher matcher = Utils.matchRegexOnString("\\/[DR]", sentence);
+		Matcher matcher = Utils.matchRegexOnString("(\\/D\\s)|(\\/R\\s)", sentence);
 
 		try{
 			if(matcher.group().equals("/R")){
@@ -264,7 +265,7 @@ public class App
 		}
 
 
-		matcher = Utils.matchRegexOnString("\\/[!]|\\/(NM)|\\/(SP)|\\/(CB)|\\/(BASEIRI)|\\/(ID)|\\/(FX)", sentence);
+		matcher = Utils.matchRegexOnString("\\/[!]|\\/(NM)|\\/(SP)|\\/(CB)|\\/(BASEIRI)|\\/(ID)|\\/(FX)|\\/(DT)", sentence);
 
 		if(!matcher.hitEnd()){
 
@@ -301,12 +302,23 @@ public class App
 					flagsList.add(extractDataFromFlagCustomIDFromSentence(sentence, EnumRegexList.SELECTCUSTOMDIDFLAG.get()));
 					sentence = Utils.removeRegexFromContent(EnumRegexList.SELECTCUSTOMDIDFLAG.get(), sentence);
 				}
+				
+				if(matcherString.equals("/DT")){
+					flagsList.add(extractDataFromFlagDataTypeFromSentence(sentence, EnumRegexList.SELECTDATATYPEFLAG.get()));
+					sentence = Utils.removeRegexFromContent(EnumRegexList.SELECTDATATYPEFLAG.get(), sentence);
+				}
 
 				matcher.find();
 			}
 		}
 
 		return flagsList;
+	}
+
+	private Flag extractDataFromFlagDataTypeFromSentence(String sentence, String regex) {
+		String contentFromQuotationMark = Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(sentence, regex);
+
+		return new FlagDataType(contentFromQuotationMark);
 	}
 
 	private Flag extractDataFromFlagCustomIDFromSentence(String sentence, String regex) {

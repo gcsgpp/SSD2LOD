@@ -15,6 +15,7 @@ public enum EnumRegexList {
 	SELECTSEPARATORFLAG("\\/SP\\(\"(.*?)\"((,(.*?)\\))|\\))"),
 	SELECTSEPARATORFLAGRANGENUMBERS("(\\d+\\s*:\\s*\\d+)"),
 	SELECTCUSTOMDIDFLAG("\\/\\ID\\(\"(.*?)\"\\)"),
+	SELECTDATATYPEFLAG("\\/\\DT\\(\"(.*?)\"\\)"),
 	//CONDITION BLOCK REGEX:
 	SELECTCOLUMNCONDITIONBLOCK("(\".*\")\\s(=|!|>|<)"),
 	SELECTPREDICATESDIVISIONSCONDITIONBLOCK("(:|,)(\\s*?)\"(.*?)\"\\s?(=|!|>|<)"),

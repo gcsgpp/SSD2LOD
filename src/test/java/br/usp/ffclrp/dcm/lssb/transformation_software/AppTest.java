@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 
+import org.apache.jena.datatypes.xsd.XSDDatatype;
+import org.apache.jena.ontology.DatatypeProperty;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.semanticweb.owlapi.model.OWLProperty;
@@ -22,9 +24,9 @@ import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Flag;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagBaseIRI;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagConditionBlock;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagContentDirectionTSVColumn;
+import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagDataType;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagFixedContent;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagNotMetadata;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagOwnID;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ObjectAsRule;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Rule;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagSeparator;
@@ -695,6 +697,32 @@ public class AppTest
 			}
 		}
 	}
+	
+	@Test
+	public void extractDatatypeContentFlag() {	
+		String sentence = "\\\"name\\\" = \\\"Term\\\" /DT(\"string\"), ";
+
+		App app = new App();
+		List<Flag> flagsExtracted = null;
+		try {
+			flagsExtracted = app.extractFlagsFromSentence(sentence);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		assertEquals(2, flagsExtracted.size()); //Datatype Flag + ContentDirection
+		for(Flag flagExtracted : flagsExtracted) {
+			if(flagExtracted instanceof FlagDataType) {
+				FlagDataType flag = (FlagDataType) flagExtracted;
+
+				assertEquals(XSDDatatype.XSDstring.getURI(), flag.getDatatype().getURI());
+			}else if(flagExtracted instanceof FlagContentDirectionTSVColumn){
+				continue;
+			}else{
+				fail();
+			}
+		}
+	}
 
 	@Test
 	public void operationNotIdentifiedAtConditionBlock() throws IllegalStateException {
@@ -877,6 +905,5 @@ public class AppTest
 			}
 		}
 	}
-	
-	
+
 }

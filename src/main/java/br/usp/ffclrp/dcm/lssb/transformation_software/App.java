@@ -82,37 +82,6 @@ public class App
 		}
 	}
 
-	/*	private void printRules(List<Rule> rulesList) {
-		for(Rule r : rulesList){
-			System.out.println("** Rule: **\n");
-			String out = "ID: " + r.getId() + "\t\t" + "Subject: " + r.getSubject().getIRI() + "\t\t";
-			r.getPredicateObjects().forEach( (key, value) -> { printSysoutRules(out, key, value); });
-
-			if(r.getPredicateObjects().size() == 0)
-				System.out.println(out);
-		}
-	}
-
-	private void printSysoutRules(String out, OWLProperty key, TripleObject value) {
-		out += "Predicate: " + key + "\t\t\t";
-		String outAddedContent = "";
-		if(value instanceof TripleObjectAsColumns){
-			@SuppressWarnings("unchecked")
-			List<TSVColumn> column = (List<TSVColumn>) value.getObject();
-			for(TSVColumn c : column){
-				outAddedContent += out +  "Object: " + c.getTitle() + "\n";
-			}
-		}else{
-			@SuppressWarnings("unchecked")
-			List<Integer> rules = (List<Integer>) value.getObject();
-
-			for(Integer r : rules){
-				outAddedContent += out + "Rule: " + r + "\n";
-			}
-		}
-		System.out.println(outAddedContent);
-	}*/
-
 	public List<Rule> extractRulesFromString(String fileContent) throws Exception {
 
 		List<String> rulesListAsText = identifyRulesBlocksFromString(fileContent);		
@@ -250,20 +219,20 @@ public class App
 	public List<Flag> extractFlagsFromSentence(String sentence) throws Exception {
 		List<Flag> flagsList = new ArrayList<Flag>();
 
-		Matcher matcher = Utils.matchRegexOnString("(\\/D\\s)|(\\/R\\s)", sentence);
+		Matcher matcher = Utils.matchRegexOnString("(\\/D[^\\w])|(\\/R[^\\w])", sentence);
 
 		try{
-			if(matcher.group().equals("/R")){
+			String t = matcher.group();
+			if(t.contains("/R")){
 				flagsList.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.RIGHT));
-				sentence = Utils.removeRegexFromContent("\\/[R]", sentence);
+				sentence = Utils.removeRegexFromContent("\\/R[^\\w]", sentence);
 			}else{
 				flagsList.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
-				sentence = Utils.removeRegexFromContent("\\/[D]", sentence);
+				sentence = Utils.removeRegexFromContent("\\/D[^\\w]", sentence);
 			}
 		}catch(Exception e){
 			flagsList.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
 		}
-
 
 		matcher = Utils.matchRegexOnString("\\/(NM)|\\/(SP)|\\/(CB)|\\/(BASEIRI)|\\/(ID)|\\/(FX)|\\/(DT)", sentence);
 		while(!matcher.hitEnd()){			

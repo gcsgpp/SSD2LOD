@@ -26,6 +26,7 @@ import org.apache.jena.riot.RDFDataMgr;
 import org.semanticweb.owlapi.model.OWLProperty;
 
 import br.usp.ffclrp.dcm.lssb.custom_exceptions.BaseIRIException;
+import br.usp.ffclrp.dcm.lssb.custom_exceptions.FileAccessException;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Condition;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ConditionBlock;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.EnumOperationsConditionBlock;
@@ -160,7 +161,7 @@ public class TriplesProcessing {
 		return subjectList;
 	}
 
-	private boolean assertConditionBlock(List<Flag> flags, Integer tsvLineNumber) {
+	private boolean assertConditionBlock(List<Flag> flags, Integer tsvLineNumber) throws FileAccessException {
 		for(Flag flag : flags){
 			if(flag instanceof FlagConditionBlock){
 
@@ -221,7 +222,7 @@ public class TriplesProcessing {
 		subject.addProperty(predicate, contentElement, datatype);
 	}
 
-	private List<String> extractDataFromTSVColumn(List<TSVColumn> listTSVColumn, Integer lineNumber) {
+	private List<String> extractDataFromTSVColumn(List<TSVColumn> listTSVColumn, Integer lineNumber) throws FileAccessException {
 		List<String> objectContent = new ArrayList<String>();
 
 
@@ -293,7 +294,7 @@ public class TriplesProcessing {
 		return objectContent;
 	}
 
-	private String[] separateDataFromTSVColumn(FlagSeparator flag, String columnTitle, Integer lineNumber) {
+	private String[] separateDataFromTSVColumn(FlagSeparator flag, String columnTitle, Integer lineNumber) throws FileAccessException {
 		String rawData = fileReader.getData(columnTitle, lineNumber);
 
 		String[] splitData = null;

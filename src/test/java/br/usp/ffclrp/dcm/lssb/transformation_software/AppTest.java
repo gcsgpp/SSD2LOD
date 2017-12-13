@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.apache.jena.datatypes.xsd.XSDDatatype;
-import org.apache.jena.ontology.DatatypeProperty;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.semanticweb.owlapi.model.OWLProperty;

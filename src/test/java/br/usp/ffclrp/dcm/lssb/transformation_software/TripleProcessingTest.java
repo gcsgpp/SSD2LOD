@@ -17,6 +17,7 @@ import org.junit.rules.ExpectedException;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLProperty;
 
+import br.usp.ffclrp.dcm.lssb.custom_exceptions.FileAccessException;
 import br.usp.ffclrp.dcm.lssb.transformation_software.OntologyHelper;
 import br.usp.ffclrp.dcm.lssb.transformation_software.TriplesProcessing;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ConditionBlock;
@@ -344,8 +345,8 @@ public class TripleProcessingTest
 		listRules.add(createRuleOne());
 		createConditionBlocks();
 
-		thrown.expect(NullPointerException.class);
-		thrown.expectMessage("*** Not possible to access the file/content in the file.");
+		thrown.expect(FileAccessException.class);
+		thrown.expectMessage("Not possible to access the file or the content in the file. Column tried to access: Term. This column may not exist or the file is not accessible.");
 
 		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "enrichedDataGOTerm2.tsv", testFolderPath + "ontology.owl");
 
@@ -419,18 +420,16 @@ public class TripleProcessingTest
 		String id = "1";
 		OWLClass subjectClass = ontologyHelper.getClass("geo sample");
 		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
+		
 		TSVColumn subject = new TSVColumn();
-
 		subject.setTitle("");
-
 		List<Flag> subjectFlags = new ArrayList<Flag>();
 		subjectFlags.add(new FlagCustomID("NormalizedData"));
-
 		subject.setFlags(subjectFlags);
+		
 		subjectTSVColumns.add(subject);
 
 		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<OWLProperty, TripleObject>();
-
 		return new Rule(id, subjectClass, subjectTSVColumns, predicateObjects);
 	}
 

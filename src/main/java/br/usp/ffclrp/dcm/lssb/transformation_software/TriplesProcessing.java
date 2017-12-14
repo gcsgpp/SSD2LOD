@@ -180,7 +180,8 @@ public class TriplesProcessing {
 					}
 
 					if(condition.getOperation() == EnumOperationsConditionBlock.DIFFERENT){
-						result = compareDifferent(contentTSVColumn, condition.getConditionValue());
+						if(contentTSVColumn.equals(condition.getConditionValue()))
+							result = false;
 					}
 
 					if(condition.getOperation() == EnumOperationsConditionBlock.LESSTHAN){
@@ -199,21 +200,7 @@ public class TriplesProcessing {
 
 		return true;
 	}
-
-	private Boolean compareDifferent(String str1, String str2){
-		char[] chr1 = str1.toCharArray();
-		char[] chr2 = str2.toCharArray();
-
-		if(chr1.length != chr2.length)
-			return true;
-
-		for(int i = 0; i < chr1.length; i++){
-			if(chr1[i] != chr2[i]) return true;
-		}
-
-		return false;
-	}
-
+	
 	private void addTripleToModel(Resource subject, Property predicate, Resource object) {
 		//System.out.println("S: " + subject.getURI() + " P: " + predicate.getURI() + " O: " + object.getURI());
 		subject.addProperty(predicate, object);		

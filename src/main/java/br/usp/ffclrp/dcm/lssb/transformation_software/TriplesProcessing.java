@@ -28,7 +28,7 @@ import org.semanticweb.owlapi.model.OWLProperty;
 import br.usp.ffclrp.dcm.lssb.custom_exceptions.BaseIRIException;
 import br.usp.ffclrp.dcm.lssb.custom_exceptions.ConditionBlockException;
 import br.usp.ffclrp.dcm.lssb.custom_exceptions.CustomExceptions;
-import br.usp.ffclrp.dcm.lssb.custom_exceptions.FileAccessException;
+import br.usp.ffclrp.dcm.lssb.custom_exceptions.SeparatorFlagException;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Condition;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ConditionBlock;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.EnumOperationsConditionBlock;
@@ -211,7 +211,7 @@ public class TriplesProcessing {
 		subject.addProperty(predicate, contentElement, datatype);
 	}
 
-	private List<String> extractDataFromTSVColumn(List<TSVColumn> listTSVColumn, Integer lineNumber) throws FileAccessException {
+	private List<String> extractDataFromTSVColumn(List<TSVColumn> listTSVColumn, Integer lineNumber) throws Exception {
 		List<String> objectContent = new ArrayList<String>();
 
 
@@ -283,16 +283,15 @@ public class TriplesProcessing {
 		return objectContent;
 	}
 
-	private String[] separateDataFromTSVColumn(FlagSeparator flag, String columnTitle, Integer lineNumber) throws FileAccessException {
+	private String[] separateDataFromTSVColumn(FlagSeparator flag, String columnTitle, Integer lineNumber) throws Exception {
 		String rawData = fileReader.getData(columnTitle, lineNumber);
 
 		String[] splitData = null;
-		try{
+		if(rawData.contains(flag.getTerm()))
 			splitData = rawData.split(flag.getTerm());
-		}catch (Exception e) {
-			System.out.println(	"There is no caractere '" + flag.getTerm() +
-					"' on the field '" + columnTitle + "' to be used as separator");
-			e.printStackTrace();
+		else {
+			throw new SeparatorFlagException("There is no caractere '" + flag.getTerm() +
+					"' in the field '" + columnTitle + "' to be used as separator");
 		}
 
 		if(flag.getColumns().get(0).equals(Integer.MAX_VALUE))

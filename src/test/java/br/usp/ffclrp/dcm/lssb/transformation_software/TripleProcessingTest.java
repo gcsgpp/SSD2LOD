@@ -20,6 +20,7 @@ import org.semanticweb.owlapi.model.OWLProperty;
 
 import br.usp.ffclrp.dcm.lssb.custom_exceptions.ConditionBlockException;
 import br.usp.ffclrp.dcm.lssb.custom_exceptions.FileAccessException;
+import br.usp.ffclrp.dcm.lssb.custom_exceptions.SeparatorFlagException;
 import br.usp.ffclrp.dcm.lssb.transformation_software.OntologyHelper;
 import br.usp.ffclrp.dcm.lssb.transformation_software.TriplesProcessing;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ConditionBlock;
@@ -549,4 +550,39 @@ public class TripleProcessingTest
 		}
 	}
 
+	private Rule createRuleSeparatorElementInSeparatorFlagDoesNotExist() {
+		String id = "1";
+		OWLClass subjectClass = ontologyHelper.getClass("Gene");
+		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
+		
+		TSVColumn subject = new TSVColumn();
+		subject.setTitle("Genes");
+		List<Flag> subjectFlags = new ArrayList<Flag>();
+		subjectFlags.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
+		subjectFlags.add(new FlagSeparator("-", new ArrayList<Integer>()));
+		subject.setFlags(subjectFlags);
+		
+		subjectTSVColumns.add(subject);
+
+		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<OWLProperty, TripleObject>();
+		return new Rule(id, subjectClass, subjectTSVColumns, predicateObjects);
+	}
+	
+	@Test
+	public void separatorElementInSeparatorFlagDoesNotExist() throws Exception {
+		ontologyHelper = new OntologyHelper();
+		String testFolderPath = "testFiles/unitTestsFiles/";
+		String ontologyPath = testFolderPath + "ontology.owl";
+
+		ontologyHelper.loadingOntologyFromFile(ontologyPath);
+		listRules.add(createRuleSeparatorElementInSeparatorFlagDoesNotExist());
+
+		thrown.expect(SeparatorFlagException.class);
+		thrown.expectMessage("There is no caractere '-' in the field 'Genes' to be used as separator");
+		
+		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "enrichedDataGOTerm2.tsv", testFolderPath + "ontology.owl");
+
+		processingClass.createTriplesFromRules(listRules, conditionsBlocks, "http://example.org/onto/individual#");
+	}
+	
 }

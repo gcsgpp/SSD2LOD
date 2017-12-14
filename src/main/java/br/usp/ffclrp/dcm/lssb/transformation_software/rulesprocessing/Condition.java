@@ -23,5 +23,9 @@ public class Condition {
 		return conditionValue;
 	}
 	
+	public void setOperation(Enum<EnumOperationsConditionBlock> operationParam) {
+		this.operation = operationParam;
+	}
+	
 	
 }

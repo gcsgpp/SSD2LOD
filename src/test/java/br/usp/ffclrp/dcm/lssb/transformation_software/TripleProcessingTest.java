@@ -5,6 +5,7 @@ import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -231,7 +232,7 @@ public class TripleProcessingTest
 		for(Statement statement : statements) {
 			Triple triple = statement.asTriple();
 
-			if( triple.getPredicate().getURI().equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#type") 	||
+			if( 	triple.getPredicate().getURI().equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#type") 	||
 					triple.getPredicate().getURI().equals("http://www.w3.org/2000/01/rdf-schema#label")			||
 					triple.getPredicate().getURI().equals("http://www.w3.org/2000/01/rdf-schema#range")				) //is not interesting to check these predicates because there are other classes in the ontology if tested will get away from the objective of this method
 				continue;
@@ -460,4 +461,32 @@ public class TripleProcessingTest
 		}
 	}
 
+	@Test
+	public void processRuleWithConditionBlockNotMet()
+	{
+		ontologyHelper = new OntologyHelper();
+		String testFolderPath = "testFiles/unitTestsFiles/";
+		String ontologyPath = testFolderPath + "ontology.owl";
+
+		ontologyHelper.loadingOntologyFromFile(ontologyPath);
+		listRules.add(createRuleOne());
+		listRules.add(createRuleThree());
+		createConditionBlocks();
+		
+		//Changing the type of operation to manage not met the data inside the dataset
+		ConditionBlock cb = conditionsBlocks.get(1);
+		for(Iterator<Condition> iteratorCB = cb.getConditions().iterator(); iteratorCB.hasNext(); ) {
+			Condition condition = (Condition) iteratorCB.next();
+			if(condition.getColumn().equals("Category")) {
+				condition.setOperation(EnumOperationsConditionBlock.EQUAL);
+			}
+		}
+
+		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "enrichedDataGOTerm.tsv", testFolderPath + "ontology.owl");
+		try{
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, "http://example.org/onto/individual#");
+		}catch(Exception e) {
+			fail();
+		}
+	}
 }

@@ -13,6 +13,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.semanticweb.owlapi.model.OWLProperty;
 
+import br.usp.ffclrp.dcm.lssb.custom_exceptions.PropertyNotExist;
 import br.usp.ffclrp.dcm.lssb.transformation_software.App;
 import br.usp.ffclrp.dcm.lssb.transformation_software.OntologyHelper;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Condition;
@@ -905,4 +906,24 @@ public class AppTest
 		}
 	}
 
+	@Test
+	public void propertyNotExist() throws Exception {
+		String 	ruleString = "transformation_rule[1, \"Term\" = \"Term\" /SP(\"~\", 1) /BASEIRI(\"http://amigo1.geneontology.org/cgi-bin/amigo/term_details?term=\", \"go\") /CB(1) :" +
+				" \"any property\" = \"PValue\" ]";
+
+		ruleString = ruleString.replace("\t", "").replaceAll("\n", "");
+
+		App app = new App();
+		app.ontologyHelper = new OntologyHelper();
+		app.ontologyHelper.loadingOntologyFromFile("testFiles/unitTestsFiles/ontology.owl");
+
+		thrown.expect(PropertyNotExist.class);
+		String message = " \"any property\" = \"PValue\" ]";
+		thrown.expectMessage("Property does not exist in ontology. Instruction: " + message);
+		try {
+			app.createRulesFromBlock(ruleString);
+		} catch (Exception e) {
+			throw e;
+		}
+	}
 }

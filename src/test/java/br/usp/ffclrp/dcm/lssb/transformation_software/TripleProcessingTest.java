@@ -548,4 +548,5 @@ public class TripleProcessingTest
 			fail();
 		}
 	}
+
 }

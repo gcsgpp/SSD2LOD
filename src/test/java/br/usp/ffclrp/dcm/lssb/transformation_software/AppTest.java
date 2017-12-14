@@ -13,7 +13,8 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.semanticweb.owlapi.model.OWLProperty;
 
-import br.usp.ffclrp.dcm.lssb.custom_exceptions.PropertyNotExist;
+import br.usp.ffclrp.dcm.lssb.custom_exceptions.PropertyNotExistException;
+import br.usp.ffclrp.dcm.lssb.custom_exceptions.SeparatorFlagException;
 import br.usp.ffclrp.dcm.lssb.transformation_software.App;
 import br.usp.ffclrp.dcm.lssb.transformation_software.OntologyHelper;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Condition;
@@ -917,9 +918,30 @@ public class AppTest
 		app.ontologyHelper = new OntologyHelper();
 		app.ontologyHelper.loadingOntologyFromFile("testFiles/unitTestsFiles/ontology.owl");
 
-		thrown.expect(PropertyNotExist.class);
+		thrown.expect(PropertyNotExistException.class);
 		String message = " \"any property\" = \"PValue\" ]";
 		thrown.expectMessage("Property does not exist in ontology. Instruction: " + message);
+		try {
+			app.createRulesFromBlock(ruleString);
+		} catch (Exception e) {
+			throw e;
+		}
+	}
+
+	@Test
+	public void extractRangeFromSeparatorFlagFailure() throws Exception {
+		String 	ruleString = "transformation_rule[1, \"Term\" = \"Term\" /SP(\"~\", 1:p) /BASEIRI(\"http://amigo1.geneontology.org/cgi-bin/amigo/term_details?term=\", \"go\") /CB(1) :" +
+				" \"has_pvalue\" = \"PValue\" ]";
+
+		ruleString = ruleString.replace("\t", "").replaceAll("\n", "");
+
+		App app = new App();
+		app.ontologyHelper = new OntologyHelper();
+		app.ontologyHelper.loadingOntologyFromFile("testFiles/unitTestsFiles/ontology.owl");
+
+		thrown.expect(SeparatorFlagException.class);
+		String message = "/SP(\"\", 1:p)";
+		thrown.expectMessage("Value specified as column number is not a number. Instruction: " + message);
 		try {
 			app.createRulesFromBlock(ruleString);
 		} catch (Exception e) {

@@ -15,9 +15,10 @@ import java.util.stream.Stream;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLProperty;
 
-import br.usp.ffclrp.dcm.lssb.custom_exceptions.ClassNotFoundInOntology;
+import br.usp.ffclrp.dcm.lssb.custom_exceptions.ClassNotFoundInOntologyException;
 import br.usp.ffclrp.dcm.lssb.custom_exceptions.CustomExceptions;
-import br.usp.ffclrp.dcm.lssb.custom_exceptions.PropertyNotExist;
+import br.usp.ffclrp.dcm.lssb.custom_exceptions.PropertyNotExistException;
+import br.usp.ffclrp.dcm.lssb.custom_exceptions.SeparatorFlagException;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ConditionBlock;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagContentDirectionTSVColumn;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagCustomID;
@@ -193,7 +194,7 @@ public class App
 		OWLProperty prop = ontologyHelper.getProperty(predicateName);
 
 		if(prop == null)
-			throw new PropertyNotExist("Property does not exist in ontology. Instruction: " + lineFromBlock);
+			throw new PropertyNotExistException("Property does not exist in ontology. Instruction: " + lineFromBlock);
 
 		return prop;
 	}
@@ -318,7 +319,7 @@ public class App
 		return new FlagConditionBlock(id);
 	}
 
-	private Flag extractDataFromFlagSeparatorFromSentence(String sentence, String regex) throws Exception {
+	private Flag extractDataFromFlagSeparatorFromSentence(String sentence, String regex) throws CustomExceptions {
 
 		sentence = Utils.matchRegexOnString(regex, sentence).group();
 		String contentFromQuotationMark = Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(sentence, regex);
@@ -327,38 +328,44 @@ public class App
 
 		List<Integer> columnsSelected = new ArrayList<Integer>();
 
-
 		//Exctact range
-		Matcher matchedRange = Utils.matchRegexOnString(EnumRegexList.SELECTSEPARATORFLAGRANGENUMBERS.get(), contentWithoutQuotationMark);
-		while(!matchedRange.hitEnd()){
-			int start, end = 0;
-			Matcher matchedColumnsSelected = Utils.matchRegexOnString("(\\d(\\d)*)", matchedRange.group());
-			try {
-				start = Integer.parseInt(matchedColumnsSelected.group());
-				matchedColumnsSelected.find();
-				end = Integer.parseInt(matchedColumnsSelected.group());
-			}catch (Exception e){
-				throw new Exception("Error trying to extract range numbers from Separator Flag.", e);
+		if(contentWithoutQuotationMark.contains(",")) {
+			String[] rangeString = contentWithoutQuotationMark.split(",");
+
+			for(int i = 1; i < rangeString.length; i++) {
+
+				rangeString[i] = rangeString[i].replaceAll("\\)", "").trim();
+
+				if(rangeString[i].contains(":")) {
+					//Columns specified are in a interval
+					int start, end = 0;
+					String[] rangeNumbers = rangeString[i].split(":");
+					try {
+						start = Integer.parseInt(rangeNumbers[0]);
+						end = Integer.parseInt(rangeNumbers[1]);
+					}catch (Exception e){
+						throw new SeparatorFlagException("Value specified as column number is not a number. Instruction: " + contentWithoutQuotationMark);
+					}
+
+					for(int ii = start; ii <= end; ii++)
+						columnsSelected.add(ii - 1);
+
+				} else {
+					//The columns specified are not in an interval
+					try {
+						columnsSelected.add(Integer.parseInt(rangeString[i]) - 1);
+					}catch (Exception e){
+						e.printStackTrace();
+						throw new SeparatorFlagException("Value specified as column number is not a number. Instruction: " + contentWithoutQuotationMark);
+
+					}
+				}
 			}
-
-			for(int i = start; i <= end; i++)
-				columnsSelected.add(i - 1);
-
-			matchedRange.find();
-		}
-
-		String contentWithoutQuotationAndRange = Utils.removeRegexFromContent(EnumRegexList.SELECTSEPARATORFLAGRANGENUMBERS.get(), contentWithoutQuotationMark);
-
-		//Exctact individuals columns
-		Matcher matchedIndividualColumns = Utils.matchRegexOnString("\\s*\\d+", contentWithoutQuotationAndRange);
-		while(!matchedIndividualColumns.hitEnd()){
-			columnsSelected.add(Integer.parseInt(matchedIndividualColumns.group().trim()) - 1);
-			matchedIndividualColumns.find();
-		}
-
-		//Case there are no columns specified
-		if(columnsSelected.size() < 1){
-			columnsSelected.add(Integer.MAX_VALUE);
+		}else {
+			//Case there are no columns specified
+			if(columnsSelected.size() < 1){
+				columnsSelected.add(Integer.MAX_VALUE);
+			}
 		}
 
 		return new FlagSeparator(contentFromQuotationMark, columnsSelected);
@@ -379,7 +386,7 @@ public class App
 		OWLClass subject = ontologyHelper.getClass(subjectString);
 
 		if(subject == null)
-			throw new ClassNotFoundInOntology("Not found any ontology class with label '" + subjectString + "'");
+			throw new ClassNotFoundInOntologyException("Not found any ontology class with label '" + subjectString + "'");
 
 		return subject;
 	}

@@ -373,7 +373,7 @@ public class TripleProcessingTest
 		processingClass.createTriplesFromRules(listRules, conditionsBlocks, "http://example.org/onto/individual#");
 	}
 
-	private Rule createRuleWithFixedContentFlag() {
+	private Rule createRuleWithFixedContentFlagOnSubjectLine() {
 		String id = "1";
 		OWLClass subjectClass = ontologyHelper.getClass("geo sample");
 		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
@@ -393,13 +393,13 @@ public class TripleProcessingTest
 	}
 
 	@Test
-	public void processRuleWithFixedContentFlag() {		
+	public void processRuleWithFixedContentFlagOnSubjectLine() {		
 		ontologyHelper = new OntologyHelper();
 		String testFolderPath = "testFiles/unitTestsFiles/normalizedFiles/";
 		String ontologyPath = testFolderPath + "ontology.owl";
 
 		ontologyHelper.loadingOntologyFromFile(ontologyPath);
-		listRules.add(createRuleWithFixedContentFlag());
+		listRules.add(createRuleWithFixedContentFlagOnSubjectLine());
 
 		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "NormalizedData.txt", testFolderPath + "ontology.owl");
 		try{
@@ -418,6 +418,64 @@ public class TripleProcessingTest
 		}
 	}
 
+	private Rule createRuleWithFixedContentFlagOnObjectLine() {
+		String id = "1";
+		OWLClass subjectClass = ontologyHelper.getClass("geo sample");
+		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
+		TSVColumn subject = new TSVColumn();
+
+		subject.setTitle("GSM1243183");
+		List<Flag> subjectFlags = new ArrayList<Flag>();
+		subjectFlags.add(new FlagNotMetadata(true));
+		subject.setFlags(subjectFlags);
+		subjectTSVColumns.add(subject);
+
+		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<OWLProperty, TripleObject>();
+		
+		OWLProperty enrichmentProperty = ontologyHelper.getProperty("has enrichement");
+		
+		List<Flag> objectFlags = new ArrayList<Flag>();
+		objectFlags.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
+		objectFlags.add(new FlagFixedContent("test fixed content"));
+		TripleObject object = new TripleObjectAsColumns(new TSVColumn("GSM1243183", objectFlags));
+		
+		predicateObjects.put(enrichmentProperty, object);
+
+		return new Rule(id, subjectClass, subjectTSVColumns, predicateObjects);
+	}
+
+	@Test
+	public void processRuleWithFixedContentFlagOnObjectLine() {		
+		ontologyHelper = new OntologyHelper();
+		String testFolderPath = "testFiles/unitTestsFiles/normalizedFiles/";
+		String ontologyPath = testFolderPath + "ontology.owl";
+
+		ontologyHelper.loadingOntologyFromFile(ontologyPath);
+		listRules.add(createRuleWithFixedContentFlagOnObjectLine());
+
+		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "NormalizedData.txt", testFolderPath + "ontology.owl");
+		try{
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, "http://example.org/onto/individual#");
+		}catch(Exception e) {
+			e.printStackTrace();
+			fail();
+		}
+		Model model = processingClass.getModel();
+		List<Statement> statements = model.listStatements().toList();
+
+		assertEquals(2, statements.size()); // the triple with rdfs:type and with the "test fixed content";
+		for(Statement statement : statements) {
+			Triple triple = statement.asTriple();
+			if(triple.getPredicate().getURI().equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")) {
+				assertEquals("http://www.purl.org/g/classes#geo_sample", triple.getObject().getURI());
+			} else if(triple.getPredicate().getURI().equals("http://www.purl.org/g/properties#enrichment")) {
+				assertEquals("test fixed content", triple.getObject().getLiteralValue());
+			} else {
+				fail();
+			}			
+		}
+	}
+	
 	private Rule createRuleWithCustomIDFlag() {
 		String id = "1";
 		OWLClass subjectClass = ontologyHelper.getClass("geo sample");

@@ -26,6 +26,8 @@ import org.apache.jena.riot.RDFDataMgr;
 import org.semanticweb.owlapi.model.OWLProperty;
 
 import br.usp.ffclrp.dcm.lssb.custom_exceptions.BaseIRIException;
+import br.usp.ffclrp.dcm.lssb.custom_exceptions.ConditionBlockException;
+import br.usp.ffclrp.dcm.lssb.custom_exceptions.CustomExceptions;
 import br.usp.ffclrp.dcm.lssb.custom_exceptions.FileAccessException;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Condition;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ConditionBlock;
@@ -161,12 +163,12 @@ public class TriplesProcessing {
 		return subjectList;
 	}
 
-	private boolean assertConditionBlock(List<Flag> flags, Integer tsvLineNumber) throws FileAccessException {
+	private boolean assertConditionBlock(List<Flag> flags, Integer tsvLineNumber) throws CustomExceptions {
 		for(Flag flag : flags){
 			if(flag instanceof FlagConditionBlock){
 
 				if(conditionBlocks.isEmpty())
-					throw new NullPointerException("No condition block created");
+					throw new ConditionBlockException("No condition block created");
 
 				ConditionBlock conditionBlock = conditionBlocks.get(((FlagConditionBlock) flag).getId());
 

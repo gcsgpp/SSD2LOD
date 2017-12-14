@@ -18,6 +18,7 @@ import org.junit.rules.ExpectedException;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLProperty;
 
+import br.usp.ffclrp.dcm.lssb.custom_exceptions.ConditionBlockException;
 import br.usp.ffclrp.dcm.lssb.custom_exceptions.FileAccessException;
 import br.usp.ffclrp.dcm.lssb.transformation_software.OntologyHelper;
 import br.usp.ffclrp.dcm.lssb.transformation_software.TriplesProcessing;
@@ -364,7 +365,7 @@ public class TripleProcessingTest
 		ontologyHelper.loadingOntologyFromFile(ontologyPath);
 		listRules.add(createRuleOne());
 
-		thrown.expect(NullPointerException.class);
+		thrown.expect(ConditionBlockException.class);
 		thrown.expectMessage("No condition block created");
 		
 		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "enrichedDataGOTerm2.tsv", testFolderPath + "ontology.owl");

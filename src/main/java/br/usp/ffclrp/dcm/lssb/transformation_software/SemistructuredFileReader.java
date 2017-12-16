@@ -7,8 +7,7 @@ import java.util.Map;
 import com.univocity.parsers.tsv.TsvParser;
 import com.univocity.parsers.tsv.TsvParserSettings;
 
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TSVColumn;
-
+import br.usp.ffclrp.dcm.lssb.custom_exceptions.FileAccessException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
@@ -47,7 +46,7 @@ public class SemistructuredFileReader {
 		return allRows;
 	}
 	
-	public String getData(String tsvColumn, Integer lineNumber){
+	public String getData(String tsvColumn, Integer lineNumber) throws FileAccessException{
 		
 		String[] dataRow = allRows.get(lineNumber);
 		
@@ -57,7 +56,7 @@ public class SemistructuredFileReader {
 				str = str.substring(1, str.length() - 1);
 			return str;
 		}catch(NullPointerException ex){
-			throw new NullPointerException("*** Not possible to access the file/content in the file.");
+			throw new FileAccessException("Not possible to access the file or the content in the file. Column tried to access: " + tsvColumn + ". This column may not exist or the file is not accessible.");
 		}
 	}
 	

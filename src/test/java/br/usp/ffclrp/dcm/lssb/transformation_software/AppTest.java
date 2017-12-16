@@ -8,10 +8,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 
+import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.semanticweb.owlapi.model.OWLProperty;
 
+import br.usp.ffclrp.dcm.lssb.custom_exceptions.PropertyNotExistException;
+import br.usp.ffclrp.dcm.lssb.custom_exceptions.SeparatorFlagException;
 import br.usp.ffclrp.dcm.lssb.transformation_software.App;
 import br.usp.ffclrp.dcm.lssb.transformation_software.OntologyHelper;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Condition;
@@ -22,9 +25,9 @@ import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Flag;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagBaseIRI;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagConditionBlock;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagContentDirectionTSVColumn;
+import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagDataType;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagFixedContent;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagNotMetadata;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagOwnID;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ObjectAsRule;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Rule;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagSeparator;
@@ -695,6 +698,32 @@ public class AppTest
 			}
 		}
 	}
+	
+	@Test
+	public void extractDatatypeContentFlag() {	
+		String sentence = "\\\"name\\\" = \\\"Term\\\" /DT(\"string\"), ";
+
+		App app = new App();
+		List<Flag> flagsExtracted = null;
+		try {
+			flagsExtracted = app.extractFlagsFromSentence(sentence);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		assertEquals(2, flagsExtracted.size()); //Datatype Flag + ContentDirection
+		for(Flag flagExtracted : flagsExtracted) {
+			if(flagExtracted instanceof FlagDataType) {
+				FlagDataType flag = (FlagDataType) flagExtracted;
+
+				assertEquals(XSDDatatype.XSDstring.getURI(), flag.getDatatype().getURI());
+			}else if(flagExtracted instanceof FlagContentDirectionTSVColumn){
+				continue;
+			}else{
+				fail();
+			}
+		}
+	}
 
 	@Test
 	public void operationNotIdentifiedAtConditionBlock() throws IllegalStateException {
@@ -877,6 +906,46 @@ public class AppTest
 			}
 		}
 	}
-	
-	
+
+	@Test
+	public void propertyNotExist() throws Exception {
+		String 	ruleString = "transformation_rule[1, \"Term\" = \"Term\" /SP(\"~\", 1) /BASEIRI(\"http://amigo1.geneontology.org/cgi-bin/amigo/term_details?term=\", \"go\") /CB(1) :" +
+				" \"any property\" = \"PValue\" ]";
+
+		ruleString = ruleString.replace("\t", "").replaceAll("\n", "");
+
+		App app = new App();
+		app.ontologyHelper = new OntologyHelper();
+		app.ontologyHelper.loadingOntologyFromFile("testFiles/unitTestsFiles/ontology.owl");
+
+		thrown.expect(PropertyNotExistException.class);
+		String message = " \"any property\" = \"PValue\" ]";
+		thrown.expectMessage("Property does not exist in ontology. Instruction: " + message);
+		try {
+			app.createRulesFromBlock(ruleString);
+		} catch (Exception e) {
+			throw e;
+		}
+	}
+
+	@Test
+	public void extractRangeFromSeparatorFlagFailure() throws Exception {
+		String 	ruleString = "transformation_rule[1, \"Term\" = \"Term\" /SP(\"~\", 1:p) /BASEIRI(\"http://amigo1.geneontology.org/cgi-bin/amigo/term_details?term=\", \"go\") /CB(1) :" +
+				" \"has_pvalue\" = \"PValue\" ]";
+
+		ruleString = ruleString.replace("\t", "").replaceAll("\n", "");
+
+		App app = new App();
+		app.ontologyHelper = new OntologyHelper();
+		app.ontologyHelper.loadingOntologyFromFile("testFiles/unitTestsFiles/ontology.owl");
+
+		thrown.expect(SeparatorFlagException.class);
+		String message = "/SP(\"\", 1:p)";
+		thrown.expectMessage("Value specified as column number is not a number. Instruction: " + message);
+		try {
+			app.createRulesFromBlock(ruleString);
+		} catch (Exception e) {
+			throw e;
+		}
+	}
 }

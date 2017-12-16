@@ -5,6 +5,7 @@ import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -17,6 +18,9 @@ import org.junit.rules.ExpectedException;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLProperty;
 
+import br.usp.ffclrp.dcm.lssb.custom_exceptions.ConditionBlockException;
+import br.usp.ffclrp.dcm.lssb.custom_exceptions.FileAccessException;
+import br.usp.ffclrp.dcm.lssb.custom_exceptions.SeparatorFlagException;
 import br.usp.ffclrp.dcm.lssb.transformation_software.OntologyHelper;
 import br.usp.ffclrp.dcm.lssb.transformation_software.TriplesProcessing;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ConditionBlock;
@@ -230,7 +234,7 @@ public class TripleProcessingTest
 		for(Statement statement : statements) {
 			Triple triple = statement.asTriple();
 
-			if( triple.getPredicate().getURI().equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#type") 	||
+			if( 	triple.getPredicate().getURI().equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#type") 	||
 					triple.getPredicate().getURI().equals("http://www.w3.org/2000/01/rdf-schema#label")			||
 					triple.getPredicate().getURI().equals("http://www.w3.org/2000/01/rdf-schema#range")				) //is not interesting to check these predicates because there are other classes in the ontology if tested will get away from the objective of this method
 				continue;
@@ -344,8 +348,8 @@ public class TripleProcessingTest
 		listRules.add(createRuleOne());
 		createConditionBlocks();
 
-		thrown.expect(NullPointerException.class);
-		thrown.expectMessage("*** Not possible to access the file/content in the file.");
+		thrown.expect(FileAccessException.class);
+		thrown.expectMessage("Not possible to access the file or the content in the file. Column tried to access: Term. This column may not exist or the file is not accessible.");
 
 		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "enrichedDataGOTerm2.tsv", testFolderPath + "ontology.owl");
 
@@ -362,7 +366,7 @@ public class TripleProcessingTest
 		ontologyHelper.loadingOntologyFromFile(ontologyPath);
 		listRules.add(createRuleOne());
 
-		thrown.expect(NullPointerException.class);
+		thrown.expect(ConditionBlockException.class);
 		thrown.expectMessage("No condition block created");
 		
 		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "enrichedDataGOTerm2.tsv", testFolderPath + "ontology.owl");
@@ -370,7 +374,7 @@ public class TripleProcessingTest
 		processingClass.createTriplesFromRules(listRules, conditionsBlocks, "http://example.org/onto/individual#");
 	}
 
-	private Rule createRuleWithFixedContentFlag() {
+	private Rule createRuleWithFixedContentFlagOnSubjectLine() {
 		String id = "1";
 		OWLClass subjectClass = ontologyHelper.getClass("geo sample");
 		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
@@ -390,13 +394,13 @@ public class TripleProcessingTest
 	}
 
 	@Test
-	public void processRuleWithFixedContentFlag() {		
+	public void processRuleWithFixedContentFlagOnSubjectLine() {		
 		ontologyHelper = new OntologyHelper();
 		String testFolderPath = "testFiles/unitTestsFiles/normalizedFiles/";
 		String ontologyPath = testFolderPath + "ontology.owl";
 
 		ontologyHelper.loadingOntologyFromFile(ontologyPath);
-		listRules.add(createRuleWithFixedContentFlag());
+		listRules.add(createRuleWithFixedContentFlagOnSubjectLine());
 
 		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "NormalizedData.txt", testFolderPath + "ontology.owl");
 		try{
@@ -415,22 +419,78 @@ public class TripleProcessingTest
 		}
 	}
 
-	private Rule createRuleWithCustomIDFlag() {
+	private Rule createRuleWithFixedContentFlagOnObjectLine() {
 		String id = "1";
 		OWLClass subjectClass = ontologyHelper.getClass("geo sample");
 		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
 		TSVColumn subject = new TSVColumn();
 
-		subject.setTitle("");
-
+		subject.setTitle("GSM1243183");
 		List<Flag> subjectFlags = new ArrayList<Flag>();
-		subjectFlags.add(new FlagCustomID("NormalizedData"));
-
+		subjectFlags.add(new FlagNotMetadata(true));
 		subject.setFlags(subjectFlags);
 		subjectTSVColumns.add(subject);
 
 		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<OWLProperty, TripleObject>();
+		
+		OWLProperty enrichmentProperty = ontologyHelper.getProperty("has enrichement");
+		
+		List<Flag> objectFlags = new ArrayList<Flag>();
+		objectFlags.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
+		objectFlags.add(new FlagFixedContent("test fixed content"));
+		TripleObject object = new TripleObjectAsColumns(new TSVColumn("GSM1243183", objectFlags));
+		
+		predicateObjects.put(enrichmentProperty, object);
 
+		return new Rule(id, subjectClass, subjectTSVColumns, predicateObjects);
+	}
+
+	@Test
+	public void processRuleWithFixedContentFlagOnObjectLine() {		
+		ontologyHelper = new OntologyHelper();
+		String testFolderPath = "testFiles/unitTestsFiles/normalizedFiles/";
+		String ontologyPath = testFolderPath + "ontology.owl";
+
+		ontologyHelper.loadingOntologyFromFile(ontologyPath);
+		listRules.add(createRuleWithFixedContentFlagOnObjectLine());
+
+		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "NormalizedData.txt", testFolderPath + "ontology.owl");
+		try{
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, "http://example.org/onto/individual#");
+		}catch(Exception e) {
+			e.printStackTrace();
+			fail();
+		}
+		Model model = processingClass.getModel();
+		List<Statement> statements = model.listStatements().toList();
+
+		assertEquals(2, statements.size()); // the triple with rdfs:type and with the "test fixed content";
+		for(Statement statement : statements) {
+			Triple triple = statement.asTriple();
+			if(triple.getPredicate().getURI().equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")) {
+				assertEquals("http://www.purl.org/g/classes#geo_sample", triple.getObject().getURI());
+			} else if(triple.getPredicate().getURI().equals("http://www.purl.org/g/properties#enrichment")) {
+				assertEquals("test fixed content", triple.getObject().getLiteralValue());
+			} else {
+				fail();
+			}			
+		}
+	}
+	
+	private Rule createRuleWithCustomIDFlag() {
+		String id = "1";
+		OWLClass subjectClass = ontologyHelper.getClass("geo sample");
+		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
+		
+		TSVColumn subject = new TSVColumn();
+		subject.setTitle("");
+		List<Flag> subjectFlags = new ArrayList<Flag>();
+		subjectFlags.add(new FlagCustomID("NormalizedData"));
+		subject.setFlags(subjectFlags);
+		
+		subjectTSVColumns.add(subject);
+
+		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<OWLProperty, TripleObject>();
 		return new Rule(id, subjectClass, subjectTSVColumns, predicateObjects);
 	}
 
@@ -461,4 +521,68 @@ public class TripleProcessingTest
 		}
 	}
 
+	@Test
+	public void processRuleWithConditionBlockNotMet()
+	{
+		ontologyHelper = new OntologyHelper();
+		String testFolderPath = "testFiles/unitTestsFiles/";
+		String ontologyPath = testFolderPath + "ontology.owl";
+
+		ontologyHelper.loadingOntologyFromFile(ontologyPath);
+		listRules.add(createRuleOne());
+		listRules.add(createRuleThree());
+		createConditionBlocks();
+		
+		//Changing the type of operation to manage not met the data inside the dataset
+		ConditionBlock cb = conditionsBlocks.get(1);
+		for(Iterator<Condition> iteratorCB = cb.getConditions().iterator(); iteratorCB.hasNext(); ) {
+			Condition condition = (Condition) iteratorCB.next();
+			if(condition.getColumn().equals("Category")) {
+				condition.setOperation(EnumOperationsConditionBlock.EQUAL);
+			}
+		}
+
+		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "enrichedDataGOTerm.tsv", testFolderPath + "ontology.owl");
+		try{
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, "http://example.org/onto/individual#");
+		}catch(Exception e) {
+			fail();
+		}
+	}
+
+	private Rule createRuleSeparatorElementInSeparatorFlagDoesNotExist() {
+		String id = "1";
+		OWLClass subjectClass = ontologyHelper.getClass("Gene");
+		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
+		
+		TSVColumn subject = new TSVColumn();
+		subject.setTitle("Genes");
+		List<Flag> subjectFlags = new ArrayList<Flag>();
+		subjectFlags.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
+		subjectFlags.add(new FlagSeparator("-", new ArrayList<Integer>()));
+		subject.setFlags(subjectFlags);
+		
+		subjectTSVColumns.add(subject);
+
+		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<OWLProperty, TripleObject>();
+		return new Rule(id, subjectClass, subjectTSVColumns, predicateObjects);
+	}
+	
+	@Test
+	public void separatorElementInSeparatorFlagDoesNotExist() throws Exception {
+		ontologyHelper = new OntologyHelper();
+		String testFolderPath = "testFiles/unitTestsFiles/";
+		String ontologyPath = testFolderPath + "ontology.owl";
+
+		ontologyHelper.loadingOntologyFromFile(ontologyPath);
+		listRules.add(createRuleSeparatorElementInSeparatorFlagDoesNotExist());
+
+		thrown.expect(SeparatorFlagException.class);
+		thrown.expectMessage("There is no caractere '-' in the field 'Genes' to be used as separator");
+		
+		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "enrichedDataGOTerm2.tsv", testFolderPath + "ontology.owl");
+
+		processingClass.createTriplesFromRules(listRules, conditionsBlocks, "http://example.org/onto/individual#");
+	}
+	
 }

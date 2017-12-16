@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.rdf.model.InfModel;
 import org.apache.jena.rdf.model.Model;
@@ -25,6 +26,9 @@ import org.apache.jena.riot.RDFDataMgr;
 import org.semanticweb.owlapi.model.OWLProperty;
 
 import br.usp.ffclrp.dcm.lssb.custom_exceptions.BaseIRIException;
+import br.usp.ffclrp.dcm.lssb.custom_exceptions.ConditionBlockException;
+import br.usp.ffclrp.dcm.lssb.custom_exceptions.CustomExceptions;
+import br.usp.ffclrp.dcm.lssb.custom_exceptions.SeparatorFlagException;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Condition;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ConditionBlock;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.EnumOperationsConditionBlock;
@@ -32,6 +36,7 @@ import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Flag;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagBaseIRI;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagConditionBlock;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagCustomID;
+import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagDataType;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagFixedContent;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagNotMetadata;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ObjectAsRule;
@@ -54,7 +59,7 @@ public class TriplesProcessing {
 
 	public TriplesProcessing(String relativePathDataFile, String relativePathOntologyFile) {
 		this.relativePathOntologyFile = relativePathOntologyFile;
-		
+
 		this.model = ModelFactory.createDefaultModel();
 		//model.read(relativePathOntologyFile); //load ontology and add its axioms to the linked graph
 		fileReader = new SemistructuredFileReader(relativePathDataFile);
@@ -93,7 +98,7 @@ public class TriplesProcessing {
 				processRule(rule, tsvLineNumber, defaultNs);
 			}
 		}
-		
+
 		loadNamespacesFromOntology();
 		writeRDF(model, "RDFtriples.rdf");
 		checkConsistency();
@@ -135,26 +140,35 @@ public class TriplesProcessing {
 					//TRIPLEOBJECTS POINTING TO LIST OF TSV COLUMNS PROCESS FLOW
 				}else{
 					@SuppressWarnings("unchecked")
-					List<String> content = extractDataFromTSVColumn((List<TSVColumn>) predicateMapEntry.getValue().getObject(), tsvLineNumber);
+					List<TSVColumn> dataColumns = (List<TSVColumn>) predicateMapEntry.getValue().getObject();
+					List<String> content = extractDataFromTSVColumn(dataColumns, tsvLineNumber);
 
-					for(String contentElement : content){
-						if(contentElement != null && contentElement != "")
-							addTripleToModel(subject, predicate, contentElement);
+					if(content.size() > 1) {
+						for(String contentElement : content){
+							if(contentElement != null && contentElement != "")
+								addTripleToModel(subject, predicate, contentElement, XSDDatatype.XSDstring);
+						}
+
+					} else {
+						TSVColumn firstDataColumn = dataColumns.iterator().next(); //iterator to get the first element of the list
+						XSDDatatype datatype = getDataTypeContentFlag(firstDataColumn); //get the first element, not necessarily the index 0
+						
+						String firstContent = content.iterator().next();
+						addTripleToModel(subject, predicate, firstContent, datatype);
 					}
 				}
 			}
 		}
 
 		return subjectList;
-
 	}
 
-	private boolean assertConditionBlock(List<Flag> flags, Integer tsvLineNumber) {
+	private boolean assertConditionBlock(List<Flag> flags, Integer tsvLineNumber) throws CustomExceptions {
 		for(Flag flag : flags){
 			if(flag instanceof FlagConditionBlock){
 
 				if(conditionBlocks.isEmpty())
-					throw new NullPointerException("No condition block created");
+					throw new ConditionBlockException("No condition block created");
 
 				ConditionBlock conditionBlock = conditionBlocks.get(((FlagConditionBlock) flag).getId());
 
@@ -166,7 +180,8 @@ public class TriplesProcessing {
 					}
 
 					if(condition.getOperation() == EnumOperationsConditionBlock.DIFFERENT){
-						result = compareDifferent(contentTSVColumn, condition.getConditionValue());
+						if(contentTSVColumn.equals(condition.getConditionValue()))
+							result = false;
 					}
 
 					if(condition.getOperation() == EnumOperationsConditionBlock.LESSTHAN){
@@ -185,32 +200,18 @@ public class TriplesProcessing {
 
 		return true;
 	}
-
-	private Boolean compareDifferent(String str1, String str2){
-		char[] chr1 = str1.toCharArray();
-		char[] chr2 = str2.toCharArray();
-
-		if(chr1.length != chr2.length)
-			return true;
-
-		for(int i = 0; i < chr1.length; i++){
-			if(chr1[i] != chr2[i]) return true;
-		}
-
-		return false;
-	}
-
+	
 	private void addTripleToModel(Resource subject, Property predicate, Resource object) {
 		//System.out.println("S: " + subject.getURI() + " P: " + predicate.getURI() + " O: " + object.getURI());
 		subject.addProperty(predicate, object);		
 	}
 
-	private void addTripleToModel(Resource subject, Property predicate, String contentElement) {
+	private void addTripleToModel(Resource subject, Property predicate, String contentElement, XSDDatatype datatype) {
 		//System.out.println("S: " + subject.getURI() + " P: " + predicate.getURI() + " O: " + contentElement);
-		subject.addProperty(predicate, contentElement);
+		subject.addProperty(predicate, contentElement, datatype);
 	}
 
-	private List<String> extractDataFromTSVColumn(List<TSVColumn> listTSVColumn, Integer lineNumber) {
+	private List<String> extractDataFromTSVColumn(List<TSVColumn> listTSVColumn, Integer lineNumber) throws Exception {
 		List<String> objectContent = new ArrayList<String>();
 
 
@@ -236,7 +237,7 @@ public class TriplesProcessing {
 				}
 			}
 
-
+			//IF ANY OF THE SPECIAL CASES (FLAGS ABOVE) WERE MET, EXTRACT THE CONTENT NORMALLY. 
 			if(!extractedData){
 				String[] columnData = new String[1];
 				columnData[0] = fileReader.getData(column.getTitle(), lineNumber);
@@ -253,7 +254,7 @@ public class TriplesProcessing {
 
 		//MAKES ALL ARRAYS TO BE THE SAME SIZE. 
 		//THE ARRAYS THAT IS SMALLER THAN THE BIGGEST IS COMPLETED WITH 
-		//THE DATA AT THE BEGGINING OF THE ARRAY IT SELF.
+		//THE DATA AT THE BEGGINING OF THE ARRAY ITSELF.
 		List<List<String>> dataColumns = new ArrayList<List<String>>();
 		for(String[] array : dataColumnsSeparated){
 			List<String> list = new ArrayList<String>();
@@ -282,16 +283,15 @@ public class TriplesProcessing {
 		return objectContent;
 	}
 
-	private String[] separateDataFromTSVColumn(FlagSeparator flag, String columnTitle, Integer lineNumber) {
+	private String[] separateDataFromTSVColumn(FlagSeparator flag, String columnTitle, Integer lineNumber) throws Exception {
 		String rawData = fileReader.getData(columnTitle, lineNumber);
 
 		String[] splitData = null;
-		try{
+		if(rawData.contains(flag.getTerm()))
 			splitData = rawData.split(flag.getTerm());
-		}catch (Exception e) {
-			System.out.println(	"There is no caractere '" + flag.getTerm() +
-					"' on the field '" + columnTitle + "' to be used as separator");
-			e.printStackTrace();
+		else {
+			throw new SeparatorFlagException("There is no caractere '" + flag.getTerm() +
+					"' in the field '" + columnTitle + "' to be used as separator");
 		}
 
 		if(flag.getColumns().get(0).equals(Integer.MAX_VALUE))
@@ -367,6 +367,15 @@ public class TriplesProcessing {
 		return null;
 	}
 
+	private XSDDatatype getDataTypeContentFlag(TSVColumn column) {
+		for(Flag flag : column.getFlags()){
+			if(flag instanceof FlagDataType){
+				return ((FlagDataType) flag).getDatatype();
+			}
+		}
+		return null;
+	}
+
 	private String getBASEIRIFlag(List<TSVColumn> listTSVColumn) throws BaseIRIException {
 		for(TSVColumn column : listTSVColumn){
 			for(Flag flag : column.getFlags()){
@@ -387,28 +396,28 @@ public class TriplesProcessing {
 
 	private void loadNamespacesFromOntology() {
 		Set<String> namespacesUsed = new HashSet<String>();
-		
+
 		model.listStatements().forEachRemaining(s -> { 
 			Triple triple = s.asTriple();
 			namespacesUsed.add(triple.getSubject().getNameSpace());
 			namespacesUsed.add(triple.getPredicate().getNameSpace());
 			if(triple.getObject().isURI())
-					namespacesUsed.add(triple.getObject().getNameSpace());
+				namespacesUsed.add(triple.getObject().getNameSpace());
 		});
-		
+
 		namespacesUsed.forEach(n -> System.out.println(n));
-		
-		
-		
+
+
+
 		Model tempModel = ModelFactory.createDefaultModel();
 		tempModel.read(relativePathOntologyFile);
-		
+
 		tempModel.getNsPrefixMap().forEach((k, v) -> {
 			if(namespacesUsed.contains(v))
 				model.setNsPrefix(k, v);
 		});
 	}
-	
+
 	public void writeRDF(Model modelToPrint, String filename){
 		System.out.println("#####################################\nWriting RDF...");
 		long startTime = System.currentTimeMillis();
@@ -431,7 +440,7 @@ public class TriplesProcessing {
 	}
 
 	private void checkConsistency() {
-		System.out.println("\"#####################################\nChecking consistency...");
+		System.out.println("#####################################\nChecking consistency...");
 		Reasoner reasoner = ReasonerRegistry.getOWLReasoner().bindSchema(ontology);
 		InfModel inf = ModelFactory.createInfModel(reasoner, model);
 

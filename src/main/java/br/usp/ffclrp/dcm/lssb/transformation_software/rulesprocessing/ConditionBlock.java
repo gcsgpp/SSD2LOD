@@ -28,7 +28,7 @@ public class ConditionBlock extends Flag {
 		String data = "";
 
 		Matcher matcher = Utils.matchRegexOnString(EnumRegexList.SELECTRULEID.get(), blockRulesAsText);
-		data = matcher.group().replace("transformation_rule[", "").replace("condition_block[", "");
+		data = matcher.group().replace("condition_block[", "");
 		return data;
 	}
 	

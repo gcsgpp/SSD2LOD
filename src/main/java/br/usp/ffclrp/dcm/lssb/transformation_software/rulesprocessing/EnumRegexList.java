@@ -1,7 +1,7 @@
 package br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing;
 
 public enum EnumRegexList {
-	SELECTRULEID("(transformation_rule|condition_block)\\[\\d+"),
+	SELECTRULEID("(matrix_rule|condition_block|rule_config|simple_rule)\\[\\d+"),
 	SELECTSUBJECTCLASSNAME("(\".*\")\\s?="), //old: \\[\\d+.*\"\\s?
 	SELECTSUBJECTLINE(":(\\s*?)\"(\\w|\\d)"),
 	SELECTPREDICATESDIVISIONS("(:|,)\\s*?\"[^:,]*?\"\\s*="),

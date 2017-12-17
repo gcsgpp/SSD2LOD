@@ -35,6 +35,7 @@ import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagFixedC
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagNotMetadata;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ObjectAsRule;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Rule;
+import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.RuleConfig;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagSeparator;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TSVColumn;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TripleObject;
@@ -61,6 +62,8 @@ public class TripleProcessingTest
 
 	private Rule createRuleOne() {
 		String id = "1";
+		RuleConfig ruleConfig = new RuleConfig("default");
+		ruleConfig.setMatrix(true);
 		OWLClass subjectClass = ontologyHelper.getClass("Term");
 		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
 		TSVColumn subject = new TSVColumn();
@@ -113,11 +116,13 @@ public class TripleProcessingTest
 
 		predicateObjects.put(ontologyHelper.getProperty("has participant"), new TripleObjectAsRule(new ObjectAsRule(3, participantFlags)));
 
-		return new Rule(id, subjectClass, subjectTSVColumns, predicateObjects);
+		return new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects);
 	}
 
 	private Rule createRuleTwo() {
 		String id = "2";
+		RuleConfig ruleConfig = new RuleConfig("default");
+		ruleConfig.setMatrix(true);
 		OWLClass subjectClass = ontologyHelper.getClass("Term");
 		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
 		TSVColumn subject = new TSVColumn();
@@ -170,11 +175,13 @@ public class TripleProcessingTest
 
 		predicateObjects.put(ontologyHelper.getProperty("has participant"), new TripleObjectAsRule(new ObjectAsRule(3, participantFlags)));
 
-		return new Rule(id, subjectClass, subjectTSVColumns, predicateObjects);
+		return new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects);
 	}
 
 	private Rule createRuleThree() {
 		String id = "3";
+		RuleConfig ruleConfig = new RuleConfig("default");
+		ruleConfig.setMatrix(true);
 		OWLClass subjectClass = ontologyHelper.getClass("Gene");
 		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
 		TSVColumn subject = new TSVColumn();
@@ -192,7 +199,7 @@ public class TripleProcessingTest
 
 		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<OWLProperty, TripleObject>();
 
-		return new Rule(id, subjectClass, subjectTSVColumns, predicateObjects);
+		return new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects);
 	}
 
 	private void createConditionBlocks() {		
@@ -296,6 +303,8 @@ public class TripleProcessingTest
 
 	private Rule createRuleWithNotMetadataFlag() {
 		String id = "1";
+		RuleConfig ruleConfig = new RuleConfig("default");
+		ruleConfig.setMatrix(true);
 		OWLClass subjectClass = ontologyHelper.getClass("geo sample");
 		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
 		TSVColumn subject = new TSVColumn();
@@ -310,7 +319,7 @@ public class TripleProcessingTest
 
 		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<OWLProperty, TripleObject>();
 
-		return new Rule(id, subjectClass, subjectTSVColumns, predicateObjects);
+		return new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects);
 	}
 
 	@Test
@@ -376,6 +385,8 @@ public class TripleProcessingTest
 
 	private Rule createRuleWithFixedContentFlagOnSubjectLine() {
 		String id = "1";
+		RuleConfig ruleConfig = new RuleConfig("default");
+		ruleConfig.setMatrix(true);
 		OWLClass subjectClass = ontologyHelper.getClass("geo sample");
 		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
 		TSVColumn subject = new TSVColumn();
@@ -390,7 +401,7 @@ public class TripleProcessingTest
 
 		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<OWLProperty, TripleObject>();
 
-		return new Rule(id, subjectClass, subjectTSVColumns, predicateObjects);
+		return new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects);
 	}
 
 	@Test
@@ -421,6 +432,8 @@ public class TripleProcessingTest
 
 	private Rule createRuleWithFixedContentFlagOnObjectLine() {
 		String id = "1";
+		RuleConfig ruleConfig = new RuleConfig("default");
+		ruleConfig.setMatrix(true);
 		OWLClass subjectClass = ontologyHelper.getClass("geo sample");
 		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
 		TSVColumn subject = new TSVColumn();
@@ -442,7 +455,7 @@ public class TripleProcessingTest
 		
 		predicateObjects.put(enrichmentProperty, object);
 
-		return new Rule(id, subjectClass, subjectTSVColumns, predicateObjects);
+		return new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects);
 	}
 
 	@Test
@@ -479,6 +492,8 @@ public class TripleProcessingTest
 	
 	private Rule createRuleWithCustomIDFlag() {
 		String id = "1";
+		RuleConfig ruleConfig = new RuleConfig("default");
+		ruleConfig.setMatrix(true);
 		OWLClass subjectClass = ontologyHelper.getClass("geo sample");
 		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
 		
@@ -491,7 +506,7 @@ public class TripleProcessingTest
 		subjectTSVColumns.add(subject);
 
 		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<OWLProperty, TripleObject>();
-		return new Rule(id, subjectClass, subjectTSVColumns, predicateObjects);
+		return new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects);
 	}
 
 	@Test
@@ -552,6 +567,8 @@ public class TripleProcessingTest
 
 	private Rule createRuleSeparatorElementInSeparatorFlagDoesNotExist() {
 		String id = "1";
+		RuleConfig ruleConfig = new RuleConfig("default");
+		ruleConfig.setMatrix(true);
 		OWLClass subjectClass = ontologyHelper.getClass("Gene");
 		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
 		
@@ -565,7 +582,7 @@ public class TripleProcessingTest
 		subjectTSVColumns.add(subject);
 
 		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<OWLProperty, TripleObject>();
-		return new Rule(id, subjectClass, subjectTSVColumns, predicateObjects);
+		return new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects);
 	}
 	
 	@Test

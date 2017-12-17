@@ -60,9 +60,17 @@ public class SemistructuredFileReader {
 		}
 	}
 	
-	public List<String[]> getAllDataRows(){
-		return this.allRows;
+	public Integer getLinesCount(){
+		return this.allRows.size();
 	}
+	
+	public Integer getColumnsCount(Integer lineNumber){
+		return this.allRows.get(lineNumber).length;
+	}
+	
+	/*public List<String[]> getAllDataRows(){
+		return this.allRows;
+	}*/
 
 	private Reader getReader(String relativePath) {
 		try{

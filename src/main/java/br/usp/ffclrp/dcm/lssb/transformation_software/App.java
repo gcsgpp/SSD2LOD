@@ -32,6 +32,7 @@ import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagCondit
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagNotMetadata;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ObjectAsRule;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Rule;
+import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.RuleConfig;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagSeparator;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TSVColumn;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TripleObject;
@@ -46,7 +47,8 @@ public class App
 {
 	public OntologyHelper ontologyHelper;
 	public List<Rule> rulesList;
-	public Map<Integer, ConditionBlock> conditionsBlocks = new HashMap<Integer, ConditionBlock>();
+	public Map<Integer, ConditionBlock> conditionsBlocks 	= new HashMap<Integer, ConditionBlock>();
+	public Map<Integer, RuleConfig> ruleConfigs 			= new HashMap<Integer, RuleConfig>();
 
 	public static void main( String[] args )
 	{
@@ -75,12 +77,18 @@ public class App
 		String fileContent = readFile(rulesRelativePath);
 
 		fileContent = fileContent.replaceAll("\n", "").replaceAll("\t", "");
-		rulesList = extractRulesFromString(fileContent);
+		
+		List<RuleConfig> listRuleConfig = RuleConfig.extractRuleConfigFromString(fileContent);
+		for(RuleConfig rc : listRuleConfig){
+			ruleConfigs.put(Integer.parseInt(rc.getId()), rc);
+		}
+		
 		List<ConditionBlock> listConditionBlock = ConditionBlock.extractConditionsBlocksFromString(fileContent);
-
 		for(ConditionBlock conditionBlock : listConditionBlock){
 			conditionsBlocks.put(conditionBlock.getId(), conditionBlock);
 		}
+		
+		rulesList = extractRulesFromString(fileContent);
 	}
 
 	public List<Rule> extractRulesFromString(String fileContent) throws Exception {
@@ -105,6 +113,13 @@ public class App
 		String predicatesLinesOneBlock 	= 	Utils.splitByIndex(blockRulesAsText, matcher.start())[1];
 
 		String ruleId 						= extractRuleIDFromSentence(subjectLine);
+		RuleConfig ruleConfig				= new RuleConfig("default");
+		Boolean isMatrix = false;
+		if(subjectLine.contains("matrix_rule[")) {
+			isMatrix = true;
+			ruleConfig.setMatrix(true);
+		}
+			
 		OWLClass ruleSubject 				= extractSubjectFromSentence(subjectLine);
 		subjectLine = Utils.removeRegexFromContent(EnumRegexList.SELECTSUBJECTCLASSNAME.get(), subjectLine);
 		List<TSVColumn> subjectTsvcolumns 	= extractTSVColumnsFromSentence(subjectLine);
@@ -158,17 +173,24 @@ public class App
 
 			}
 		}
-
-		return new Rule(ruleId, ruleSubject, subjectTsvcolumns, predicateObjects);
+		
+		Rule rule = new Rule(ruleId, ruleConfig, ruleSubject, subjectTsvcolumns, predicateObjects);
+		
+		if(isMatrix)
+			rule.setEnable(false);
+		
+		return rule;
 	}
 
 	public Rule exctactRuleFromOneLineRuleBlock(String subjectLine) throws Exception {
 		String ruleId 						= extractRuleIDFromSentence(subjectLine);
+		RuleConfig ruleConfig				= new RuleConfig("default");
+		ruleConfig.setMatrix(true);
 		OWLClass ruleSubject 				= extractSubjectFromSentence(subjectLine);
 		subjectLine = Utils.removeRegexFromContent(EnumRegexList.SELECTSUBJECTCLASSNAME.get(), subjectLine);
 		List<TSVColumn> subjectTsvcolumns 	= extractTSVColumnsFromSentence(subjectLine);
 
-		return new Rule(ruleId, ruleSubject, subjectTsvcolumns, new HashMap<OWLProperty, TripleObject>());
+		return new Rule(ruleId, ruleConfig, ruleSubject, subjectTsvcolumns, new HashMap<OWLProperty, TripleObject>());
 	}
 
 	public Integer extractRuleNumberAsTripleObject(String lineFromBlock) {
@@ -375,7 +397,7 @@ public class App
 		String data = "";
 
 		Matcher matcher = Utils.matchRegexOnString(EnumRegexList.SELECTRULEID.get(), blockRulesAsText);
-		data = matcher.group().replace("transformation_rule[", "").replace("condition_block[", "");
+		data = matcher.group().replace("matrix_rule[", "").replace("simple_rule[", "");
 		return data;
 	}
 
@@ -399,7 +421,7 @@ public class App
 		try{
 			data = matcher.group(); 
 			int firstQuotationMark = data.indexOf("\"");
-			String quotationBlock = data.substring(firstQuotationMark + 1, data.indexOf("\"", firstQuotationMark +1));
+			String quotationBlock = data.substring(firstQuotationMark, data.indexOf("\"", firstQuotationMark +1) + 1);
 			content = content.replace(quotationBlock, "");
 		}catch(IllegalStateException e){
 			//used just to identify when the matcher did not find anything.
@@ -409,7 +431,7 @@ public class App
 	}
 
 	private List<String> identifyRulesBlocksFromString(String fileContent) {
-		Pattern patternToFind = Pattern.compile("transformation_rule\\[(.*?)\\]");
+		Pattern patternToFind = Pattern.compile("(matrix_rule|simple_rule)\\[(.*?)\\]");
 		Matcher match = patternToFind.matcher(fileContent);
 
 		List<String> identifiedRules = new ArrayList<String>();

@@ -8,12 +8,23 @@ import org.semanticweb.owlapi.model.OWLProperty;
 
 public class Rule {
 	private String id;
+	private RuleConfig config;
 	private OWLClass subject;
 	private List<TSVColumn> subjectTSVColumns = null;
 	private Map<OWLProperty, TripleObject> predicateObjects;
+	private Boolean enabled = null;
 
 	public Rule(String id, OWLClass subject, List<TSVColumn> subjectTSVColumns, Map<OWLProperty, TripleObject> predicateObjects){
 		this.id = id;
+		this.config = new RuleConfig("default");
+		this.subject = subject;
+		this.subjectTSVColumns = subjectTSVColumns;
+		this.predicateObjects = predicateObjects;
+	}
+	
+	public Rule(String id, RuleConfig ruleConfig, OWLClass subject, List<TSVColumn> subjectTSVColumns, Map<OWLProperty, TripleObject> predicateObjects){
+		this.id = id;
+		this.config = ruleConfig;
 		this.subject = subject;
 		this.subjectTSVColumns = subjectTSVColumns;
 		this.predicateObjects = predicateObjects;
@@ -34,4 +45,17 @@ public class Rule {
 	public Map<OWLProperty, TripleObject> getPredicateObjects() {
 		return this.predicateObjects;
 	}
+	
+	public Boolean isMatrix() {
+		return config.getMatrix();
+	}
+	
+	public Boolean isEnabled() {
+		return this.enabled;
+	}
+
+	public void setEnable(boolean status) {
+		this.enabled = status;
+	}
+
 }

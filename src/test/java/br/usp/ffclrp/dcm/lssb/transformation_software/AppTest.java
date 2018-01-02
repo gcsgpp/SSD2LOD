@@ -1,40 +1,19 @@
 package br.usp.ffclrp.dcm.lssb.transformation_software;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map.Entry;
-
+import br.usp.ffclrp.dcm.lssb.custom_exceptions.ConditionBlockException;
+import br.usp.ffclrp.dcm.lssb.custom_exceptions.PropertyNotExistException;
+import br.usp.ffclrp.dcm.lssb.custom_exceptions.SeparatorFlagException;
+import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.*;
 import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.semanticweb.owlapi.model.OWLProperty;
 
-import br.usp.ffclrp.dcm.lssb.custom_exceptions.PropertyNotExistException;
-import br.usp.ffclrp.dcm.lssb.custom_exceptions.SeparatorFlagException;
-import br.usp.ffclrp.dcm.lssb.transformation_software.App;
-import br.usp.ffclrp.dcm.lssb.transformation_software.OntologyHelper;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Condition;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ConditionBlock;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.EnumContentDirectionTSVColumn;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.EnumOperationsConditionBlock;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Flag;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagBaseIRI;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagConditionBlock;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagContentDirectionTSVColumn;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagDataType;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagFixedContent;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagNotMetadata;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ObjectAsRule;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Rule;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagSeparator;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TSVColumn;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TripleObject;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TripleObjectAsColumns;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TripleObjectAsRule;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map.Entry;
+
+import static org.junit.Assert.*;
 
 public class AppTest
 {
@@ -42,12 +21,17 @@ public class AppTest
 	public ExpectedException thrown = ExpectedException.none();
 
 	@Test
-	public void exctractConditionsFromString()
-	{
+	public void exctractConditionsFromString(){
 		String content = "condition_block[1: \"Category\" != \"KEGG_PATHWAY\", \"PValue\" < \"0.01\" ]";
 		content += "condition_block[2: \"Category\" == \"KEGG_PATHWAY\",	\"PValue\" < \"0.03\" ]";
 
-		List<ConditionBlock> conditionsExtracted = ConditionBlock.extractConditionsBlocksFromString(content);
+		List<ConditionBlock> conditionsExtracted = null;
+		try {
+			conditionsExtracted = ConditionBlock.extractConditionsBlocksFromString(content);
+		} catch (ConditionBlockException e) {
+			e.printStackTrace();
+			fail();
+		}
 
 		assertEquals(2, conditionsExtracted.size());
 
@@ -726,10 +710,10 @@ public class AppTest
 	}
 
 	@Test
-	public void operationNotIdentifiedAtConditionBlock() throws IllegalStateException {
+	public void operationNotIdentifiedAtConditionBlock() throws ConditionBlockException {
 		String content = "condition_block[1: \"Category\" = \"KEGG_PATHWAY\", \"PValue\" < \"0.01\" ]";
-		thrown.expect(IllegalStateException.class);
-		thrown.expectMessage("Condition operation not identified at condition block");
+		thrown.expect(ConditionBlockException.class);
+		thrown.expectMessage("No valid condition operator identified in a condition block.");
 		@SuppressWarnings("unused")
 		List<ConditionBlock> conditionsExtracted = ConditionBlock.extractConditionsBlocksFromString(content);
 	}

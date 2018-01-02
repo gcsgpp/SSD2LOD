@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import br.usp.ffclrp.dcm.lssb.custom_exceptions.ConditionBlockException;
 import br.usp.ffclrp.dcm.lssb.transformation_software.Utils;
 
 public class ConditionBlock extends Flag {
@@ -44,7 +45,7 @@ public class ConditionBlock extends Flag {
 		return identifiedCB;
 	}
 
-	static private ConditionBlock createConditionBlockFromString(String cbAsText) {
+	static private ConditionBlock createConditionBlockFromString(String cbAsText) throws ConditionBlockException {
 		Matcher matcher 				=	Utils.matchRegexOnString(EnumRegexList.SELECTSUBJECTLINE.get(), cbAsText);
 		String subjectLine 				=	Utils.splitByIndex(cbAsText, matcher.start())[0];
 		String predicatesLinesOneBlock 	= 	Utils.splitByIndex(cbAsText, matcher.start())[1];
@@ -75,7 +76,7 @@ public class ConditionBlock extends Flag {
 			try{
 				operation = retrieveOperation(lineFromBlock);
 			}catch(IllegalStateException e) {
-				throw new IllegalStateException("Condition operation not identified at condition block");
+				throw new ConditionBlockException("No valid condition operator identified in a condition block.");
 			}
 
 			String column 	= Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(lineFromBlock, EnumRegexList.SELECTCOLUMNCONDITIONBLOCK.get());
@@ -92,14 +93,14 @@ public class ConditionBlock extends Flag {
 		operation = Utils.matchRegexOnString(EnumRegexList.SELECTOPERATIONCONDITIONBLOCK.get(), lineFromBlock).group();
 
 
-		if(operation.equals(EnumOperationsConditionBlock.DIFFERENT.getOperation())) 		return EnumOperationsConditionBlock.DIFFERENT;
+		if(operation.equals(EnumOperationsConditionBlock.DIFFERENT.getOperation())) 	return EnumOperationsConditionBlock.DIFFERENT;
 		if(operation.equals(EnumOperationsConditionBlock.EQUAL.getOperation()))			return EnumOperationsConditionBlock.EQUAL;
 		if(operation.equals(EnumOperationsConditionBlock.GREATERTHAN.getOperation())) 	return EnumOperationsConditionBlock.GREATERTHAN;
 		if(operation.equals(EnumOperationsConditionBlock.LESSTHAN.getOperation()))		return EnumOperationsConditionBlock.LESSTHAN;
 		return null;
 	}
 	
-	static public List<ConditionBlock> extractConditionsBlocksFromString(String fileContent) {
+	static public List<ConditionBlock> extractConditionsBlocksFromString(String fileContent) throws ConditionBlockException {
 		List<String> conditionsBlocksListAsText = identifyConditionBlocksFromString(fileContent);
 		List<ConditionBlock> cbList = new ArrayList<ConditionBlock>();
 

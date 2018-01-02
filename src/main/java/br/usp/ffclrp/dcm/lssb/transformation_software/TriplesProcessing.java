@@ -320,16 +320,18 @@ public class TriplesProcessing {
 				biggerColumn = array.length;
 		}
 
-		//MAKES ALL ARRAYS TO BE THE SAME SIZE. 
+		//MAKES ALL ARRAYS BE THE SAME SIZE.
 		//THE ARRAYS THAT IS SMALLER THAN THE BIGGEST IS COMPLETED WITH 
 		//THE DATA AT THE BEGGINING OF THE ARRAY ITSELF.
 		List<List<String>> dataColumns = new ArrayList<List<String>>();
 		for(String[] array : dataColumnsSeparated){
 			List<String> list = new ArrayList<String>();
-			int oldPosition = 0;
+			int oldPosition = -1;
 			while(list.size() != biggerColumn.intValue()) {
 				try {
-					list.add(array[oldPosition]);
+					list.add(array[oldPosition + 1]);
+					oldPosition++;
+
 				}catch(ArrayIndexOutOfBoundsException e){
 					oldPosition = 0;
 				}

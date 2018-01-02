@@ -55,20 +55,20 @@ public class TriplesProcessing {
 	private List<Rule> dependencyList = new ArrayList<Rule>();
 	private Map<Integer, ConditionBlock> conditionBlocks;
 	private Model ontology = null;
-	String relativePathOntologyFile = null;
+	private String relativePathOntologyFile = null;
 
-	public TriplesProcessing(String relativePathDataFile, String relativePathOntologyFile) {
-		this.relativePathOntologyFile = relativePathOntologyFile;
+	public TriplesProcessing(String relativePathOntologyFile) {
 
 		this.model = ModelFactory.createDefaultModel();
 		//model.read(relativePathOntologyFile); //load ontology and add its axioms to the linked graph
-		fileReader = new SemistructuredFileReader(relativePathDataFile);
-
+        this.relativePathOntologyFile = relativePathOntologyFile;
 		this.ontology = ModelFactory.createDefaultModel().read(relativePathOntologyFile);
 	}
 
 	@SuppressWarnings("unchecked")
-	public void createTriplesFromRules(List<Rule> listRules, Map<Integer, ConditionBlock> conditionBlocks,  String defaultNs) throws Exception{	
+	public void createTriplesFromRules(List<Rule> listRules, Map<Integer, ConditionBlock> conditionBlocks, String relativePathDataFile,  String defaultNs) throws Exception{
+
+		fileReader = new SemistructuredFileReader(relativePathDataFile);
 
 		this.regularRuleList = listRules;
 		this.conditionBlocks = conditionBlocks;

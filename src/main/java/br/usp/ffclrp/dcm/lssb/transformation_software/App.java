@@ -54,11 +54,11 @@ public class App
 	{
 		App app = new App();
 		List<String> listOfOntologies = new ArrayList<String>();
-		listOfOntologies.add("testFiles/normalizedFile/fourth_attempt/ontology-imported.owl");
+		listOfOntologies.add("testFiles/normalizedFile/fifth_attempt/ontology.owl");
 		try {
-			app.extractRulesFromFile("testFiles/normalizedFile/fourth_attempt/rules.txt", listOfOntologies);
-			TriplesProcessing triplesProcessing = new TriplesProcessing("testFiles/normalizedFile/fourth_attempt/NormalizedData.txt", "testFiles/normalizedFile/fourth_attempt/ontology-imported.owl");
-			triplesProcessing.createTriplesFromRules(app.rulesList, app.conditionsBlocks, "http://www.example.org/onto/individual/");
+			app.extractRulesFromFile("testFiles/normalizedFile/fifth_attempt/rules.txt", listOfOntologies);
+			TriplesProcessing triplesProcessing = new TriplesProcessing("testFiles/normalizedFile/fifth_attempt/ontology.owl");
+			triplesProcessing.createTriplesFromRules(app.rulesList, app.conditionsBlocks, "testFiles/normalizedFile/fifth_attempt/NormalizedData.txt", "http://www.example.org/onto/individual/");
 		} catch (CustomExceptions e) { 
 			e.getMessage();
 			System.out.println(e);
@@ -67,8 +67,6 @@ public class App
 		} finally {
 			System.out.println("Finished!");
 		}
-
-
 	}
 
 	public void extractRulesFromFile(String rulesRelativePath, List<String> listOfOntologies) throws Exception{

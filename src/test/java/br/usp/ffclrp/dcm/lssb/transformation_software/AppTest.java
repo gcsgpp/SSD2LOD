@@ -300,6 +300,124 @@ public class AppTest
 	}
 
 	@Test
+	public void creatingRuleFromStringUsingCommaAsSeparator(){
+
+		String 	ruleString = " matrix_rule[2, \"Term\" = \"Term\" /SP(\",\", 1) /BASEIRI(\"http://www.kegg.jp/entry/\", \"kegg\") /CB(2) : " +
+				" \"has_pvalue\" = \"PValue\", " +
+				" \"name\" = \"Term\" /SP(\",\", 2), " +
+				" \"has participant\" = 3 " +
+				"] ";
+
+
+		ruleString = ruleString.replace("\t", "").replaceAll("\n", "");
+
+		App app = new App();
+		app.ontologyHelper = new OntologyHelper();
+		app.ontologyHelper.loadingOntologyFromFile("testFiles/unitTestsFiles/ontology.owl");
+
+		Rule rule2Extracted = null;
+		try {
+			rule2Extracted = app.createRulesFromBlock(ruleString);
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail();
+		}
+
+		assertEquals("2", rule2Extracted.getId());
+		assertEquals("http://purl.obolibrary.org/obo/NCIT_P382", rule2Extracted.getSubject().getIRI().toString());
+		for(TSVColumn column : rule2Extracted.getSubjectTSVColumns()){
+			if(column.getTitle().equals("Term")){
+
+				assertEquals(4, column.getFlags().size()); //all from the rule line plus the ContentDirection
+
+				for(Flag flag : column.getFlags()){
+					if(flag instanceof FlagSeparator){
+						FlagSeparator separator = (FlagSeparator) flag;
+						assertEquals(",", separator.getTerm());
+						assertEquals(1, separator.getColumns().size());
+						assertEquals(0, separator.getColumns().get(0).intValue());
+					}else if(flag instanceof FlagBaseIRI){
+						FlagBaseIRI baseiri = (FlagBaseIRI) flag;
+						assertEquals("http://www.kegg.jp/entry/", baseiri.getIRI());
+						assertEquals("kegg", baseiri.getNamespace());
+					}else if(flag instanceof FlagConditionBlock){
+						assertEquals(2, ((FlagConditionBlock) flag).getId().intValue());
+
+					}else if(flag instanceof FlagContentDirectionTSVColumn){
+						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
+					}else{
+						fail();
+					}
+				}
+			}else{
+				fail();
+			}
+		}
+
+		assertEquals(3, rule2Extracted.getPredicateObjects().size());
+
+		for(Entry<OWLProperty, TripleObject> entry : rule2Extracted.getPredicateObjects().entrySet()){
+
+			if(entry.getKey().getIRI().toString().equals("http://purl.org/g/onto/has_pvalue")){
+				TripleObjectAsColumns object = (TripleObjectAsColumns) entry.getValue();
+
+				assertEquals(1, object.getObject().size());
+				assertEquals("PValue", object.getObject().get(0).getTitle());
+				assertEquals(1, object.getObject().get(0).getFlags().size());
+				Flag flag = object.getObject().get(0).getFlags().get(0);
+				assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
+
+
+
+
+			}else if(entry.getKey().getIRI().toString().equals("http://schema.org/name")){
+				TripleObjectAsColumns object = (TripleObjectAsColumns) entry.getValue();
+
+				assertEquals("Term", object.getObject().get(0).getTitle());
+
+				List<Flag> flagsList = object.getObject().get(0).getFlags();
+				assertEquals(2, flagsList.size());
+				for(Flag flag : flagsList){
+					if(flag instanceof FlagSeparator){
+						FlagSeparator separator = (FlagSeparator) flag;
+						assertEquals(",", separator.getTerm());
+						assertEquals(1, separator.getColumns().size());
+						assertEquals(1, separator.getColumns().get(0).intValue());
+					}else if(flag instanceof FlagContentDirectionTSVColumn){
+						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
+					}else{
+						fail();
+					}
+				}
+
+
+
+
+			}else if(entry.getKey().getIRI().toString().equals("http://purl.org/g/onto/has_participant")){
+				TripleObjectAsRule object = (TripleObjectAsRule) entry.getValue();
+
+				assertEquals(1, object.getObject().size());
+
+				for(ObjectAsRule objectAsRule : object.getObject()){
+					assertEquals(3, objectAsRule.getRuleNumber().intValue());
+					assertEquals(1, objectAsRule.getFlags().size());
+					for(Flag flag : objectAsRule.getFlags()){
+						if(flag instanceof FlagContentDirectionTSVColumn){
+							assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
+						}else{
+							fail();
+						}
+					}
+				}
+
+
+			}else
+				fail();
+		}
+
+	}
+
+	@Test
 	public void creatingRuleFromStringWithNoPredicatesAndObjects(){
 
 		String 	ruleString = " matrix_rule[3, \"Gene\" = \"Genes\" /SP(\", \") /BASEIRI(\"http://www.genecards.org/cgi-bin/carddisp.pl?gene=\", \"genecard\") ] ";

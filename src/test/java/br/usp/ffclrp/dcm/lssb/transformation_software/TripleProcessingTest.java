@@ -664,5 +664,63 @@ public class TripleProcessingTest
 
 		processingClass.createTriplesFromRules(listRules, conditionsBlocks, testFolderPath + "enrichedDataGOTerm2.tsv", "http://example.org/onto/individual#");
 	}
-	
+
+
+	private void createConditionBlockWithGreaterThanCondition() {
+		List<Condition> conditions = new ArrayList<Condition>();
+		conditions.add(new Condition("Pop Hits", EnumOperationsConditionBlock.GREATERTHAN, "800"));
+
+		conditionsBlocks.put(1, new ConditionBlock("1", conditions));
+	}
+
+	@Test
+	public void processRuleWithConditionblockWithGreaterThanCondition()
+	{
+		ontologyHelper = new OntologyHelper();
+		String testFolderPath = "testFiles/unitTestsFiles/";
+		String ontologyPath = testFolderPath + "ontology.owl";
+
+		ontologyHelper.loadingOntologyFromFile(ontologyPath);
+		listRules.add(createRuleOne());
+		listRules.add(createRuleThree());
+		createConditionBlockWithGreaterThanCondition();
+
+		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "ontology.owl");
+		try{
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, testFolderPath + "enrichedDataGOTerm3.tsv", "http://example.org/onto/individual#");
+		}catch(Exception e) {
+			e.printStackTrace();
+		    fail();
+		}
+
+		Model model = processingClass.getModel();
+		List<Statement> statements = model.listStatements().toList();
+
+		int numberOfStatementsPassed = 0;
+		for(Statement statement : statements) {
+			Triple triple = statement.asTriple();
+
+			if( 	triple.getPredicate().getURI().equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#type") 	||
+					triple.getPredicate().getURI().equals("http://www.w3.org/2000/01/rdf-schema#label")			||
+					triple.getPredicate().getURI().equals("http://www.w3.org/2000/01/rdf-schema#range")				) //is not interesting to check these predicates because there are other classes in the ontology if tested will get away from the objective of this method
+				continue;
+
+			if(triple.getSubject().getURI().equals("http://amigo1.geneontology.org/cgi-bin/amigo/term_details?term=GO:0030001")){
+				if(	triple.getPredicate().getURI().equals("http://purl.org/g/onto/has_pvalue") 		&& triple.getObject().getLiteralValue().equals("0.000397262") ||
+					triple.getPredicate().getURI().equals("http://schema.org/name") 				&& triple.getObject().getLiteralValue().equals("metal ion transport") ||
+					triple.getPredicate().getURI().equals("http://purl.org/g/onto/has_participant")	&& triple.getObject().getURI().equals("http://www.genecards.org/cgi-bin/carddisp.pl?gene=SLC5A5") ||
+					triple.getPredicate().getURI().equals("http://purl.org/g/onto/has_participant")	&& triple.getObject().getURI().equals("http://www.genecards.org/cgi-bin/carddisp.pl?gene=JPH3") ||
+					triple.getPredicate().getURI().equals("http://purl.org/g/onto/has_participant")	&& triple.getObject().getURI().equals("http://www.genecards.org/cgi-bin/carddisp.pl?gene=SLC5A4") ||
+					triple.getPredicate().getURI().equals("http://purl.org/g/onto/has_participant")	&& triple.getObject().getURI().equals("http://www.genecards.org/cgi-bin/carddisp.pl?gene=SLC5A12"))
+                    {
+                     numberOfStatementsPassed++;
+                    }
+			}else {
+				assert(false);
+			}
+		}
+
+		assertEquals(6, numberOfStatementsPassed);
+	}
+
 }

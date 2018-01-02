@@ -1,14 +1,10 @@
 package br.usp.ffclrp.dcm.lssb.transformation_software;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
+import br.usp.ffclrp.dcm.lssb.custom_exceptions.BaseIRIException;
+import br.usp.ffclrp.dcm.lssb.custom_exceptions.ConditionBlockException;
+import br.usp.ffclrp.dcm.lssb.custom_exceptions.FileAccessException;
+import br.usp.ffclrp.dcm.lssb.custom_exceptions.SeparatorFlagException;
+import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.*;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Statement;
@@ -18,30 +14,10 @@ import org.junit.rules.ExpectedException;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLProperty;
 
-import br.usp.ffclrp.dcm.lssb.custom_exceptions.ConditionBlockException;
-import br.usp.ffclrp.dcm.lssb.custom_exceptions.FileAccessException;
-import br.usp.ffclrp.dcm.lssb.custom_exceptions.SeparatorFlagException;
-import br.usp.ffclrp.dcm.lssb.transformation_software.OntologyHelper;
-import br.usp.ffclrp.dcm.lssb.transformation_software.TriplesProcessing;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ConditionBlock;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.EnumContentDirectionTSVColumn;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.EnumOperationsConditionBlock;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Flag;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagBaseIRI;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagConditionBlock;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagContentDirectionTSVColumn;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagCustomID;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagFixedContent;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagNotMetadata;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ObjectAsRule;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Rule;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.RuleConfig;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagSeparator;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TSVColumn;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TripleObject;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TripleObjectAsColumns;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TripleObjectAsRule;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Condition;
+import java.util.*;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class TripleProcessingTest 
 {
@@ -108,7 +84,7 @@ public class TripleProcessingTest
 
 		/* 'has participant' predicate */
 		TSVColumn participantColumn = new TSVColumn();
-		participantColumn.setTitle("Term");
+		participantColumn.setTitle("Genes");
 
 		List<Flag> participantFlags = new ArrayList<Flag>();
 		participantFlags.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
@@ -217,8 +193,7 @@ public class TripleProcessingTest
 	}
 
 	@Test
-	public void processRuleWithConditionblockflagBaseiriflagSeparatorflag()
-	{
+	public void processRuleWithConditionblockflagBaseiriflagSeparatorflag()	{
 		ontologyHelper = new OntologyHelper();
 		String testFolderPath = "testFiles/unitTestsFiles/";
 		String ontologyPath = testFolderPath + "ontology.owl";
@@ -228,9 +203,9 @@ public class TripleProcessingTest
 		listRules.add(createRuleThree());
 		createConditionBlocks();
 
-		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "enrichedDataGOTerm.tsv", testFolderPath + "ontology.owl");
+		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "ontology.owl");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks, "http://example.org/onto/individual#");
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, testFolderPath + "enrichedDataGOTerm.tsv", "http://example.org/onto/individual#");
 		}catch(Exception e) {
 			fail();
 		}
@@ -260,8 +235,7 @@ public class TripleProcessingTest
 	}
 
 	@Test
-	public void processRuleWithColonAsSeparator()
-	{
+	public void processRuleWithColonAsSeparator()	{
 		ontologyHelper = new OntologyHelper();
 		String testFolderPath = "testFiles/unitTestsFiles/";
 		String ontologyPath = testFolderPath + "ontology.owl";
@@ -271,9 +245,9 @@ public class TripleProcessingTest
 		listRules.add(createRuleThree());
 		createConditionBlocks();
 
-		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "enrichedDataKeggTerm.tsv", testFolderPath + "ontology.owl");
+		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "ontology.owl");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks, "http://example.org/onto/individual#");
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, testFolderPath + "enrichedDataKeggTerm.tsv", "http://example.org/onto/individual#");
 		}catch(Exception e) {
 			fail();
 		}
@@ -331,9 +305,9 @@ public class TripleProcessingTest
 		ontologyHelper.loadingOntologyFromFile(ontologyPath);
 		listRules.add(createRuleWithNotMetadataFlag());
 
-		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "NormalizedData.txt", testFolderPath + "ontology.owl");
+		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "ontology.owl");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks, "http://example.org/onto/individual#");
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, testFolderPath + "NormalizedData.txt", "http://example.org/onto/individual#");
 		}catch(Exception e) {
 			fail();
 		}
@@ -360,9 +334,9 @@ public class TripleProcessingTest
 		thrown.expect(FileAccessException.class);
 		thrown.expectMessage("Not possible to access the file or the content in the file. Column tried to access: Term. This column may not exist or the file is not accessible.");
 
-		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "enrichedDataGOTerm2.tsv", testFolderPath + "ontology.owl");
+		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "ontology.owl");
 
-		processingClass.createTriplesFromRules(listRules, conditionsBlocks, "http://example.org/onto/individual#");
+		processingClass.createTriplesFromRules(listRules, conditionsBlocks, testFolderPath + "enrichedDataGOTerm2.tsv", "http://example.org/onto/individual#");
 
 	}
 
@@ -378,9 +352,9 @@ public class TripleProcessingTest
 		thrown.expect(ConditionBlockException.class);
 		thrown.expectMessage("No condition block created");
 		
-		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "enrichedDataGOTerm2.tsv", testFolderPath + "ontology.owl");
+		TriplesProcessing processingClass = new TriplesProcessing( testFolderPath + "ontology.owl");
 
-		processingClass.createTriplesFromRules(listRules, conditionsBlocks, "http://example.org/onto/individual#");
+		processingClass.createTriplesFromRules(listRules, conditionsBlocks, testFolderPath + "enrichedDataGOTerm2.tsv", "http://example.org/onto/individual#");
 	}
 
 	private Rule createRuleWithFixedContentFlagOnSubjectLine() {
@@ -413,9 +387,9 @@ public class TripleProcessingTest
 		ontologyHelper.loadingOntologyFromFile(ontologyPath);
 		listRules.add(createRuleWithFixedContentFlagOnSubjectLine());
 
-		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "NormalizedData.txt", testFolderPath + "ontology.owl");
+		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "ontology.owl");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks, "http://example.org/onto/individual#");
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, testFolderPath + "NormalizedData.txt", "http://example.org/onto/individual#");
 		}catch(Exception e) {
 			fail();
 		}
@@ -467,9 +441,9 @@ public class TripleProcessingTest
 		ontologyHelper.loadingOntologyFromFile(ontologyPath);
 		listRules.add(createRuleWithFixedContentFlagOnObjectLine());
 
-		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "NormalizedData.txt", testFolderPath + "ontology.owl");
+		TriplesProcessing processingClass = new TriplesProcessing( testFolderPath + "ontology.owl");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks, "http://example.org/onto/individual#");
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, testFolderPath + "NormalizedData.txt", "http://example.org/onto/individual#");
 		}catch(Exception e) {
 			e.printStackTrace();
 			fail();
@@ -518,9 +492,9 @@ public class TripleProcessingTest
 		ontologyHelper.loadingOntologyFromFile(ontologyPath);
 		listRules.add(createRuleWithCustomIDFlag());
 
-		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "NormalizedData.txt", testFolderPath + "ontology.owl");
+		TriplesProcessing processingClass = new TriplesProcessing( testFolderPath + "ontology.owl");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks, "http://example.org/onto/individual#");
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, testFolderPath + "NormalizedData.txt", "http://example.org/onto/individual#");
 		}catch(Exception e) {
 			e.printStackTrace();
 			fail();
@@ -551,15 +525,15 @@ public class TripleProcessingTest
 		//Changing the type of operation to manage not met the data inside the dataset
 		ConditionBlock cb = conditionsBlocks.get(1);
 		for(Iterator<Condition> iteratorCB = cb.getConditions().iterator(); iteratorCB.hasNext(); ) {
-			Condition condition = (Condition) iteratorCB.next();
+			Condition condition = iteratorCB.next();
 			if(condition.getColumn().equals("Category")) {
 				condition.setOperation(EnumOperationsConditionBlock.EQUAL);
 			}
 		}
 
-		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "enrichedDataGOTerm.tsv", testFolderPath + "ontology.owl");
+		TriplesProcessing processingClass = new TriplesProcessing( testFolderPath + "ontology.owl");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks, "http://example.org/onto/individual#");
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, testFolderPath + "enrichedDataGOTerm.tsv", "http://example.org/onto/individual#");
 		}catch(Exception e) {
 			fail();
 		}
@@ -597,9 +571,9 @@ public class TripleProcessingTest
 		thrown.expect(SeparatorFlagException.class);
 		thrown.expectMessage("There is no caractere '-' in the field 'Genes' to be used as separator");
 		
-		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "enrichedDataGOTerm2.tsv", testFolderPath + "ontology.owl");
+		TriplesProcessing processingClass = new TriplesProcessing( testFolderPath + "ontology.owl");
 
-		processingClass.createTriplesFromRules(listRules, conditionsBlocks, "http://example.org/onto/individual#");
+		processingClass.createTriplesFromRules(listRules, conditionsBlocks, testFolderPath + "enrichedDataGOTerm2.tsv", "http://example.org/onto/individual#");
 	}
 	
 }

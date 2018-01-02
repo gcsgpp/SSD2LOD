@@ -522,9 +522,86 @@ public class TripleProcessingTest
 		}
 	}
 
+
+
+	private Rule createRuleWithBaseIRIWithNoNamespace() {
+		String id = "1";
+		RuleConfig ruleConfig = new RuleConfig("default");
+		ruleConfig.setMatrix(true);
+		OWLClass subjectClass = ontologyHelper.getClass("geo sample");
+		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
+
+		TSVColumn subject = new TSVColumn();
+		subject.setTitle("");
+		List<Flag> subjectFlags = new ArrayList<Flag>();
+		subjectFlags.add(new FlagBaseIRI("http://purl.org/g/", null));
+		subject.setFlags(subjectFlags);
+
+		subjectTSVColumns.add(subject);
+
+		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<OWLProperty, TripleObject>();
+		return new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects);
+	}
+
 	@Test
-	public void processRuleWithConditionBlockNotMet()
-	{
+	public void processRuleWithBaseIRIWithNoNamespace() throws Exception {
+		ontologyHelper = new OntologyHelper();
+		String testFolderPath = "testFiles/unitTestsFiles/normalizedFiles/";
+		String ontologyPath = testFolderPath + "ontology.owl";
+
+		ontologyHelper.loadingOntologyFromFile(ontologyPath);
+		listRules.add(createRuleWithBaseIRIWithNoNamespace());
+
+		TriplesProcessing processingClass = new TriplesProcessing( testFolderPath + "ontology.owl");
+
+        thrown.expect(BaseIRIException.class);
+        thrown.expectMessage("Some BaseIRI flag has an empty namespace field.");
+
+        processingClass.createTriplesFromRules(listRules, conditionsBlocks, testFolderPath + "NormalizedData.txt", "http://example.org/onto/individual#");
+	}
+
+
+
+	private Rule createRuleWithBaseIRIWithNoIRI() {
+		String id = "1";
+		RuleConfig ruleConfig = new RuleConfig("default");
+		ruleConfig.setMatrix(true);
+		OWLClass subjectClass = ontologyHelper.getClass("geo sample");
+		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
+
+		TSVColumn subject = new TSVColumn();
+		subject.setTitle("");
+		List<Flag> subjectFlags = new ArrayList<Flag>();
+		subjectFlags.add(new FlagBaseIRI(null, "purl"));
+		subject.setFlags(subjectFlags);
+
+		subjectTSVColumns.add(subject);
+
+		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<OWLProperty, TripleObject>();
+		return new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects);
+	}
+
+	@Test
+	public void processRuleWithBaseIRIWithNoIRI() throws Exception {
+		ontologyHelper = new OntologyHelper();
+		String testFolderPath = "testFiles/unitTestsFiles/normalizedFiles/";
+		String ontologyPath = testFolderPath + "ontology.owl";
+
+		ontologyHelper.loadingOntologyFromFile(ontologyPath);
+		listRules.add(createRuleWithBaseIRIWithNoIRI());
+
+		TriplesProcessing processingClass = new TriplesProcessing( testFolderPath + "ontology.owl");
+
+		thrown.expect(BaseIRIException.class);
+		thrown.expectMessage("Some BaseIRI flag has an empty IRI field.");
+
+		processingClass.createTriplesFromRules(listRules, conditionsBlocks, testFolderPath + "NormalizedData.txt", "http://example.org/onto/individual#");
+	}
+
+
+
+	@Test
+	public void processRuleWithConditionBlockNotMet()	{
 		ontologyHelper = new OntologyHelper();
 		String testFolderPath = "testFiles/unitTestsFiles/";
 		String ontologyPath = testFolderPath + "ontology.owl";

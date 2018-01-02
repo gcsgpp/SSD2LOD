@@ -1,5 +1,6 @@
 package br.usp.ffclrp.dcm.lssb.transformation_software;
 
+import br.usp.ffclrp.dcm.lssb.custom_exceptions.ClassNotFoundInOntologyException;
 import br.usp.ffclrp.dcm.lssb.custom_exceptions.ConditionBlockException;
 import br.usp.ffclrp.dcm.lssb.custom_exceptions.PropertyNotExistException;
 import br.usp.ffclrp.dcm.lssb.custom_exceptions.SeparatorFlagException;
@@ -1006,6 +1007,26 @@ public class AppTest
 			}else{
 				fail();
 			}
+		}
+	}
+
+	@Test
+	public void classNotExist() throws Exception {
+		String 	ruleString = "matrix_rule[1, \"Pudim\" = \"Term\" /SP(\"~\", 1) /BASEIRI(\"http://amigo1.geneontology.org/cgi-bin/amigo/term_details?term=\", \"go\") /CB(1) :" +
+				" \"has_pvalue\" = \"PValue\" ]";
+
+		ruleString = ruleString.replace("\t", "").replaceAll("\n", "");
+
+		App app = new App();
+		app.ontologyHelper = new OntologyHelper();
+		app.ontologyHelper.loadingOntologyFromFile("testFiles/unitTestsFiles/ontology.owl");
+
+		thrown.expect(ClassNotFoundInOntologyException.class);
+		thrown.expectMessage("Not found any ontology class with label 'Pudim'");
+		try {
+			app.createRulesFromBlock(ruleString);
+		} catch (Exception e) {
+			throw e;
 		}
 	}
 

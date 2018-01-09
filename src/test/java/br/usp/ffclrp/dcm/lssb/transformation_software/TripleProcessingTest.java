@@ -204,8 +204,9 @@ public class TripleProcessingTest
 		createConditionBlocks();
 
 		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "ontology.owl");
+		processingClass.addFilesToBeProcessed(testFolderPath + "enrichedDataGOTerm.tsv");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks, testFolderPath + "enrichedDataGOTerm.tsv", "http://example.org/onto/individual#");
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, "http://example.org/onto/individual#");
 		}catch(Exception e) {
 			fail();
 		}
@@ -256,8 +257,9 @@ public class TripleProcessingTest
 		createConditionBlocks();
 
 		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "ontology.owl");
+		processingClass.addFilesToBeProcessed(testFolderPath + "enrichedDataKeggTerm.tsv");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks, testFolderPath + "enrichedDataKeggTerm.tsv", "http://example.org/onto/individual#");
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, "http://example.org/onto/individual#");
 		}catch(Exception e) {
 			fail();
 		}
@@ -326,8 +328,9 @@ public class TripleProcessingTest
 		listRules.add(createRuleWithNotMetadataFlag());
 
 		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "ontology.owl");
+		processingClass.addFilesToBeProcessed(testFolderPath + "NormalizedData.txt");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks, testFolderPath + "NormalizedData.txt", "http://example.org/onto/individual#");
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, "http://example.org/onto/individual#");
 		}catch(Exception e) {
 			fail();
 		}
@@ -345,7 +348,7 @@ public class TripleProcessingTest
     // ##################
 
 
-	@Test
+/*	@Test
 	public void accessingColumnThatDontExist() throws Exception {
 		ontologyHelper = new OntologyHelper();
 		String testFolderPath = "testFiles/unitTestsFiles/";
@@ -359,11 +362,12 @@ public class TripleProcessingTest
 		thrown.expectMessage("Not possible to access the file or the content in the file. Column tried to access: Term. This column may not exist or the file is not accessible.");
 
 		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "ontology.owl");
+		processingClass.addFilesToBeProcessed(testFolderPath + "enrichedDataGOTerm2.tsv");
 
-		processingClass.createTriplesFromRules(listRules, conditionsBlocks, testFolderPath + "enrichedDataGOTerm2.tsv", "http://example.org/onto/individual#");
+		processingClass.createTriplesFromRules(listRules, conditionsBlocks, "http://example.org/onto/individual#");
 
 	}
-
+*/
 
     // ##################
 
@@ -381,8 +385,9 @@ public class TripleProcessingTest
 		thrown.expectMessage("No condition block created");
 		
 		TriplesProcessing processingClass = new TriplesProcessing( testFolderPath + "ontology.owl");
+		processingClass.addFilesToBeProcessed(testFolderPath + "enrichedDataGOTerm2.tsv");
 
-		processingClass.createTriplesFromRules(listRules, conditionsBlocks, testFolderPath + "enrichedDataGOTerm2.tsv", "http://example.org/onto/individual#");
+		processingClass.createTriplesFromRules(listRules, conditionsBlocks, "http://example.org/onto/individual#");
 	}
 
 
@@ -420,8 +425,9 @@ public class TripleProcessingTest
 		listRules.add(createRuleWithFixedContentFlagOnSubjectLine());
 
 		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "ontology.owl");
+		processingClass.addFilesToBeProcessed(testFolderPath + "NormalizedData.txt");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks, testFolderPath + "NormalizedData.txt", "http://example.org/onto/individual#");
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, "http://example.org/onto/individual#");
 		}catch(Exception e) {
 			fail();
 		}
@@ -478,8 +484,9 @@ public class TripleProcessingTest
 		listRules.add(createRuleWithFixedContentFlagOnObjectLine());
 
 		TriplesProcessing processingClass = new TriplesProcessing( testFolderPath + "ontology.owl");
+		processingClass.addFilesToBeProcessed(testFolderPath + "NormalizedData.txt");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks, testFolderPath + "NormalizedData.txt", "http://example.org/onto/individual#");
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, "http://example.org/onto/individual#");
 		}catch(Exception e) {
 			e.printStackTrace();
 			fail();
@@ -533,8 +540,9 @@ public class TripleProcessingTest
 		listRules.add(createRuleWithCustomIDFlag());
 
 		TriplesProcessing processingClass = new TriplesProcessing( testFolderPath + "ontology.owl");
+		processingClass.addFilesToBeProcessed(testFolderPath + "NormalizedData.txt");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks, testFolderPath + "NormalizedData.txt", "http://example.org/onto/individual#");
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks,  "http://example.org/onto/individual#");
 		}catch(Exception e) {
 			e.printStackTrace();
 			fail();
@@ -583,11 +591,12 @@ public class TripleProcessingTest
 		listRules.add(createRuleWithBaseIRIWithNoNamespace());
 
 		TriplesProcessing processingClass = new TriplesProcessing( testFolderPath + "ontology.owl");
+		processingClass.addFilesToBeProcessed(testFolderPath + "NormalizedData.txt");
 
         thrown.expect(BaseIRIException.class);
         thrown.expectMessage("Some BaseIRI flag has an empty namespace field.");
 
-        processingClass.createTriplesFromRules(listRules, conditionsBlocks, testFolderPath + "NormalizedData.txt", "http://example.org/onto/individual#");
+        processingClass.createTriplesFromRules(listRules, conditionsBlocks, "http://example.org/onto/individual#");
 	}
 
 
@@ -623,11 +632,12 @@ public class TripleProcessingTest
 		listRules.add(createRuleWithBaseIRIWithNoIRI());
 
 		TriplesProcessing processingClass = new TriplesProcessing( testFolderPath + "ontology.owl");
+		processingClass.addFilesToBeProcessed(testFolderPath + "NormalizedData.txt");
 
 		thrown.expect(BaseIRIException.class);
 		thrown.expectMessage("Some BaseIRI flag has an empty IRI field.");
 
-		processingClass.createTriplesFromRules(listRules, conditionsBlocks, testFolderPath + "NormalizedData.txt", "http://example.org/onto/individual#");
+		processingClass.createTriplesFromRules(listRules, conditionsBlocks, "http://example.org/onto/individual#");
 	}
 
 
@@ -655,8 +665,9 @@ public class TripleProcessingTest
 		}
 
 		TriplesProcessing processingClass = new TriplesProcessing( testFolderPath + "ontology.owl");
+		processingClass.addFilesToBeProcessed(testFolderPath + "enrichedDataGOTerm.tsv");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks, testFolderPath + "enrichedDataGOTerm.tsv", "http://example.org/onto/individual#");
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, "http://example.org/onto/individual#");
 		}catch(Exception e) {
 			fail();
 		}
@@ -686,7 +697,7 @@ public class TripleProcessingTest
 		return new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects);
 	}
 	
-	@Test
+/*	@Test
 	public void separatorElementInSeparatorFlagDoesNotExist() throws Exception {
 		ontologyHelper = new OntologyHelper();
 		String testFolderPath = "testFiles/unitTestsFiles/";
@@ -699,10 +710,11 @@ public class TripleProcessingTest
 		thrown.expectMessage("There is no caractere '-' in the field 'Genes' to be used as separator");
 		
 		TriplesProcessing processingClass = new TriplesProcessing( testFolderPath + "ontology.owl");
+		processingClass.addFilesToBeProcessed(testFolderPath + "enrichedDataGOTerm2.tsv");
 
-		processingClass.createTriplesFromRules(listRules, conditionsBlocks, testFolderPath + "enrichedDataGOTerm2.tsv", "http://example.org/onto/individual#");
+		processingClass.createTriplesFromRules(listRules, conditionsBlocks, "http://example.org/onto/individual#");
 	}
-
+*/
 
 	// ##################
 
@@ -726,8 +738,9 @@ public class TripleProcessingTest
 		createConditionBlockWithGreaterThanCondition();
 
 		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "ontology.owl");
+		processingClass.addFilesToBeProcessed(testFolderPath + "enrichedDataGOTerm3.tsv");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks, testFolderPath + "enrichedDataGOTerm3.tsv", "http://example.org/onto/individual#");
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, "http://example.org/onto/individual#");
 		}catch(Exception e) {
 			e.printStackTrace();
 		    fail();
@@ -778,9 +791,10 @@ public class TripleProcessingTest
         createConditionBlocks();
 
         TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "ontology.owl");
+        processingClass.addFilesToBeProcessed(testFolderPath + "enrichedDataGOTerm.tsv");
+        processingClass.addFilesToBeProcessed(testFolderPath + "enrichedDataGOTerm3.tsv");
         try{
-            processingClass.createTriplesFromRules(listRules, conditionsBlocks, testFolderPath + "enrichedDataGOTerm.tsv", "http://example.org/onto/individual#");
-            processingClass.createTriplesFromRules(listRules, conditionsBlocks, testFolderPath + "enrichedDataGOTerm3.tsv", "http://example.org/onto/individual#");
+            processingClass.createTriplesFromRules(listRules, conditionsBlocks, "http://example.org/onto/individual#");
         }catch(Exception e) {
             e.printStackTrace();
             fail();

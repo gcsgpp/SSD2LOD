@@ -8,7 +8,7 @@ public enum EnumTypeOfProperty {
 	
 	private final String typeOfProperty;
 	
-	private EnumTypeOfProperty(String typeOfProperty) {
+	EnumTypeOfProperty(String typeOfProperty) {
 		this.typeOfProperty = typeOfProperty;
 	}
 	

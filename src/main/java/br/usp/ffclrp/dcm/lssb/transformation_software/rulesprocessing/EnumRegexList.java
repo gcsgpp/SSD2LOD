@@ -24,7 +24,7 @@ public enum EnumRegexList {
 	
 	private final String regexExpressions;
 	
-	private EnumRegexList (String regexExpressions){
+	EnumRegexList(String regexExpressions){
 		this.regexExpressions = regexExpressions;
 	}
 	

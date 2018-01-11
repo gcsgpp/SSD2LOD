@@ -2,8 +2,6 @@ package br.usp.ffclrp.dcm.lssb.transformation_software;
 
 import br.usp.ffclrp.dcm.lssb.custom_exceptions.BaseIRIException;
 import br.usp.ffclrp.dcm.lssb.custom_exceptions.ConditionBlockException;
-import br.usp.ffclrp.dcm.lssb.custom_exceptions.FileAccessException;
-import br.usp.ffclrp.dcm.lssb.custom_exceptions.SeparatorFlagException;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.*;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.rdf.model.Model;
@@ -344,30 +342,6 @@ public class TripleProcessingTest
 		}
 	}
 
-
-    // ##################
-
-
-/*	@Test
-	public void accessingColumnThatDontExist() throws Exception {
-		ontologyHelper = new OntologyHelper();
-		String testFolderPath = "testFiles/unitTestsFiles/";
-		String ontologyPath = testFolderPath + "ontology.owl";
-
-		ontologyHelper.loadingOntologyFromFile(ontologyPath);
-		listRules.add(createRuleOne());
-		createConditionBlocks();
-
-		thrown.expect(FileAccessException.class);
-		thrown.expectMessage("Not possible to access the file or the content in the file. Column tried to access: Term. This column may not exist or the file is not accessible.");
-
-		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "ontology.owl");
-		processingClass.addFilesToBeProcessed(testFolderPath + "enrichedDataGOTerm2.tsv");
-
-		processingClass.createTriplesFromRules(listRules, conditionsBlocks, "http://example.org/onto/individual#");
-
-	}
-*/
 
     // ##################
 
@@ -841,4 +815,87 @@ public class TripleProcessingTest
         assertEquals(5, numberOfStatementsPassedGO0098662);
     }
 
+
+	// ##################
+
+
+    private Rule createSimpleRule(){
+		String id = "1";
+		RuleConfig ruleConfig = new RuleConfig(id);
+		OWLClass subjectClass = ontologyHelper.getClass("investigation");
+		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
+
+		TSVColumn subject = new TSVColumn();
+		subject.setTitle("GSE67111_SERIES");
+		List<Flag> subjectFlags = new ArrayList<Flag>();
+		subjectFlags.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
+		subject.setFlags(subjectFlags);
+
+		subjectTSVColumns.add(subject);
+
+		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<OWLProperty, TripleObject>();
+
+		OWLProperty statusProperty = ontologyHelper.getProperty("status");
+		List<Flag> contentDirection = new ArrayList<Flag>();
+		contentDirection.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
+		TripleObject statusTripleObject = new TripleObjectAsColumns(new TSVColumn("GSE67111_status",contentDirection));
+
+		OWLProperty summaryProperty = ontologyHelper.getProperty("summary");
+		TripleObject summaryTripleObject = new TripleObjectAsColumns(new TSVColumn("GSE67111_summary",contentDirection));
+
+
+		predicateObjects.put(statusProperty, statusTripleObject);
+		predicateObjects.put(summaryProperty, summaryTripleObject);
+
+		return new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects);
+	}
+
+	@Test
+	public void processSimpleRule()	{
+		ontologyHelper = new OntologyHelper();
+		String testFolderPath = "testFiles/unitTestsFiles/geo_preprocessed/";
+		String ontologyPath = testFolderPath + "ontology.owl";
+
+		ontologyHelper.loadingOntologyFromFile(ontologyPath);
+		listRules.add(createSimpleRule());
+		createConditionBlockWithGreaterThanCondition();
+
+		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "ontology.owl");
+		processingClass.addFilesToBeProcessed(testFolderPath + "GSE67111.tsv");
+		try{
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, "http://example.org/onto/individual#");
+		}catch(Exception e) {
+			e.printStackTrace();
+			fail();
+		}
+
+		Model model = processingClass.getModel();
+		List<Statement> statements = model.listStatements().toList();
+
+		String summary1 = "This study addressed involvement of fourteen 5-fluorouracil pathway genes in the prognosis of colorectal carcinoma patients. The major goal of our study was to investigate associations of gene expression of enzymes metabolizing 5-fluorouracil with therapy response and survival of colorectal carcinoma patients";
+		String summary2 = "Downregulation of DPYD and upregulation of PPAT, UMPS, RRM2, and SLC29A1 transcripts were found in tumors compared to adjacent mucosas in testing and validation sets of patients. Low RRM2 transcript level significantly associated with poor response to the first-line palliative 5-FU-based chemotherapy in the testing set and with poor disease-free interval of patients in the validation set.";
+
+		int numberOfStatementsPassed = 0;
+		for(Statement statement : statements) {
+			Triple triple = statement.asTriple();
+
+			if( 	triple.getPredicate().getURI().equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#type") 	||
+					triple.getPredicate().getURI().equals("http://www.w3.org/2000/01/rdf-schema#label")			||
+					triple.getPredicate().getURI().equals("http://www.w3.org/2000/01/rdf-schema#range")				) //is not interesting to check these predicates because there are other classes in the ontology if tested will get away from the objective of this method
+				continue;
+
+			if(triple.getSubject().getURI().equals("http://example.org/onto/individual#GSE67111")){
+				if(	triple.getPredicate().getURI().equals("http://example.com/geo_experiments/status") 		&& triple.getObject().getLiteralValue().equals("Public on Aug 31 2015") ||
+						triple.getPredicate().getURI().equals("http://example.com/geo_experiments/summary") 				&& triple.getObject().getLiteralValue().equals(summary1) ||
+						triple.getPredicate().getURI().equals("http://example.com/geo_experiments/summary") 				&& triple.getObject().getLiteralValue().equals(summary2))
+				{
+					numberOfStatementsPassed++;
+				}
+			}else {
+				assert(false);
+			}
+		}
+
+		assertEquals(3, numberOfStatementsPassed);
+	}
 }

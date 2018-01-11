@@ -1,0 +1,205 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns="http://example.com/geo_experiments/"
+     xml:base="http://example.com/geo_experiments/"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:oboInOwl="http://www.geneontology.org/formats/oboInOwl#"
+     xmlns:protege="http://protege.stanford.edu/plugins/owl/protege#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:geo_exp="http://example.com/geo_experiments/"
+     xmlns:cito="http://purl.org/spar/cito/"
+     xmlns:swrla="http://swrl.stanford.edu/ontologies/3.3/swrla.owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:terms="http://purl.org/dc/terms/"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:oboInOwl1="ttp://www.geneontology.org/formats/oboInOwl#"
+     xmlns:obo="http://purl.obolibrary.org/obo/"
+     xmlns:foaf="http://xmlns.com/foaf/0.1/"
+     xmlns:dc="http://purl.org/dc/elements/1.1/"
+     xmlns:subsets="http://purl.obolibrary.org/obo/ro/subsets#">
+    <owl:Ontology rdf:about="http://example.com/geo_experiments/">
+        <owl:versionIRI rdf:resource="http://example.com/geo_experiments/"/>
+        <owl:imports rdf:resource="http://dublincore.org/2012/06/14/dcterms.rdf"/>
+        <owl:imports rdf:resource="http://purl.obolibrary.org/obo/obi/2017-11-07/obi.owl"/>
+        <owl:imports rdf:resource="http://purl.obolibrary.org/obo/ro/releases/2018-01-05b/ro.owl"/>
+    </owl:Ontology>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Annotation properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.w3.org/2004/02/skos/core#note -->
+
+    <owl:AnnotationProperty rdf:about="http://www.w3.org/2004/02/skos/core#note"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Datatypes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.w3.org/2001/XMLSchema#date -->
+
+    <rdfs:Datatype rdf:about="http://www.w3.org/2001/XMLSchema#date"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://example.com/geo_experiments/ORF -->
+
+    <owl:ObjectProperty rdf:about="http://example.com/geo_experiments/ORF">
+        <rdfs:label rdf:datatype="http://www.w3.org/2000/01/rdf-schema#Literal">ORF</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://example.com/geo_experiments/assay_id -->
+
+    <owl:ObjectProperty rdf:about="http://example.com/geo_experiments/assay_id">
+        <rdfs:label rdf:datatype="http://www.w3.org/2000/01/rdf-schema#Literal">Assay ID</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://example.com/geo_experiments/id -->
+
+    <owl:ObjectProperty rdf:about="http://example.com/geo_experiments/id">
+        <rdfs:label rdf:datatype="http://www.w3.org/2000/01/rdf-schema#Literal">ID</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://example.com/geo_experiments/contributor -->
+
+    <owl:DatatypeProperty rdf:about="http://example.com/geo_experiments/contributor">
+        <rdfs:label rdf:datatype="http://www.w3.org/2000/01/rdf-schema#Literal">contributor</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/geo_experiments/extracted_protocol -->
+
+    <owl:DatatypeProperty rdf:about="http://example.com/geo_experiments/extracted_protocol">
+        <rdfs:label rdf:datatype="http://www.w3.org/2000/01/rdf-schema#Literal">extracted protocol</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/geo_experiments/molecule -->
+
+    <owl:DatatypeProperty rdf:about="http://example.com/geo_experiments/molecule">
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:label rdf:datatype="http://www.w3.org/2000/01/rdf-schema#Literal">molecule</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/geo_experiments/overall_design -->
+
+    <owl:DatatypeProperty rdf:about="http://example.com/geo_experiments/overall_design">
+        <rdfs:label rdf:datatype="http://www.w3.org/2000/01/rdf-schema#Literal">overall design</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/geo_experiments/sample_value -->
+
+    <owl:DatatypeProperty rdf:about="http://example.com/geo_experiments/sample_value">
+        <rdfs:label rdf:datatype="http://www.w3.org/2000/01/rdf-schema#Literal">sample value</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/geo_experiments/status -->
+
+    <owl:DatatypeProperty rdf:about="http://example.com/geo_experiments/status">
+        <rdfs:label rdf:datatype="http://www.w3.org/2000/01/rdf-schema#Literal">status</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/geo_experiments/summary -->
+
+    <owl:DatatypeProperty rdf:about="http://example.com/geo_experiments/summary">
+        <rdfs:label rdf:datatype="http://www.w3.org/2000/01/rdf-schema#Literal">summary</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/geo_experiments/type -->
+
+    <owl:DatatypeProperty rdf:about="http://example.com/geo_experiments/type">
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:label rdf:datatype="http://www.w3.org/2000/01/rdf-schema#Literal">type</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://example.com/geo_experiments/platform_data -->
+
+    <owl:Class rdf:about="http://example.com/geo_experiments/platform_data">
+        <rdfs:label rdf:datatype="http://www.w3.org/2000/01/rdf-schema#Literal">Platform Data</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://example.com/geo_experiments/sample_data -->
+
+    <owl:Class rdf:about="http://example.com/geo_experiments/sample_data">
+        <rdfs:label rdf:datatype="http://www.w3.org/2000/01/rdf-schema#Literal">sample data</rdfs:label>
+    </owl:Class>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 4.2.8.20170104-2310) https://github.com/owlcs/owlapi -->
+

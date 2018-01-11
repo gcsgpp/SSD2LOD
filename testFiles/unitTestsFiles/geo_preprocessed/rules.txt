@@ -1,0 +1,70 @@
+simple_rule[1, "investigation" = "GSE67111_SERIES" :
+	"status" = "GSE67111_status" /DT("string"),
+	"Title" = "GSE67111_title" /DT("literal"),
+	"type" = "GSE67111_type" /DT("string"),
+	"summary" = "GSE67111_summary" /DT("string"),
+	"overall design" = "GSE67111_overall_design" /DT("string"),
+	"contributor" = "GSE67111_contributor" /DT("string"),
+	"has participant" = 2,
+	"has participant" = 8,
+	"has participant" = 10,
+	"has participant" = 12,
+	"has output" = 4
+]
+
+simple_rule[2, "microarray platform" = "GPL19921_geo_accession" :
+	"Title" = "GPL19921_title" /DT("literal"),
+	"depends on" = 3
+]
+
+simple_rule[3, "organism" = "GPL19921_organism" ]
+
+matrix_rule[4, "Platform Data" = "ID"; "ORF"; "Assay ID" :
+	"ID" = 5,
+	"ORF" = 6,
+	"Assay ID" = 7
+]
+
+matrix_rule[5, "genetic material" = "ID" /BASEIRI("http://www.example.org/onto/individual/id/", "id") ]
+
+
+matrix_rule[6, "genetic material" = "ORF" /BASEIRI("http://www.example.org/onto/individual/ORF/", "orf") ]
+
+
+matrix_rule[7, "assay" = "Assay ID" /BASEIRI("https://www.thermofisher.com/taqman-gene-expression/product/", "assayID") /SP(",") ]
+
+simple_rule[8, "sample from organism" = "GSM1638971_geo_accession" : 
+	"Title" = "GSM1638971_title" /DT("literal"),
+	"molecule" = "GSM1638971_molecule_ch1" /DT("string"),
+	"extracted protocol" = "GSM1638971_extract_protocol_ch1",
+	"has output" = 9
+]
+
+matrix_rule[9, "sample data" = "GSM1638971_ID_REF"; "GSM1638971_VALUE" :
+	"ID" = "GSM1638971_ID_REF",
+	"sample value" = "GSM1638971_VALUE"
+]
+
+simple_rule[10, "sample from organism" = "GSM1638972_geo_accession" : 
+	"Title" = "GSM1638972_title" /DT("literal"),
+	"molecule" = "GSM1638972_molecule_ch1" /DT("string"),
+	"extracted protocol" = "GSM1638972_extract_protocol_ch1",
+	"has output" = 11
+]
+
+matrix_rule[11, "sample data" = "GSM1638972_ID_REF"; "GSM1638972_VALUE" :
+	"ID" = "GSM1638972_ID_REF",
+	"sample value" = "GSM1638972_VALUE"
+]
+
+simple_rule[12, "sample from organism" = "GSM1638973_geo_accession" : 
+	"Title" = "GSM1638973_title" /DT("literal"),
+	"molecule" = "GSM1638973_molecule_ch1" /DT("string"),
+	"extracted protocol" = "GSM1638973_extract_protocol_ch1",
+	"has output" = 13
+]
+
+matrix_rule[13, "sample data" = "GSM1638973_ID_REF"; "GSM1638973_VALUE" :
+	"ID" = "GSM1638973_ID_REF",
+	"sample value" = "GSM1638973_VALUE"
+]

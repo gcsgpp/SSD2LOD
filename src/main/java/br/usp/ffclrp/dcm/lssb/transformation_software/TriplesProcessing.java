@@ -163,65 +163,6 @@ public class TriplesProcessing {
 		return subjectListToBeReturned;
 	}
 
-	private List<Resource> 	processMatrixRule(Rule rule, Integer tsvLineNumber, String defaultNs) throws Exception {
-
-		for(TSVColumn ruleColumns : rule.getSubjectTSVColumns()){
-			if(!assertConditionBlock(ruleColumns.getFlags(), tsvLineNumber))
-				return null;
-		}
-
-		// *** SUBJECT ***
-		List<Resource> subjectList = getSubject(rule, defaultNs, tsvLineNumber); //ONE SUBJECT FOR EACH ITEM IN THE CELL
-
-		// *** PREDICATE AND OBJECT ***
-		Property predicate;
-
-		for(Resource subject : subjectList){
-
-			Map<OWLProperty, TripleObject> predicateObjectMAP = rule.getPredicateObjects();
-			for(Map.Entry<OWLProperty, TripleObject> predicateMapEntry : predicateObjectMAP.entrySet()){
-				//GET PREDICATE IRI
-				predicate = model.createProperty(predicateMapEntry.getKey().getIRI().toString());
-
-				//TRIPLEOBJECTS POINTING TO A RULE PROCESS FLOW
-				if(predicateMapEntry.getValue() instanceof TripleObjectAsRule){
-					TripleObjectAsRule tripleObjectAsRule = (TripleObjectAsRule) predicateMapEntry.getValue();
-					for(ObjectAsRule objectAsRule : tripleObjectAsRule.getObject()){
-						if(assertConditionBlock(objectAsRule.getFlags(), tsvLineNumber)){
-							List<Resource> subjectsFromDependentRule = processMatrixRule(allRules.get(objectAsRule.getRuleNumber()), tsvLineNumber, defaultNs);
-							if(subjectsFromDependentRule != null){
-								for(Resource singleSubjectFromDependentRule : subjectsFromDependentRule){
-									addTripleToModel(subject, predicate, singleSubjectFromDependentRule);
-								}
-							}
-						}
-					}
-					//TRIPLEOBJECTS POINTING TO LIST OF TSV COLUMNS PROCESS FLOW
-				}else{
-					@SuppressWarnings("unchecked")
-					List<TSVColumn> dataColumns = (List<TSVColumn>) predicateMapEntry.getValue().getObject();
-					List<String> content = extractDataFromTSVColumn(dataColumns, tsvLineNumber);
-
-					if(content.size() > 1) {
-						for(String contentElement : content){
-							if(contentElement != null && contentElement != "")
-								addTripleToModel(subject, predicate, contentElement, XSDDatatype.XSDstring);
-						}
-
-					} else {
-						TSVColumn firstDataColumn = dataColumns.iterator().next(); //iterator to get the first element of the list
-						XSDDatatype datatype = getDataTypeContentFlag(firstDataColumn); //get the first element, not necessarily the index 0
-
-						String firstContent = content.iterator().next();
-						addTripleToModel(subject, predicate, firstContent, datatype);
-					}
-				}
-			}
-		}
-
-		return subjectList;
-	}
-
 	private List<Resource> 	processPredicateAndObject(Rule rule, Integer tsvLineNumber, String defaultNs, List<Resource> subjectList) throws Exception {
 
 		// *** PREDICATE AND OBJECT ***

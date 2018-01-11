@@ -259,8 +259,10 @@ public class TriplesProcessing {
 		//System.out.println("S: " + subject.getURI() + " P: " + predicate.getURI() + " O: " + contentElement);
 		if(datatype instanceof XSDDatatype)
 			subject.addProperty(predicate, contentElement, (XSDDatatype) datatype);
-		else
+		else if(datatype instanceof String && datatype.equals("Literal")) //defined in the FlagDataType
 			subject.addProperty(predicate, contentElement, new BaseDatatype("http://www.w3.org/2000/01/rdf-schema#Literal"));
+		else
+			subject.addProperty(predicate, contentElement);
 	}
 
 	private List<String> 	extractDataFromTSVColumn(List<TSVColumn> listTSVColumn, Integer lineNumber) throws Exception {

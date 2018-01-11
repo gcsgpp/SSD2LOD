@@ -29,6 +29,7 @@ public class TriplesProcessing {
 	private Model ontology = null;
 	private String relativePathOntologyFile = null;
 	private MatrixLineNumberTracking currentLineNumberMatrixRules = new MatrixLineNumberTracking();
+	private Map<Integer, List<Resource>> simpleRuleAlreadyProcessed = new HashMap<>();
 
 	public 					TriplesProcessing(String relativePathOntologyFile) {
 
@@ -123,23 +124,32 @@ public class TriplesProcessing {
 
 
 		}else{
-			// *** SUBJECT ***
-			List<Resource> subjectList = getSubject(rule, defaultNs, 1); //ONE SUBJECT FOR EACH ITEM IN THE CELL
+			List<Resource> t = simpleRuleAlreadyProcessed.get(Integer.parseInt(rule.getId()));
 
-			for(Integer tsvLineNumber = 1; tsvLineNumber < fileReader.getLinesCount(); tsvLineNumber++) {
-				try {
-					for (TSVColumn ruleColumns : rule.getSubjectTSVColumns()) {
-						if (!assertConditionBlock(ruleColumns.getFlags(), tsvLineNumber))
-							return null;
+			if(simpleRuleAlreadyProcessed.get(Integer.parseInt(rule.getId())) == null){
+				// *** SUBJECT ***
+				List<Resource> subjectList = getSubject(rule, defaultNs, 1); //ONE SUBJECT FOR EACH ITEM IN THE CELL
+
+				for(Integer tsvLineNumber = 1; tsvLineNumber < fileReader.getLinesCount(); tsvLineNumber++) {
+					try {
+						for (TSVColumn ruleColumns : rule.getSubjectTSVColumns()) {
+							if (!assertConditionBlock(ruleColumns.getFlags(), tsvLineNumber))
+								return null;
+						}
+
+						List<Resource> subjectsProcessed = processPredicateAndObject(rule, tsvLineNumber, defaultNs, subjectList);
+						simpleRuleAlreadyProcessed.put(Integer.parseInt(rule.getId()), subjectsProcessed);
+						subjectListToBeReturned = subjectsProcessed;
+
+					} catch (CustomWarnings w) {
+						//System.out.println(w.getMessage());
+						return null;
+					} catch (ArrayIndexOutOfBoundsException e) {
+						return null;
 					}
-
-					subjectListToBeReturned = processPredicateAndObject(rule, tsvLineNumber, defaultNs, subjectList);
-				} catch (CustomWarnings w) {
-					//System.out.println(w.getMessage());
-					return null;
-				} catch (ArrayIndexOutOfBoundsException e) {
-					return null;
 				}
+			}else{
+				subjectListToBeReturned = simpleRuleAlreadyProcessed.get(Integer.parseInt(rule.getId()));
 			}
 		}
 		return subjectListToBeReturned;

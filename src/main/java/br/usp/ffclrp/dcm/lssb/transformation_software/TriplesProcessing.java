@@ -184,26 +184,22 @@ public class TriplesProcessing {
 				}else{
 					@SuppressWarnings("unchecked")
 					List<TSVColumn> dataColumns = (List<TSVColumn>) predicateMapEntry.getValue().getObject();
-					List<String> content = null;
-					try {
-						content = extractDataFromTSVColumn(dataColumns, tsvLineNumber);
-					}catch(ColumnNotFoundWarning e){
-						//Skipping to next rule line
-						continue;
-					}
+					List<String> listOfContent = null;
 
-					if(content.size() > 1) {
-						for(String contentElement : content){
-							if(contentElement != null && contentElement != "")
-								addTripleToModel(subject, predicate, contentElement, "Literal");
+					for(TSVColumn dataColumn : (List<TSVColumn>) predicateMapEntry.getValue().getObject()) {
+						try {
+							listOfContent = extractDataFromTSVColumn(dataColumns, tsvLineNumber);
+						} catch (ColumnNotFoundWarning e) {
+							//Skipping to next rule line
+							continue;
 						}
 
-					} else {
-						TSVColumn firstDataColumn = dataColumns.iterator().next(); //iterator to get the first element of the list
-						Object datatype = getDataTypeContentFlag(firstDataColumn); //get the first element, not necessarily the index 0
+						Object datatype = getDataTypeContentFlag(dataColumn); //get the first element, not necessarily the index 0
 
-						String firstContent = content.iterator().next();
-						addTripleToModel(subject, predicate, firstContent, datatype);
+						for(String content : listOfContent){
+							if(content != null && !content.equals(""))
+								addTripleToModel(subject, predicate, content, datatype);
+						}
 					}
 				}
 			}
@@ -485,8 +481,8 @@ public class TriplesProcessing {
 		try{
 			File f = new File(filename);
 			FileOutputStream fos = new FileOutputStream(f);
-			//RDFDataMgr.write(fos, model, Lang.TRIG);
-			RDFDataMgr.write(fos, model, Lang.TURTLE);
+			RDFDataMgr.write(fos, model, Lang.TRIG);
+			//RDFDataMgr.write(fos, model, Lang.TURTLE);
 			//RDFDataMgr.write(fos, model, Lang.RDFXML);
 			//RDFDataMgr.write(fos, model, Lang.NTRIPLES);
 			fos.close();

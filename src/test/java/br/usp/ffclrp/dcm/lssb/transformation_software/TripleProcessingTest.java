@@ -898,4 +898,265 @@ public class TripleProcessingTest
 
 		assertEquals(3, numberOfStatementsPassed);
 	}
+
+
+	// ##################
+
+
+	private List<Rule> createSimpleRuleInsideSimpleRuleAndOtherFile(){
+		List<Rule> rules = new ArrayList<>();
+		//RULE 1
+		String id = "1";
+		RuleConfig ruleConfig = new RuleConfig(id);
+		OWLClass subjectClass = ontologyHelper.getClass("investigation");
+		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
+
+		TSVColumn subject = new TSVColumn();
+		subject.setTitle("GSE67111_SERIES");
+		List<Flag> subjectFlags = new ArrayList<Flag>();
+		subjectFlags.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
+		subject.setFlags(subjectFlags);
+
+		subjectTSVColumns.add(subject);
+
+		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<OWLProperty, TripleObject>();
+
+		List<Flag> contentDirection = new ArrayList<Flag>();
+		contentDirection.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
+
+		OWLProperty hasParticipantProperty = ontologyHelper.getProperty("has participant");
+		TripleObject hasParticipantTripleObject = new TripleObjectAsRule(new ObjectAsRule(2, contentDirection));
+		predicateObjects.put(hasParticipantProperty, hasParticipantTripleObject);
+
+		rules.add(new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects));
+
+		//RULE 2
+		id = "2";
+		ruleConfig = new RuleConfig(id);
+		subjectClass = ontologyHelper.getClass("microarray platform");
+		subjectTSVColumns = new ArrayList<TSVColumn>();
+
+		subject = new TSVColumn();
+		subject.setTitle("GPL19921_geo_accession");
+		subjectFlags = new ArrayList<Flag>();
+		subjectFlags.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
+		subject.setFlags(subjectFlags);
+		subjectTSVColumns.add(subject);
+
+		predicateObjects = new HashMap<>();
+
+		contentDirection = new ArrayList<Flag>();
+		contentDirection.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
+
+		OWLProperty titleProperty = ontologyHelper.getProperty("Title");
+		TripleObject titleTripleObject = new TripleObjectAsColumns(new TSVColumn("GPL19921_title",contentDirection));
+		predicateObjects.put(titleProperty, titleTripleObject);
+
+		rules.add(new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects));
+
+
+		return rules;
+	}
+
+	@Test
+	public void processSimpleRuleInsideSimpleRuleAndOtherFile()	{
+		ontologyHelper = new OntologyHelper();
+		String testFolderPath = "testFiles/unitTestsFiles/geo_preprocessed/";
+		String ontologyPath = testFolderPath + "ontology.owl";
+
+		ontologyHelper.loadingOntologyFromFile(ontologyPath);
+		listRules.addAll(createSimpleRuleInsideSimpleRuleAndOtherFile());
+		createConditionBlockWithGreaterThanCondition();
+
+		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "ontology.owl");
+		processingClass.addFilesToBeProcessed(testFolderPath + "GSE67111.tsv");
+		processingClass.addFilesToBeProcessed(testFolderPath + "GPL19921.tsv");
+		try{
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, "http://example.org/onto/individual#");
+		}catch(Exception e) {
+			e.printStackTrace();
+			fail();
+		}
+
+		Model model = processingClass.getModel();
+		List<Statement> statements = model.listStatements().toList();
+
+		int numberOfStatementsPassed = 0;
+		for(Statement statement : statements) {
+			Triple triple = statement.asTriple();
+
+			if( 	triple.getPredicate().getURI().equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#type") 	||
+					triple.getPredicate().getURI().equals("http://www.w3.org/2000/01/rdf-schema#label")			||
+					triple.getPredicate().getURI().equals("http://www.w3.org/2000/01/rdf-schema#range")				) //is not interesting to check these predicates because there are other classes in the ontology if tested will get away from the objective of this method
+				continue;
+
+			if(triple.getSubject().getURI().equals("http://example.org/onto/individual#GSE67111")){
+				if(	triple.getPredicate().getURI().equals("http://purl.obolibrary.org/obo/RO_0000057") 		&& triple.getObject().getURI().equals("http://example.org/onto/individual#GPL19921"))
+					numberOfStatementsPassed++;
+			}else if(triple.getSubject().getURI().equals("http://example.org/onto/individual#GPL19921")) {
+				if (triple.getPredicate().getURI().equals("http://purl.org/dc/terms/title") && triple.getObject().getLiteralValue().equals("Custom TaqMan: qPCR ViiA7 real-time PCR system"))
+					numberOfStatementsPassed++;
+			}else{
+				assert(false);
+			}
+		}
+
+		assertEquals(2, numberOfStatementsPassed);
+	}
+
+
+	// ##################
+
+
+	private List<Rule> createSimpleRuleInsideMatrixRule(){
+		List<Rule> rules = new ArrayList<>();
+		//RULE 1
+		String id = "1";
+		RuleConfig ruleConfig = new RuleConfig(id);
+		OWLClass subjectClass = ontologyHelper.getClass("investigation");
+		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
+
+		TSVColumn subject = new TSVColumn();
+		subject.setTitle("GSE67111_SERIES");
+		List<Flag> subjectFlags = new ArrayList<Flag>();
+		subjectFlags.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
+		subject.setFlags(subjectFlags);
+
+		subjectTSVColumns.add(subject);
+
+		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<OWLProperty, TripleObject>();
+
+		List<Flag> contentDirection = new ArrayList<Flag>();
+		contentDirection.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
+
+		OWLProperty hasParticipantProperty = ontologyHelper.getProperty("has participant");
+		TripleObject hasParticipantTripleObject = new TripleObjectAsRule(new ObjectAsRule(2, contentDirection));
+		predicateObjects.put(hasParticipantProperty, hasParticipantTripleObject);
+
+		rules.add(new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects));
+
+		//RULE 2
+		id = "2";
+		ruleConfig = new RuleConfig(id);
+		ruleConfig.setMatrix(true);
+		subjectClass = ontologyHelper.getClass("Platform Data");
+		subjectTSVColumns = new ArrayList<TSVColumn>();
+
+		subject = new TSVColumn();
+		subject.setTitle("GPL19921_ID");
+		subjectFlags = new ArrayList<Flag>();
+		subjectFlags.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
+		subject.setFlags(subjectFlags);
+
+		TSVColumn subject2 = new TSVColumn();
+		subject2.setTitle("GPL19921_ORF");
+		List<Flag> subject2Flags = new ArrayList<Flag>();
+		subject2Flags.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
+		subject2.setFlags(subjectFlags);
+
+		TSVColumn subject3 = new TSVColumn();
+		subject3.setTitle("GPL19921_Assay ID");
+		List<Flag> subject3Flags = new ArrayList<Flag>();
+		subject3Flags.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
+		subject3.setFlags(subjectFlags);
+
+		subjectTSVColumns.add(subject);
+		subjectTSVColumns.add(subject2);
+		subjectTSVColumns.add(subject3);
+
+		predicateObjects = new HashMap<>();
+
+		contentDirection = new ArrayList<Flag>();
+		contentDirection.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
+
+		OWLProperty idProperty = ontologyHelper.getProperty("ID");
+		TripleObject idTripleObject = new TripleObjectAsColumns(new TSVColumn("GPL19921_ID",contentDirection));
+
+		OWLProperty orfProperty = ontologyHelper.getProperty("ORF");
+		TripleObject orfTripleObject = new TripleObjectAsColumns(new TSVColumn("GPL19921_ORF",contentDirection));
+
+		OWLProperty assayidProperty = ontologyHelper.getProperty("Assay ID");
+		List<Flag> assayidFlags = new ArrayList<>();
+		assayidFlags.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
+		List<Integer> maxnumber = new ArrayList<>();
+		maxnumber.add(Integer.MAX_VALUE);
+		assayidFlags.add(new FlagSeparator(",", maxnumber));
+		TripleObject assayidTripleObject = new TripleObjectAsColumns(new TSVColumn("GPL19921_Assay ID",assayidFlags));
+
+		predicateObjects.put(idProperty, idTripleObject);
+		predicateObjects.put(orfProperty, orfTripleObject);
+		predicateObjects.put(assayidProperty, assayidTripleObject);
+
+		rules.add(new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects));
+		return rules;
+	}
+
+	@Test
+	public void processSimpleRuleInsideMatrixRule()	{
+		ontologyHelper = new OntologyHelper();
+		String testFolderPath = "testFiles/unitTestsFiles/geo_preprocessed/";
+		String ontologyPath = testFolderPath + "ontology.owl";
+
+		ontologyHelper.loadingOntologyFromFile(ontologyPath);
+		listRules.addAll(createSimpleRuleInsideMatrixRule());
+		createConditionBlockWithGreaterThanCondition();
+
+		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "ontology.owl");
+		processingClass.addFilesToBeProcessed(testFolderPath + "GSE67111.tsv");
+		processingClass.addFilesToBeProcessed(testFolderPath + "GPL19921.tsv");
+		try{
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, "http://example.org/onto/individual/");
+		}catch(Exception e) {
+			e.printStackTrace();
+			fail();
+
+		}
+
+		Model model = processingClass.getModel();
+		List<Statement> statements = model.listStatements().toList();
+
+		int numberOfStatementsRule1 = 0;
+		int numberOfStatementsRule2 = 0;
+		int numberOfStatementsRule3 = 0;
+		int numberOfStatementsRule4 = 0;
+		for(Statement statement : statements) {
+			Triple triple = statement.asTriple();
+
+			if( 	triple.getPredicate().getURI().equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#type") 	||
+					triple.getPredicate().getURI().equals("http://www.w3.org/2000/01/rdf-schema#label")			||
+					triple.getPredicate().getURI().equals("http://www.w3.org/2000/01/rdf-schema#range")				) //is not interesting to check these predicates because there are other classes in the ontology if tested will get away from the objective of this method
+				continue;
+
+			if(triple.getSubject().getURI().equals("http://example.org/onto/individual/GSE67111")){
+				if(	triple.getPredicate().getURI().equals("http://purl.obolibrary.org/obo/RO_0000057") 		&& triple.getObject().getURI().equals("http://example.org/onto/individual/ABCA1_ABCA1_Hs00194045_m1") ||
+					triple.getPredicate().getURI().equals("http://purl.obolibrary.org/obo/RO_0000057") 		&& triple.getObject().getURI().equals("http://example.org/onto/individual/ABCA10_ABCA10_Hs00365268_m1,Hs00739326_m1") ||
+					triple.getPredicate().getURI().equals("http://purl.obolibrary.org/obo/RO_0000057") 		&& triple.getObject().getURI().equals("http://example.org/onto/individual/ABCA12_ABCA12_Hs00292421_m1,Hs00252524_m1"))
+					numberOfStatementsRule1++;
+			}else if(triple.getSubject().getURI().equals("http://example.org/onto/individual/ABCA1_ABCA1_Hs00194045_m1")) {
+				  if (	triple.getPredicate().getURI().equals("http://example.com/geo_experiments/id") 			&& triple.getObject().getLiteralValue().equals("ABCA1") ||
+						triple.getPredicate().getURI().equals("http://example.com/geo_experiments/ORF") 		&& triple.getObject().getLiteralValue().equals("ABCA1") ||
+						triple.getPredicate().getURI().equals("http://example.com/geo_experiments/assay_id") 	&& triple.getObject().getLiteralValue().equals("Hs00194045_m1"))
+					numberOfStatementsRule2++;
+			}else if(triple.getSubject().getURI().equals("http://example.org/onto/individual/ABCA10_ABCA10_Hs00365268_m1,Hs00739326_m1")) {
+				  if (	triple.getPredicate().getURI().equals("http://example.com/geo_experiments/id") 			&& triple.getObject().getLiteralValue().equals("ABCA10") ||
+						triple.getPredicate().getURI().equals("http://example.com/geo_experiments/ORF") 		&& triple.getObject().getLiteralValue().equals("ABCA10") ||
+						triple.getPredicate().getURI().equals("http://example.com/geo_experiments/assay_id") 	&& triple.getObject().getLiteralValue().equals("Hs00365268_m1") ||
+						triple.getPredicate().getURI().equals("http://example.com/geo_experiments/assay_id") 	&& triple.getObject().getLiteralValue().equals("Hs00739326_m1"))
+					  numberOfStatementsRule3++;
+			}else if(triple.getSubject().getURI().equals("http://example.org/onto/individual/ABCA12_ABCA12_Hs00292421_m1,Hs00252524_m1")) {
+				  if (	triple.getPredicate().getURI().equals("http://example.com/geo_experiments/id") 			&& triple.getObject().getLiteralValue().equals("ABCA12") ||
+						triple.getPredicate().getURI().equals("http://example.com/geo_experiments/ORF") 		&& triple.getObject().getLiteralValue().equals("ABCA12") ||
+						triple.getPredicate().getURI().equals("http://example.com/geo_experiments/assay_id") 	&& triple.getObject().getLiteralValue().equals("Hs00292421_m1") ||
+						triple.getPredicate().getURI().equals("http://example.com/geo_experiments/assay_id") 	&& triple.getObject().getLiteralValue().equals("Hs00252524_m1"))
+					numberOfStatementsRule4++;
+			}else{
+				assert(false);
+			}
+		}
+
+		assertEquals(3, numberOfStatementsRule1);
+		assertEquals(3, numberOfStatementsRule2);
+		assertEquals(4, numberOfStatementsRule3);
+		assertEquals(4, numberOfStatementsRule4);
+	}
 }

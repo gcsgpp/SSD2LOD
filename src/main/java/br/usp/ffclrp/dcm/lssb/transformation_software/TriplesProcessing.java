@@ -1,41 +1,22 @@
 package br.usp.ffclrp.dcm.lssb.transformation_software;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.util.*;
-
 import br.usp.ffclrp.dcm.lssb.custom_exceptions.*;
+import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.*;
+import openllet.jena.PelletReasonerFactory;
+import org.apache.jena.datatypes.BaseDatatype;
 import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.graph.Triple;
-import org.apache.jena.rdf.model.InfModel;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.Property;
-import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.*;
 import org.apache.jena.reasoner.Reasoner;
-import org.apache.jena.reasoner.ReasonerRegistry;
 import org.apache.jena.reasoner.ValidityReport;
 import org.apache.jena.reasoner.ValidityReport.Report;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.semanticweb.owlapi.model.OWLProperty;
 
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Condition;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ConditionBlock;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.EnumOperationsConditionBlock;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Flag;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagBaseIRI;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagConditionBlock;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagCustomID;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagDataType;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagFixedContent;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagNotMetadata;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ObjectAsRule;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Rule;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagSeparator;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TSVColumn;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TripleObject;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TripleObjectAsRule;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.util.*;
 
 public class TriplesProcessing {
 
@@ -54,7 +35,7 @@ public class TriplesProcessing {
 		this.model = ModelFactory.createDefaultModel();
 		//model.read(relativePathOntologyFile); //load ontology and add its axioms to the linked graph
         this.relativePathOntologyFile = relativePathOntologyFile;
-		this.ontology = ModelFactory.createDefaultModel().read(relativePathOntologyFile);
+		this.ontology = ModelFactory.createOntologyModel().read(relativePathOntologyFile);
 		fileReader = new SemistructuredFileReader();
 	}
 
@@ -91,6 +72,7 @@ public class TriplesProcessing {
 		}
 
  		for(Rule rule : regularRuleList){
+			System.out.println("Processing rules...");
 			processRule(rule, defaultNs);
 		}
 
@@ -508,8 +490,8 @@ public class TriplesProcessing {
 
 	private Boolean 		checkConsistency() {
 		System.out.println("#####################################\nChecking consistency...");
-		Reasoner reasoner = ReasonerRegistry.getOWLReasoner().bindSchema(ontology);
-		InfModel inf = ModelFactory.createInfModel(reasoner, model);
+		Reasoner openPellet = PelletReasonerFactory.theInstance().create().bindSchema(ontology);
+		InfModel inf = ModelFactory.createInfModel(openPellet, model);
 
 		ValidityReport report = inf.validate();
 

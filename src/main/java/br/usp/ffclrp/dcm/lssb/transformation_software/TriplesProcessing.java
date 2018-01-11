@@ -262,12 +262,12 @@ public class TriplesProcessing {
 					if(content.size() > 1) {
 						for(String contentElement : content){
 							if(contentElement != null && contentElement != "")
-								addTripleToModel(subject, predicate, contentElement, XSDDatatype.XSDstring);
+								addTripleToModel(subject, predicate, contentElement, "Literal");
 						}
 
 					} else {
 						TSVColumn firstDataColumn = dataColumns.iterator().next(); //iterator to get the first element of the list
-						XSDDatatype datatype = getDataTypeContentFlag(firstDataColumn); //get the first element, not necessarily the index 0
+						Object datatype = getDataTypeContentFlag(firstDataColumn); //get the first element, not necessarily the index 0
 
 						String firstContent = content.iterator().next();
 						addTripleToModel(subject, predicate, firstContent, datatype);
@@ -322,9 +322,12 @@ public class TriplesProcessing {
 		subject.addProperty(predicate, object);		
 	}
 
-	private void 			addTripleToModel(Resource subject, Property predicate, String contentElement, XSDDatatype datatype) {
+	private void 			addTripleToModel(Resource subject, Property predicate, String contentElement, Object datatype) {
 		//System.out.println("S: " + subject.getURI() + " P: " + predicate.getURI() + " O: " + contentElement);
-		subject.addProperty(predicate, contentElement, datatype);
+		if(datatype instanceof XSDDatatype)
+			subject.addProperty(predicate, contentElement, (XSDDatatype) datatype);
+		else
+			subject.addProperty(predicate, contentElement, new BaseDatatype("http://www.w3.org/2000/01/rdf-schema#Literal"));
 	}
 
 	private List<String> 	extractDataFromTSVColumn(List<TSVColumn> listTSVColumn, Integer lineNumber) throws Exception {
@@ -488,7 +491,7 @@ public class TriplesProcessing {
 		return null;
 	}
 
-	private XSDDatatype 	getDataTypeContentFlag(TSVColumn column) {
+	private Object 	getDataTypeContentFlag(TSVColumn column) {
 		for(Flag flag : column.getFlags()){
 			if(flag instanceof FlagDataType){
 				return ((FlagDataType) flag).getDatatype();

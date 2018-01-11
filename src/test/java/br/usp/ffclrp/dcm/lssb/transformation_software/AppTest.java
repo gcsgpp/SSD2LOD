@@ -819,7 +819,7 @@ public class AppTest
 			if(flagExtracted instanceof FlagDataType) {
 				FlagDataType flag = (FlagDataType) flagExtracted;
 
-				assertEquals(XSDDatatype.XSDstring.getURI(), flag.getDatatype().getURI());
+				assertEquals(XSDDatatype.XSDstring.getURI(), ((XSDDatatype) flag.getDatatype()).getURI());
 			}else if(flagExtracted instanceof FlagContentDirectionTSVColumn){
 				continue;
 			}else{

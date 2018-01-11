@@ -1,16 +1,24 @@
 package br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing;
 
 import org.apache.jena.datatypes.xsd.XSDDatatype;
+import org.apache.jena.vocabulary.RDFS;
 
 public class FlagDataType extends Flag {
 	XSDDatatype datatype = null;
+	Boolean literal = false;
 	
 	public FlagDataType (String type) {
-		
-		this.datatype = new XSDDatatype(type);
+		if(type.equals("literal"))
+			this.literal = true;
+		else
+			this.datatype = new XSDDatatype(type);
 	}
-	
-	public XSDDatatype getDatatype() {
+
+	public Object getDatatype() {
+
+		if(literal)
+			return "Literal";
+
 		return this.datatype;
 	}
 

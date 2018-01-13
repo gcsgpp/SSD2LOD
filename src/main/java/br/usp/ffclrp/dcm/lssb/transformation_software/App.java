@@ -434,13 +434,29 @@ public class App
 	}
 
 	private List<String> 	identifyRulesBlocksFromString(String fileContent) {
-		Pattern patternToFind = Pattern.compile("(matrix_rule|simple_rule)\\[(.*?)\\]");
-		Matcher match = patternToFind.matcher(fileContent);
+		Pattern patternToFind = Pattern.compile("(matrix_rule|simple_rule)");
+		Matcher matcher = patternToFind.matcher(fileContent);
+		matcher.find();
+
+
+		List<Integer> initialOfEachMatch = new ArrayList<Integer>();
+		while(!matcher.hitEnd()){
+			initialOfEachMatch.add(matcher.start());
+			matcher.find();
+		}
 
 		List<String> identifiedRules = new ArrayList<String>();
+		for(int i = 0; i < initialOfEachMatch.size(); i++) {
+			int finalChar;
+			if (i == initialOfEachMatch.size() - 1) //IF LAST MATCH, GET THE END OF THE SENTENCE
+				finalChar = fileContent.length();
+			else
+				finalChar = initialOfEachMatch.get(i + 1);
 
-		while(match.find()){
-			identifiedRules.add(match.group());
+
+			String rule = fileContent.substring(initialOfEachMatch.get(i), finalChar);
+
+			identifiedRules.add(rule);
 		}
 		return identifiedRules;
 	}

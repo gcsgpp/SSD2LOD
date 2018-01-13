@@ -12,7 +12,6 @@ public class Rule {
 	private OWLClass subject;
 	private List<TSVColumn> subjectTSVColumns = null;
 	private Map<OWLProperty, TripleObject> predicateObjects;
-	private Boolean enabled = null;
 
 	public Rule(String id, OWLClass subject, List<TSVColumn> subjectTSVColumns, Map<OWLProperty, TripleObject> predicateObjects){
 		this.id = id;
@@ -48,14 +47,6 @@ public class Rule {
 	
 	public Boolean isMatrix() {
 		return config.getMatrix();
-	}
-	
-	public Boolean isEnabled() {
-		return this.enabled;
-	}
-
-	public void setEnable(boolean status) {
-		this.enabled = status;
 	}
 
 }

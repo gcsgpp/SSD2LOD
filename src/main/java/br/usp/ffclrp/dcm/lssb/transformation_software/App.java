@@ -157,10 +157,7 @@ public class App
 		}
 		
 		Rule rule = new Rule(ruleId, ruleConfig, ruleSubject, subjectTsvcolumns, predicateObjects);
-		
-		if(isMatrix)
-			rule.setEnable(false);
-		
+
 		return rule;
 	}
 

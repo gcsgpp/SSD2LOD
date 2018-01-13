@@ -931,4 +931,31 @@ public class AppTest
 			throw e;
 		}
 	}
+
+	@Test
+	public void baseIRIWithIDTermInURL(){
+		String 	sentence = "\"Term\" = \"Term\" /BASEIRI(\"http://amigo1.geneontology.org/cgi-bin/ID(amigo/term_details?term=\", \"go\")";
+
+		sentence = sentence.replace("\t", "").replaceAll("\n", "");
+
+		App app = new App();
+		List<Flag> flagsExtracted = null;
+		try {
+			flagsExtracted = app.extractFlagsFromSentence(sentence);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		assertEquals(1, flagsExtracted.size());
+		for(Flag flagExtracted : flagsExtracted) {
+			if(flagExtracted instanceof FlagBaseIRI) {
+				FlagBaseIRI flag = (FlagBaseIRI) flagExtracted;
+				assertEquals("http://amigo1.geneontology.org/cgi-bin/ID(amigo/term_details?term=", flag.getIRI());
+				assertEquals("go", flag.getNamespace());
+			}else{
+				fail();
+			}
+		}
+
+	}
 }

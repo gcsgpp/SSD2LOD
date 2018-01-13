@@ -30,9 +30,11 @@ public class TriplesProcessing {
 	private String relativePathOntologyFile = null;
 	private MatrixLineNumberTracking currentLineNumberMatrixRules = new MatrixLineNumberTracking();
 	private Map<Integer, List<Resource>> simpleRuleAlreadyProcessed = new HashMap<>();
+	private long startTime;
+	private long endTime;
 
 	public 					TriplesProcessing(String relativePathOntologyFile) {
-
+		startTime = new Date().getTime();
 		this.model = ModelFactory.createDefaultModel();
 		//model.read(relativePathOntologyFile); //load ontology and add its axioms to the linked graph
         this.relativePathOntologyFile = relativePathOntologyFile;
@@ -73,7 +75,7 @@ public class TriplesProcessing {
 		}
 
  		for(Rule rule : regularRuleList){
-			System.out.println("Processing rules...");
+			//System.out.println("Processing rules...");
 			processRule(rule, defaultNs);
 		}
 
@@ -81,6 +83,7 @@ public class TriplesProcessing {
 	}
 
 	private List<Resource> 	processRule(Rule rule, String defaultNs) throws Exception {
+		System.out.println("Processing rules...");
 		List<Resource> subjectListToBeReturned = new LinkedList<>();
 		if(rule.isMatrix()){
 			if(currentLineNumberMatrixRules.isEmpty()){
@@ -494,6 +497,8 @@ public class TriplesProcessing {
 		long stopTime = System.currentTimeMillis();
 		long elapsedTime = stopTime - startTime;
 		System.out.println("Wrote RDF in " + elapsedTime / 1000 + " secs");
+		elapsedTime = stopTime - this.startTime;
+		System.out.println("Processed in " + elapsedTime / 1000 + " secs");
 	}
 
 	private Boolean 		checkConsistency() {

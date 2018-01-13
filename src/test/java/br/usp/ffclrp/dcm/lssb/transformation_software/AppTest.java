@@ -100,7 +100,7 @@ public class AppTest
 		for(TSVColumn column : rule1Extracted.getSubjectTSVColumns()){
 			if(column.getTitle().equals("Term")){
 
-				assertEquals(4, column.getFlags().size()); //all from the rule line plus the ContentDirection
+				assertEquals(3, column.getFlags().size()); //all from the rule line plus the ContentDirection
 
 				for(Flag flag : column.getFlags()){
 					if(flag instanceof FlagSeparator){
@@ -117,8 +117,6 @@ public class AppTest
 					}else if(flag instanceof FlagConditionBlock){
 						assertEquals(1, ((FlagConditionBlock) flag).getId().intValue());
 
-					}else if(flag instanceof FlagContentDirectionTSVColumn){
-						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
 					}else{
 						fail();
 					}
@@ -137,11 +135,7 @@ public class AppTest
 
 				assertEquals(1, object.getObject().size());
 				assertEquals("PValue", object.getObject().get(0).getTitle());
-				assertEquals(1, object.getObject().get(0).getFlags().size());
-				Flag flag = object.getObject().get(0).getFlags().get(0);
-				assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
-
-
+				assertEquals(0, object.getObject().get(0).getFlags().size());
 
 			}else if(entry.getKey().getIRI().toString().equals("http://schema.org/name")){
 				TripleObjectAsColumns object = (TripleObjectAsColumns) entry.getValue();
@@ -149,16 +143,13 @@ public class AppTest
 				assertEquals("Term", object.getObject().get(0).getTitle());
 
 				List<Flag> flagsList = object.getObject().get(0).getFlags();
-				assertEquals(2, flagsList.size());
+				assertEquals(1, flagsList.size());
 				for(Flag flag : flagsList){
 					if(flag instanceof FlagSeparator){
 						FlagSeparator separator = (FlagSeparator) flag;
 						assertEquals("~", separator.getTerm());
 						assertEquals(1, separator.getColumns().size());
 						assertEquals(1, separator.getColumns().get(0).intValue());
-					}else if(flag instanceof FlagContentDirectionTSVColumn){
-						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
-
 					}else{
 						fail();
 					}
@@ -171,9 +162,7 @@ public class AppTest
 
 				for(ObjectAsRule objectAsRule : object.getObject()){
 					assertEquals(3, objectAsRule.getRuleNumber().intValue());
-					assertEquals(1, objectAsRule.getFlags().size());
-					Flag flag = objectAsRule.getFlags().get(0);
-					assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
+					assertEquals(0, objectAsRule.getFlags().size());
 
 				}
 
@@ -211,7 +200,7 @@ public class AppTest
 		for(TSVColumn column : rule2Extracted.getSubjectTSVColumns()){
 			if(column.getTitle().equals("Term")){
 
-				assertEquals(4, column.getFlags().size()); //all from the rule line plus the ContentDirection
+				assertEquals(3, column.getFlags().size()); //all from the rule line plus the ContentDirection
 
 				for(Flag flag : column.getFlags()){
 					if(flag instanceof FlagSeparator){
@@ -226,8 +215,6 @@ public class AppTest
 					}else if(flag instanceof FlagConditionBlock){
 						assertEquals(2, ((FlagConditionBlock) flag).getId().intValue());
 
-					}else if(flag instanceof FlagContentDirectionTSVColumn){
-						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
 					}else{
 						fail();
 					}
@@ -246,11 +233,7 @@ public class AppTest
 
 				assertEquals(1, object.getObject().size());
 				assertEquals("PValue", object.getObject().get(0).getTitle());
-				assertEquals(1, object.getObject().get(0).getFlags().size());
-				Flag flag = object.getObject().get(0).getFlags().get(0);
-				assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
-
-
+				assertEquals(0, object.getObject().get(0).getFlags().size());
 
 
 			}else if(entry.getKey().getIRI().toString().equals("http://schema.org/name")){
@@ -259,21 +242,17 @@ public class AppTest
 				assertEquals("Term", object.getObject().get(0).getTitle());
 
 				List<Flag> flagsList = object.getObject().get(0).getFlags();
-				assertEquals(2, flagsList.size());
+				assertEquals(1, flagsList.size());
 				for(Flag flag : flagsList){
 					if(flag instanceof FlagSeparator){
 						FlagSeparator separator = (FlagSeparator) flag;
 						assertEquals(":", separator.getTerm());
 						assertEquals(1, separator.getColumns().size());
 						assertEquals(1, separator.getColumns().get(0).intValue());
-					}else if(flag instanceof FlagContentDirectionTSVColumn){
-						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
 					}else{
 						fail();
 					}
 				}
-
-
 
 
 			}else if(entry.getKey().getIRI().toString().equals("http://purl.org/g/onto/has_participant")){
@@ -283,14 +262,7 @@ public class AppTest
 
 				for(ObjectAsRule objectAsRule : object.getObject()){
 					assertEquals(3, objectAsRule.getRuleNumber().intValue());
-					assertEquals(1, objectAsRule.getFlags().size());
-					for(Flag flag : objectAsRule.getFlags()){
-						if(flag instanceof FlagContentDirectionTSVColumn){
-							assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
-						}else{
-							fail();
-						}
-					}
+					assertEquals(0, objectAsRule.getFlags().size());
 				}
 
 
@@ -329,7 +301,7 @@ public class AppTest
 		for(TSVColumn column : rule2Extracted.getSubjectTSVColumns()){
 			if(column.getTitle().equals("Term")){
 
-				assertEquals(4, column.getFlags().size()); //all from the rule line plus the ContentDirection
+				assertEquals(3, column.getFlags().size()); //all from the rule line plus the ContentDirection
 
 				for(Flag flag : column.getFlags()){
 					if(flag instanceof FlagSeparator){
@@ -344,8 +316,6 @@ public class AppTest
 					}else if(flag instanceof FlagConditionBlock){
 						assertEquals(2, ((FlagConditionBlock) flag).getId().intValue());
 
-					}else if(flag instanceof FlagContentDirectionTSVColumn){
-						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
 					}else{
 						fail();
 					}
@@ -364,10 +334,7 @@ public class AppTest
 
 				assertEquals(1, object.getObject().size());
 				assertEquals("PValue", object.getObject().get(0).getTitle());
-				assertEquals(1, object.getObject().get(0).getFlags().size());
-				Flag flag = object.getObject().get(0).getFlags().get(0);
-				assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
-
+				assertEquals(0, object.getObject().get(0).getFlags().size());
 
 
 
@@ -377,15 +344,13 @@ public class AppTest
 				assertEquals("Term", object.getObject().get(0).getTitle());
 
 				List<Flag> flagsList = object.getObject().get(0).getFlags();
-				assertEquals(2, flagsList.size());
+				assertEquals(1, flagsList.size());
 				for(Flag flag : flagsList){
 					if(flag instanceof FlagSeparator){
 						FlagSeparator separator = (FlagSeparator) flag;
 						assertEquals(",", separator.getTerm());
 						assertEquals(1, separator.getColumns().size());
 						assertEquals(1, separator.getColumns().get(0).intValue());
-					}else if(flag instanceof FlagContentDirectionTSVColumn){
-						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
 					}else{
 						fail();
 					}
@@ -401,14 +366,7 @@ public class AppTest
 
 				for(ObjectAsRule objectAsRule : object.getObject()){
 					assertEquals(3, objectAsRule.getRuleNumber().intValue());
-					assertEquals(1, objectAsRule.getFlags().size());
-					for(Flag flag : objectAsRule.getFlags()){
-						if(flag instanceof FlagContentDirectionTSVColumn){
-							assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
-						}else{
-							fail();
-						}
-					}
+					assertEquals(0, objectAsRule.getFlags().size());
 				}
 
 
@@ -442,7 +400,7 @@ public class AppTest
 		for(TSVColumn column : rule3Extracted.getSubjectTSVColumns()){
 			if(column.getTitle().equals("Genes")){
 
-				assertEquals(3, column.getFlags().size()); //all from the rule line plus the ContentDirection
+				assertEquals(2, column.getFlags().size()); //all from the rule line plus the ContentDirection
 
 				for(Flag flag : column.getFlags()){
 					if(flag instanceof FlagSeparator){
@@ -454,8 +412,6 @@ public class AppTest
 						FlagBaseIRI baseiri = (FlagBaseIRI) flag;
 						assertEquals("http://www.genecards.org/cgi-bin/carddisp.pl?gene=", baseiri.getIRI().toString());
 						assertEquals("genecard", baseiri.getNamespace());
-					}else if(flag instanceof FlagContentDirectionTSVColumn){
-						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
 					}else{
 						fail();
 					}
@@ -498,7 +454,7 @@ public class AppTest
 		for(TSVColumn column : rule2Extracted.getSubjectTSVColumns()){
 			if(column.getTitle().equals("Term")){
 
-				assertEquals(4, column.getFlags().size()); //all from the rule line plus the ContentDirection
+				assertEquals(3, column.getFlags().size()); //all from the rule line plus the ContentDirection
 
 				for(Flag flag : column.getFlags()){
 					if(flag instanceof FlagSeparator){
@@ -513,8 +469,6 @@ public class AppTest
 					}else if(flag instanceof FlagConditionBlock){
 						assertEquals(2, ((FlagConditionBlock) flag).getId().intValue());
 
-					}else if(flag instanceof FlagContentDirectionTSVColumn){
-						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
 					}else{
 						fail();
 					}
@@ -533,9 +487,7 @@ public class AppTest
 
 				assertEquals(1, object.getObject().size());
 				assertEquals("PValue", object.getObject().get(0).getTitle());
-				assertEquals(1, object.getObject().get(0).getFlags().size());
-				Flag flag = object.getObject().get(0).getFlags().get(0);
-				assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
+				assertEquals(0, object.getObject().get(0).getFlags().size());
 
 
 
@@ -546,15 +498,13 @@ public class AppTest
 				assertEquals("Term", object.getObject().get(0).getTitle());
 
 				List<Flag> flagsList = object.getObject().get(0).getFlags();
-				assertEquals(2, flagsList.size());
+				assertEquals(1, flagsList.size());
 				for(Flag flag : flagsList){
 					if(flag instanceof FlagSeparator){
 						FlagSeparator separator = (FlagSeparator) flag;
 						assertEquals(":", separator.getTerm());
 						assertEquals(1, separator.getColumns().size());
 						assertEquals(1, separator.getColumns().get(0).intValue());
-					}else if(flag instanceof FlagContentDirectionTSVColumn){
-						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
 					}else{
 						fail();
 					}
@@ -568,14 +518,8 @@ public class AppTest
 				for(ObjectAsRule objectAsRule : object.getObject()){
 					assert((objectAsRule.getRuleNumber().intValue() == 3) ||
 							(objectAsRule.getRuleNumber().intValue() == 4));
-					assertEquals(1, objectAsRule.getFlags().size());
-					for(Flag flag : objectAsRule.getFlags()){
-						if(flag instanceof FlagContentDirectionTSVColumn){
-							assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
-						}else{
-							fail();
-						}
-					}
+					assertEquals(0, objectAsRule.getFlags().size());
+
 				}
 
 			}else
@@ -611,7 +555,7 @@ public class AppTest
 		for(TSVColumn column : ruleExtracted.getSubjectTSVColumns()){
 			if(column.getTitle().equals("Term")){
 
-				assertEquals(4, column.getFlags().size()); //all from the rule line plus the ContentDirection
+				assertEquals(3, column.getFlags().size()); //all from the rule line plus the ContentDirection
 
 				for(Flag flag : column.getFlags()){
 					if(flag instanceof FlagSeparator){
@@ -626,8 +570,6 @@ public class AppTest
 					}else if(flag instanceof FlagConditionBlock){
 						assertEquals(1, ((FlagConditionBlock) flag).getId().intValue());
 
-					}else if(flag instanceof FlagContentDirectionTSVColumn){
-						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
 					}else{
 						fail();
 					}
@@ -648,15 +590,12 @@ public class AppTest
 
 				for(TSVColumn object : objects.getObject()) {
 					if(object.getTitle().equals("PValue")) {
-						assertEquals(1, object.getFlags().size()); //ContentDirection
+						assertEquals(0, object.getFlags().size());
 					}else if(object.getTitle().equals("List Total")) {
-						assertEquals(1, object.getFlags().size()); //ContentDirection
+						assertEquals(0, object.getFlags().size());
 					}else {
 						fail();
 					}
-
-					Flag flag = object.getFlags().get(0);
-					assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
 				}
 
 			}else if(entry.getKey().getIRI().toString().equals("http://schema.org/name")){
@@ -665,15 +604,13 @@ public class AppTest
 				assertEquals("Term", object.getObject().get(0).getTitle());
 
 				List<Flag> flagsList = object.getObject().get(0).getFlags();
-				assertEquals(2, flagsList.size());
+				assertEquals(1, flagsList.size());
 				for(Flag flag : flagsList){
 					if(flag instanceof FlagSeparator){
 						FlagSeparator separator = (FlagSeparator) flag;
 						assertEquals("~", separator.getTerm());
 						assertEquals(1, separator.getColumns().size());
 						assertEquals(1, separator.getColumns().get(0).intValue());
-					}else if(flag instanceof FlagContentDirectionTSVColumn){
-						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
 					}else{
 						fail();
 					}
@@ -686,67 +623,11 @@ public class AppTest
 
 				for(ObjectAsRule objectAsRule : object.getObject()){
 					assert(objectAsRule.getRuleNumber().intValue() == 3);
-					assertEquals(1, objectAsRule.getFlags().size());
-					for(Flag flag : objectAsRule.getFlags()){
-						if(flag instanceof FlagContentDirectionTSVColumn){
-							assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
-						}else{
-							fail();
-						}
-					}
+					assertEquals(0, objectAsRule.getFlags().size());
 				}
 
 			}else
 				fail();
-		}
-	}
-
-	@Test
-	public void extractContentDirectionFlagWithValueDown() {	
-		String sentence = "\\\"name\\\" = \\\"Term\\\" /D, ";
-
-		App app = new App();
-		
-		List<Flag> flagsExtracted = null;
-		try {
-			flagsExtracted = app.extractFlagsFromSentence(sentence);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		assertEquals(1, flagsExtracted.size());
-		for(Flag flagExtracted : flagsExtracted) {
-			if(flagExtracted instanceof FlagContentDirectionTSVColumn) {
-				FlagContentDirectionTSVColumn flag = (FlagContentDirectionTSVColumn) flagExtracted;
-
-				assertEquals(EnumContentDirectionTSVColumn.DOWN, flag.getDirection());
-			}else{
-				fail();
-			}
-		}
-	}
-
-	@Test
-	public void extractContentDirectionFlagWithValueRight() {	
-		String sentence = "\\\"name\\\" = \\\"Term\\\" /R, ";
-
-		App app = new App();
-		List<Flag> flagsExtracted = null;
-		try {
-			flagsExtracted = app.extractFlagsFromSentence(sentence);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		assertEquals(1, flagsExtracted.size());
-		for(Flag flagExtracted : flagsExtracted) {
-			if(flagExtracted instanceof FlagContentDirectionTSVColumn) {
-				FlagContentDirectionTSVColumn flag = (FlagContentDirectionTSVColumn) flagExtracted;
-
-				assertEquals(EnumContentDirectionTSVColumn.RIGHT, flag.getDirection());
-			}else{
-				fail();
-			}
 		}
 	}
 
@@ -762,14 +643,12 @@ public class AppTest
 			e.printStackTrace();
 		}
 
-		assertEquals(2, flagsExtracted.size()); //Fixed Content + ContentDirection
+		assertEquals(1, flagsExtracted.size());
 		for(Flag flagExtracted : flagsExtracted) {
 			if(flagExtracted instanceof FlagFixedContent) {
 				FlagFixedContent flag = (FlagFixedContent) flagExtracted;
 
 				assertEquals("fixed content test", flag.getContent());
-			}else if(flagExtracted instanceof FlagContentDirectionTSVColumn){
-				continue;
 			}else{
 				fail();
 			}
@@ -788,14 +667,12 @@ public class AppTest
 			e.printStackTrace();
 		}
 
-		assertEquals(2, flagsExtracted.size()); //NotMetadata + ContentDirection
+		assertEquals(1, flagsExtracted.size());
 		for(Flag flagExtracted : flagsExtracted) {
 			if(flagExtracted instanceof FlagNotMetadata) {
 				FlagNotMetadata flag = (FlagNotMetadata) flagExtracted;
 
 				assert(flag.isMetadata());
-			}else if(flagExtracted instanceof FlagContentDirectionTSVColumn){
-				continue;
 			}else{
 				fail();
 			}
@@ -814,14 +691,12 @@ public class AppTest
 			e.printStackTrace();
 		}
 
-		assertEquals(2, flagsExtracted.size()); //Datatype Flag + ContentDirection
+		assertEquals(1, flagsExtracted.size());
 		for(Flag flagExtracted : flagsExtracted) {
 			if(flagExtracted instanceof FlagDataType) {
 				FlagDataType flag = (FlagDataType) flagExtracted;
 
 				assertEquals(XSDDatatype.XSDstring.getURI(), ((XSDDatatype) flag.getDatatype()).getURI());
-			}else if(flagExtracted instanceof FlagContentDirectionTSVColumn){
-				continue;
 			}else{
 				fail();
 			}
@@ -866,7 +741,7 @@ public class AppTest
 		for(TSVColumn column : rule1Extracted.getSubjectTSVColumns()){
 			if(column.getTitle().equals("Term")){
 
-				assertEquals(4, column.getFlags().size()); //all from the rule line plus the ContentDirection
+				assertEquals(3, column.getFlags().size());
 
 				for(Flag flag : column.getFlags()){
 					if(flag instanceof FlagSeparator){
@@ -883,8 +758,6 @@ public class AppTest
 					}else if(flag instanceof FlagConditionBlock){
 						assertEquals(1, ((FlagConditionBlock) flag).getId().intValue());
 
-					}else if(flag instanceof FlagContentDirectionTSVColumn){
-						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
 					}else{
 						fail();
 					}
@@ -903,11 +776,6 @@ public class AppTest
 
 				assertEquals(1, object.getObject().size());
 				assertEquals("PValue", object.getObject().get(0).getTitle());
-				assertEquals(1, object.getObject().get(0).getFlags().size());
-				Flag flag = object.getObject().get(0).getFlags().get(0);
-				assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
-
-
 
 			}else if(entry.getKey().getIRI().toString().equals("http://schema.org/name2")){
 				TripleObjectAsColumns object = (TripleObjectAsColumns) entry.getValue();
@@ -915,15 +783,13 @@ public class AppTest
 				assertEquals("Term", object.getObject().get(0).getTitle());
 
 				List<Flag> flagsList = object.getObject().get(0).getFlags();
-				assertEquals(2, flagsList.size());
+				assertEquals(1, flagsList.size());
 				for(Flag flag : flagsList){
 					if(flag instanceof FlagSeparator){
 						FlagSeparator separator = (FlagSeparator) flag;
 						assertEquals("~", separator.getTerm());
 						assertEquals(1, separator.getColumns().size());
 						assertEquals(1, separator.getColumns().get(0).intValue());
-					}else if(flag instanceof FlagContentDirectionTSVColumn){
-						assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
 
 					}else{
 						fail();
@@ -937,9 +803,7 @@ public class AppTest
 
 				for(ObjectAsRule objectAsRule : object.getObject()){
 					assertEquals(3, objectAsRule.getRuleNumber().intValue());
-					assertEquals(1, objectAsRule.getFlags().size());
-					Flag flag = objectAsRule.getFlags().get(0);
-					assertEquals(EnumContentDirectionTSVColumn.DOWN, ((FlagContentDirectionTSVColumn) flag).getDirection());
+					assertEquals(0, objectAsRule.getFlags().size());
 				}
 
 			}else
@@ -963,17 +827,15 @@ public class AppTest
 		for(TSVColumn column : tsvColumns) {
 
 			if(column.getTitle().equals("column1")) {
-				assertEquals(1, column.getFlags().size());
-				assertTrue(column.getFlags().get(0) instanceof FlagContentDirectionTSVColumn);
+				assertEquals(0, column.getFlags().size());
 
 			}else if(column.getTitle().equals("column2")){
-				assertEquals(1, column.getFlags().size());
-				assertTrue(column.getFlags().get(0) instanceof FlagContentDirectionTSVColumn);
+				assertEquals(0, column.getFlags().size());
 
 			}else if(column.getTitle().equals("column3")){
-				assertEquals(2, column.getFlags().size());
+				assertEquals(1, column.getFlags().size());
 				for(Flag flag : column.getFlags()) {
-					assertTrue((flag instanceof FlagBaseIRI) || ((flag instanceof FlagContentDirectionTSVColumn)));
+					assertTrue(flag instanceof FlagBaseIRI);
 				}
 			}else {
 				fail();
@@ -993,7 +855,7 @@ public class AppTest
 			e.printStackTrace();
 		}
 
-		assertEquals(2, flagsExtracted.size()); //Separator Flag + ContentDirection
+		assertEquals(1, flagsExtracted.size()); //Separator Flag
 		for(Flag flagExtracted : flagsExtracted) {
 			if(flagExtracted instanceof FlagSeparator) {
 				FlagSeparator flag = (FlagSeparator) flagExtracted;
@@ -1002,8 +864,6 @@ public class AppTest
 				for(int columnNumber : flag.getColumns()) {
 					assert(columnNumber == 0 | columnNumber == 1 | columnNumber == 2);
 				}
-			}else if(flagExtracted instanceof FlagContentDirectionTSVColumn){
-				continue;
 			}else{
 				fail();
 			}

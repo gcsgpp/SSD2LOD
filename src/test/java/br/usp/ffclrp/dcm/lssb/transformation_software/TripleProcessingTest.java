@@ -50,7 +50,6 @@ public class TripleProcessingTest
 		subjectFlags.add(new FlagSeparator("~", separatorCols));
 		subjectFlags.add(new FlagBaseIRI("http://amigo1.geneontology.org/cgi-bin/amigo/term_details?term=", "go"));
 		subjectFlags.add(new FlagConditionBlock(1));
-		subjectFlags.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
 
 		subject.setFlags(subjectFlags);
 		subjectTSVColumns.add(subject);
@@ -62,7 +61,6 @@ public class TripleProcessingTest
 		pvalueColumn.setTitle("PValue");
 
 		List<Flag> pvalueFlags = new ArrayList<Flag>();
-		pvalueFlags.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
 		pvalueColumn.setFlags(pvalueFlags);
 
 		predicateObjects.put(ontologyHelper.getProperty("has_pvalue"), new TripleObjectAsColumns(pvalueColumn));
@@ -72,7 +70,6 @@ public class TripleProcessingTest
 		nameColumn.setTitle("Term");
 
 		List<Flag> nameFlags = new ArrayList<Flag>();
-		nameFlags.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
 		separatorCols = new ArrayList<Integer>();
 		separatorCols.add(1);
 		nameFlags.add(new FlagSeparator("~", separatorCols));
@@ -85,7 +82,6 @@ public class TripleProcessingTest
 		participantColumn.setTitle("Genes");
 
 		List<Flag> participantFlags = new ArrayList<Flag>();
-		participantFlags.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
 		participantColumn.setFlags(participantFlags);
 
 		predicateObjects.put(ontologyHelper.getProperty("has participant"), new TripleObjectAsRule(new ObjectAsRule(3, participantFlags)));
@@ -109,7 +105,6 @@ public class TripleProcessingTest
 		subjectFlags.add(new FlagSeparator(":", separatorCols));
 		subjectFlags.add(new FlagBaseIRI("http://www.kegg.jp/entry/", "kegg"));
 		subjectFlags.add(new FlagConditionBlock(2));
-		subjectFlags.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
 
 		subject.setFlags(subjectFlags);
 		subjectTSVColumns.add(subject);
@@ -121,7 +116,6 @@ public class TripleProcessingTest
 		pvalueColumn.setTitle("PValue");
 
 		List<Flag> pvalueFlags = new ArrayList<Flag>();
-		pvalueFlags.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
 		pvalueColumn.setFlags(pvalueFlags);
 
 		predicateObjects.put(ontologyHelper.getProperty("has_pvalue"), new TripleObjectAsColumns(pvalueColumn));
@@ -131,7 +125,6 @@ public class TripleProcessingTest
 		nameColumn.setTitle("Term");
 
 		List<Flag> nameFlags = new ArrayList<Flag>();
-		nameFlags.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
 		separatorCols = new ArrayList<Integer>();
 		separatorCols.add(1);
 		nameFlags.add(new FlagSeparator(":", separatorCols));
@@ -144,7 +137,6 @@ public class TripleProcessingTest
 		participantColumn.setTitle("Term");
 
 		List<Flag> participantFlags = new ArrayList<Flag>();
-		participantFlags.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
 		participantColumn.setFlags(participantFlags);
 
 		predicateObjects.put(ontologyHelper.getProperty("has participant"), new TripleObjectAsRule(new ObjectAsRule(3, participantFlags)));
@@ -439,7 +431,6 @@ public class TripleProcessingTest
 		OWLProperty enrichmentProperty = ontologyHelper.getProperty("has enrichement");
 		
 		List<Flag> objectFlags = new ArrayList<Flag>();
-		objectFlags.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
 		objectFlags.add(new FlagFixedContent("test fixed content"));
 		TripleObject object = new TripleObjectAsColumns(new TSVColumn("GSM1243183", objectFlags));
 		
@@ -661,7 +652,6 @@ public class TripleProcessingTest
 		TSVColumn subject = new TSVColumn();
 		subject.setTitle("Genes");
 		List<Flag> subjectFlags = new ArrayList<Flag>();
-		subjectFlags.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
 		subjectFlags.add(new FlagSeparator("-", new ArrayList<Integer>()));
 		subject.setFlags(subjectFlags);
 		
@@ -828,7 +818,6 @@ public class TripleProcessingTest
 		TSVColumn subject = new TSVColumn();
 		subject.setTitle("GSE67111_SERIES");
 		List<Flag> subjectFlags = new ArrayList<Flag>();
-		subjectFlags.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
 		subject.setFlags(subjectFlags);
 
 		subjectTSVColumns.add(subject);
@@ -837,7 +826,6 @@ public class TripleProcessingTest
 
 		OWLProperty statusProperty = ontologyHelper.getProperty("status");
 		List<Flag> contentDirection = new ArrayList<Flag>();
-		contentDirection.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
 		TripleObject statusTripleObject = new TripleObjectAsColumns(new TSVColumn("GSE67111_status",contentDirection));
 
 		OWLProperty summaryProperty = ontologyHelper.getProperty("summary");
@@ -914,18 +902,16 @@ public class TripleProcessingTest
 		TSVColumn subject = new TSVColumn();
 		subject.setTitle("GSE67111_SERIES");
 		List<Flag> subjectFlags = new ArrayList<Flag>();
-		subjectFlags.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
 		subject.setFlags(subjectFlags);
 
 		subjectTSVColumns.add(subject);
 
 		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<OWLProperty, TripleObject>();
 
-		List<Flag> contentDirection = new ArrayList<Flag>();
-		contentDirection.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
+		TripleObject hasParticipantTripleObject = new TripleObjectAsRule(new ObjectAsRule(2, new ArrayList<Flag>()));
 
 		OWLProperty hasParticipantProperty = ontologyHelper.getProperty("has participant");
-		TripleObject hasParticipantTripleObject = new TripleObjectAsRule(new ObjectAsRule(2, contentDirection));
+
 		predicateObjects.put(hasParticipantProperty, hasParticipantTripleObject);
 
 		rules.add(new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects));
@@ -938,18 +924,13 @@ public class TripleProcessingTest
 
 		subject = new TSVColumn();
 		subject.setTitle("GPL19921_geo_accession");
-		subjectFlags = new ArrayList<Flag>();
-		subjectFlags.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
-		subject.setFlags(subjectFlags);
+		subject.setFlags(new ArrayList<Flag>());
 		subjectTSVColumns.add(subject);
 
 		predicateObjects = new HashMap<>();
 
-		contentDirection = new ArrayList<Flag>();
-		contentDirection.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
-
 		OWLProperty titleProperty = ontologyHelper.getProperty("Title");
-		TripleObject titleTripleObject = new TripleObjectAsColumns(new TSVColumn("GPL19921_title",contentDirection));
+		TripleObject titleTripleObject = new TripleObjectAsColumns(new TSVColumn("GPL19921_title", new ArrayList<Flag>()));
 		predicateObjects.put(titleProperty, titleTripleObject);
 
 		rules.add(new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects));
@@ -1018,19 +999,14 @@ public class TripleProcessingTest
 
 		TSVColumn subject = new TSVColumn();
 		subject.setTitle("GSE67111_SERIES");
-		List<Flag> subjectFlags = new ArrayList<Flag>();
-		subjectFlags.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
-		subject.setFlags(subjectFlags);
+		subject.setFlags(new ArrayList<Flag>());
 
 		subjectTSVColumns.add(subject);
 
 		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<OWLProperty, TripleObject>();
 
-		List<Flag> contentDirection = new ArrayList<Flag>();
-		contentDirection.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
-
 		OWLProperty hasParticipantProperty = ontologyHelper.getProperty("has participant");
-		TripleObject hasParticipantTripleObject = new TripleObjectAsRule(new ObjectAsRule(2, contentDirection));
+		TripleObject hasParticipantTripleObject = new TripleObjectAsRule(new ObjectAsRule(2, new ArrayList<Flag>()));
 		predicateObjects.put(hasParticipantProperty, hasParticipantTripleObject);
 
 		rules.add(new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects));
@@ -1044,21 +1020,15 @@ public class TripleProcessingTest
 
 		subject = new TSVColumn();
 		subject.setTitle("GPL19921_ID");
-		subjectFlags = new ArrayList<Flag>();
-		subjectFlags.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
-		subject.setFlags(subjectFlags);
+		subject.setFlags(new ArrayList<Flag>());
 
 		TSVColumn subject2 = new TSVColumn();
 		subject2.setTitle("GPL19921_ORF");
-		List<Flag> subject2Flags = new ArrayList<Flag>();
-		subject2Flags.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
-		subject2.setFlags(subjectFlags);
+		subject2.setFlags(new ArrayList<Flag>());
 
 		TSVColumn subject3 = new TSVColumn();
 		subject3.setTitle("GPL19921_Assay ID");
-		List<Flag> subject3Flags = new ArrayList<Flag>();
-		subject3Flags.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
-		subject3.setFlags(subjectFlags);
+		subject3.setFlags(new ArrayList<Flag>());
 
 		subjectTSVColumns.add(subject);
 		subjectTSVColumns.add(subject2);
@@ -1066,18 +1036,14 @@ public class TripleProcessingTest
 
 		predicateObjects = new HashMap<>();
 
-		contentDirection = new ArrayList<Flag>();
-		contentDirection.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
-
 		OWLProperty idProperty = ontologyHelper.getProperty("ID");
-		TripleObject idTripleObject = new TripleObjectAsColumns(new TSVColumn("GPL19921_ID",contentDirection));
+		TripleObject idTripleObject = new TripleObjectAsColumns(new TSVColumn("GPL19921_ID",new ArrayList<Flag>()));
 
 		OWLProperty orfProperty = ontologyHelper.getProperty("ORF");
-		TripleObject orfTripleObject = new TripleObjectAsColumns(new TSVColumn("GPL19921_ORF",contentDirection));
+		TripleObject orfTripleObject = new TripleObjectAsColumns(new TSVColumn("GPL19921_ORF",new ArrayList<Flag>()));
 
 		OWLProperty assayidProperty = ontologyHelper.getProperty("Assay ID");
 		List<Flag> assayidFlags = new ArrayList<>();
-		assayidFlags.add(new FlagContentDirectionTSVColumn(EnumContentDirectionTSVColumn.DOWN));
 		List<Integer> maxnumber = new ArrayList<>();
 		maxnumber.add(Integer.MAX_VALUE);
 		assayidFlags.add(new FlagSeparator(",", maxnumber));

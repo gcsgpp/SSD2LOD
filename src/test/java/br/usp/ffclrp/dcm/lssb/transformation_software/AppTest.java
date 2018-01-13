@@ -958,4 +958,22 @@ public class AppTest
 		}
 
 	}
+
+	@Test
+	public void datatypeNotFound() throws Exception {
+		String 	sentence = "\"Term\" = \"Term\" /DT(\"strng\")";
+
+		sentence = sentence.replace("\t", "").replaceAll("\n", "");
+
+		App app = new App();
+		List<Flag> flagsExtracted = null;
+
+		thrown.expect(Exception.class);
+		thrown.expectMessage("Not found XSD datatype for 'strng'");
+		try {
+			flagsExtracted = app.extractFlagsFromSentence(sentence);
+		} catch (Exception e) {
+			throw e;
+		}
+	}
 }

@@ -1,43 +1,20 @@
 package br.usp.ffclrp.dcm.lssb.transformation_software;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Stream;
-
-import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLProperty;
-
 import br.usp.ffclrp.dcm.lssb.custom_exceptions.ClassNotFoundInOntologyException;
 import br.usp.ffclrp.dcm.lssb.custom_exceptions.CustomExceptions;
 import br.usp.ffclrp.dcm.lssb.custom_exceptions.PropertyNotExistException;
 import br.usp.ffclrp.dcm.lssb.custom_exceptions.SeparatorFlagException;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ConditionBlock;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagContentDirectionTSVColumn;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagCustomID;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagDataType;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.EnumContentDirectionTSVColumn;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.EnumRegexList;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagFixedContent;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Flag;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagBaseIRI;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagConditionBlock;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagNotMetadata;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.ObjectAsRule;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Rule;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.RuleConfig;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagSeparator;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TSVColumn;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TripleObject;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TripleObjectAsRule;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TripleObjectBuilder;
+import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.*;
+import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLProperty;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 /**
  * Hello world!
@@ -80,6 +57,8 @@ public class App
 		String fileContent = readFile(rulesRelativePath);
 
 		fileContent = fileContent.replaceAll("\n", "").replaceAll("\t", "");
+
+
 		
 		List<RuleConfig> listRuleConfig = RuleConfig.extractRuleConfigFromString(fileContent);
 		for(RuleConfig rc : listRuleConfig){
@@ -300,10 +279,15 @@ public class App
 		return flagsList;
 	}
 
-	private Flag 			extractDataFromFlagDataTypeFromSentence(String sentence, String regex) {
+	private Flag 			extractDataFromFlagDataTypeFromSentence(String sentence, String regex) throws Exception {
 		String contentFromQuotationMark = Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(sentence, regex);
 
-		return new FlagDataType(contentFromQuotationMark);
+		try{
+			return new FlagDataType(contentFromQuotationMark);
+		}catch (Exception e){
+			throw new Exception("Not found XSD datatype for '" + contentFromQuotationMark + "'");
+		}
+
 	}
 
 	private Flag 			extractDataFromFlagCustomIDFromSentence(String sentence, String regex) {

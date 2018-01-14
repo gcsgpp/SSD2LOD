@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import br.usp.ffclrp.dcm.lssb.transformation_software.App;
 import br.usp.ffclrp.dcm.lssb.transformation_software.Utils;
 
 public class RuleConfig {
@@ -51,17 +52,7 @@ public class RuleConfig {
 		return data;
 	}
 
-	static private List<String> identifyRuleConfigBlocksFromString(String fileContent) {
-		Pattern patternToFind = Pattern.compile("rule_config\\[(.*?)\\]");
-		Matcher match = patternToFind.matcher(fileContent);
 
-		List<String> identifiedRC = new ArrayList<String>();
-
-		while(match.find()){
-			identifiedRC.add(match.group());
-		}
-		return identifiedRC;
-	}
 	
 	static private RuleConfig createRuleConfigFromString(String rcAsText) throws Exception {
 		Matcher matcher 				=	Utils.matchRegexOnString(EnumRegexList.SELECTSUBJECTLINE.get(), rcAsText);
@@ -108,7 +99,7 @@ public class RuleConfig {
 	}
 	
 	static public List<RuleConfig> extractRuleConfigFromString(String fileContent) throws Exception {
-		List<String> ruleConfigListAsText = identifyRuleConfigBlocksFromString(fileContent);
+		List<String> ruleConfigListAsText = App.identifyBlocksFromString(fileContent);
 		List<RuleConfig> rcList = new ArrayList<RuleConfig>();
 
 		for(String rc : ruleConfigListAsText){

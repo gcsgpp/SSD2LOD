@@ -75,7 +75,7 @@ public class App
 
 	public List<Rule> 		extractRulesFromString(String fileContent) throws Exception {
 
-		List<String> rulesListAsText = identifyRulesBlocksFromString(fileContent);		
+		List<String> rulesListAsText = identifyBlocksFromString(fileContent);
 
 		List<Rule> ruleList = new ArrayList<Rule>();
 
@@ -414,8 +414,8 @@ public class App
 		return content;
 	}
 
-	private List<String> 	identifyRulesBlocksFromString(String fileContent) {
-		Pattern patternToFind = Pattern.compile("(matrix_rule|simple_rule)");
+	public static List<String> 	identifyBlocksFromString(String fileContent) {
+		Pattern patternToFind = Pattern.compile("(matrix_rule|simple_rule|rule_config)");
 		Matcher matcher = patternToFind.matcher(fileContent);
 		matcher.find();
 

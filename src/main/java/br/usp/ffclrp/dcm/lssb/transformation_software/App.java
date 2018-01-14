@@ -431,16 +431,18 @@ public class App
 
 	public static List<String> identifyConfigBlocksFromString(String fileContent) throws Exception {
 		List<String> configBlocks = new ArrayList<>();
-		try {
-			List<String> identifiedBlocks = identifyBlocksFromString(fileContent);
-			for(String block : identifiedBlocks){
-				if(block.startsWith("rule_config"))
-					configBlocks.add(block);
-			}
-		}catch(Exception e){
-			throw new Exception("No config rule block identified in your file of rules. Please check your file.");
+
+		List<String> identifiedBlocks = identifyBlocksFromString(fileContent);
+		if(identifiedBlocks.size() == 0)
+			throw new Exception("No config_rule, simple_rule or matrix_rule blocks identified in your file of rules. Please check your file.");
+
+		for(String block : identifiedBlocks){
+			if(block.startsWith("rule_config"))
+				configBlocks.add(block);
 		}
 
+		if(configBlocks.size() == 0)
+			throw new Exception("No config rule block identified in your file of rules. Please check your file.");
 		return configBlocks;
 	}
 

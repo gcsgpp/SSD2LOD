@@ -1039,4 +1039,41 @@ public class AppTest
 		assertEquals("http://www.example.org/onto/individual/", ruleConfig.getDefaultBaseIRI());
 
 	}
+
+	@Test
+	public void noRuleConfigInFile() throws Exception {
+		String sentence = 	"simple_rule[1, \"microarray platform\" = \"A-BUGS-23_Comment[ArrayExpressAccession]_4\" :\n" +
+							"\t\"Title\" = \"A-BUGS-23_Array Design Name_1\" /DT(\"literal\"),\n" +
+							"\t\"depends on\" = 2\n ]" +
+							"simple_rule[2, \"organism\" = \"A-BUGS-23_Comment[Organism]_6\" ]";
+
+		sentence = sentence.replace("\t", "").replaceAll("\n", "");
+
+		List<RuleConfig> rulesConfigExtracted = null;
+		thrown.expect(Exception.class);
+		thrown.expectMessage("No config rule block identified in your file of rules. Please check your file.");
+		try {
+			rulesConfigExtracted = RuleConfig.extractRuleConfigFromString(sentence);
+		} catch (Exception e) {
+			throw e;
+		}
+
+	}
+
+	@Test
+	public void noRulesInFile() throws Exception {
+		String sentence = 	"";
+
+		sentence = sentence.replace("\t", "").replaceAll("\n", "");
+
+		List<RuleConfig> rulesConfigExtracted = null;
+		thrown.expect(Exception.class);
+		thrown.expectMessage("No config_rule, simple_rule or matrix_rule blocks identified in your file of rules. Please check your file");
+		try {
+			rulesConfigExtracted = RuleConfig.extractRuleConfigFromString(sentence);
+		} catch (Exception e) {
+			throw e;
+		}
+
+	}
 }

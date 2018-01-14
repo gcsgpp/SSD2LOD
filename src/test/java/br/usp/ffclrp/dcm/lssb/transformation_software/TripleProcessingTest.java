@@ -289,7 +289,7 @@ public class TripleProcessingTest
 
 	private Rule createRuleWithNotMetadataFlag() {
 		String id = "1";
-		RuleConfig ruleConfig = new RuleConfig("default");
+		RuleConfig ruleConfig = new RuleConfig("default", "http://example.org/onto/individual#");
 		ruleConfig.setMatrix(true);
 		OWLClass subjectClass = ontologyHelper.getClass("geo sample");
 		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
@@ -362,7 +362,7 @@ public class TripleProcessingTest
 
 	private Rule createRuleWithFixedContentFlagOnSubjectLine() {
 		String id = "1";
-		RuleConfig ruleConfig = new RuleConfig("default");
+		RuleConfig ruleConfig = new RuleConfig("default", "http://example.org/onto/individual#");
 		ruleConfig.setMatrix(true);
 		OWLClass subjectClass = ontologyHelper.getClass("geo sample");
 		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
@@ -478,7 +478,7 @@ public class TripleProcessingTest
 
 	private Rule createRuleWithCustomIDFlag() {
 		String id = "1";
-		RuleConfig ruleConfig = new RuleConfig("default");
+		RuleConfig ruleConfig = new RuleConfig("default", "http://example.org/onto/individual#");
 		ruleConfig.setMatrix(true);
 		OWLClass subjectClass = ontologyHelper.getClass("geo sample");
 		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
@@ -811,7 +811,7 @@ public class TripleProcessingTest
 
     private Rule createSimpleRule(){
 		String id = "1";
-		RuleConfig ruleConfig = new RuleConfig(id);
+		RuleConfig ruleConfig = new RuleConfig(id, "http://example.org/onto/individual#");
 		OWLClass subjectClass = ontologyHelper.getClass("investigation");
 		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
 
@@ -895,7 +895,7 @@ public class TripleProcessingTest
 		List<Rule> rules = new ArrayList<>();
 		//RULE 1
 		String id = "1";
-		RuleConfig ruleConfig = new RuleConfig(id);
+		RuleConfig ruleConfig = new RuleConfig(id, "http://example.org/onto/individual#");
 		OWLClass subjectClass = ontologyHelper.getClass("investigation");
 		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
 
@@ -918,7 +918,7 @@ public class TripleProcessingTest
 
 		//RULE 2
 		id = "2";
-		ruleConfig = new RuleConfig(id);
+		ruleConfig = new RuleConfig(id, "http://example.org/onto/individual#");
 		subjectClass = ontologyHelper.getClass("microarray platform");
 		subjectTSVColumns = new ArrayList<TSVColumn>();
 
@@ -993,7 +993,7 @@ public class TripleProcessingTest
 		List<Rule> rules = new ArrayList<>();
 		//RULE 1
 		String id = "1";
-		RuleConfig ruleConfig = new RuleConfig(id);
+		RuleConfig ruleConfig = new RuleConfig(id, "http://example.org/onto/individual/");
 		OWLClass subjectClass = ontologyHelper.getClass("investigation");
 		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
 
@@ -1013,7 +1013,7 @@ public class TripleProcessingTest
 
 		//RULE 2
 		id = "2";
-		ruleConfig = new RuleConfig(id);
+		ruleConfig = new RuleConfig(id, "http://example.org/onto/individual/");
 		ruleConfig.setMatrix(true);
 		subjectClass = ontologyHelper.getClass("Platform Data");
 		subjectTSVColumns = new ArrayList<TSVColumn>();

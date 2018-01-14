@@ -25,7 +25,7 @@ public class App
 	public OntologyHelper ontologyHelper;
 	public List<Rule> rulesList;
 	public Map<Integer, ConditionBlock> conditionsBlocks 	= new HashMap<Integer, ConditionBlock>();
-	public Map<Integer, RuleConfig> ruleConfigs 			= new HashMap<Integer, RuleConfig>();
+	public Map<String, RuleConfig> ruleConfigs 			= new HashMap<>();
 
 	public static void 		main( String[] args ){
 		App app = new App();
@@ -62,7 +62,7 @@ public class App
 		
 		List<RuleConfig> listRuleConfig = RuleConfig.extractRuleConfigFromString(fileContent);
 		for(RuleConfig rc : listRuleConfig){
-			ruleConfigs.put(Integer.parseInt(rc.getId()), rc);
+			ruleConfigs.put(rc.getId(), rc);
 		}
 		
 		List<ConditionBlock> listConditionBlock = ConditionBlock.extractConditionsBlocksFromString(fileContent);
@@ -95,10 +95,16 @@ public class App
 		String predicatesLinesOneBlock 	= 	Utils.splitByIndex(blockRulesAsText, matcher.start())[1];
 
 		String ruleId 						= extractRuleIDFromSentence(subjectLine);
-		RuleConfig ruleConfig				= new RuleConfig("default");
-		Boolean isMatrix = false;
+
+
+
+		RuleConfig ruleConfig				= ruleConfigs.get(ruleId);
+		if(ruleConfig == null){
+			ruleConfig = ruleConfigs.get("default");
+			if(ruleConfig == null)
+				throw new Exception("Not found a config rule block for rule id '" + ruleId + "' neither a 'default' config rule block.");
+		}
 		if(subjectLine.contains("matrix_rule[")) {
-			isMatrix = true;
 			ruleConfig.setMatrix(true);
 		}
 			

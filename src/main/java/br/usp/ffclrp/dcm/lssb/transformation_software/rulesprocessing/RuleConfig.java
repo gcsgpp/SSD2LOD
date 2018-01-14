@@ -10,10 +10,17 @@ import br.usp.ffclrp.dcm.lssb.transformation_software.Utils;
 public class RuleConfig {
 	private String id = null;
 	private Boolean matrix = null;
+	private String defaultNS = null;
 	
 	public RuleConfig(String ID) {
 		this.matrix = false;
 		this.id = ID;
+	}
+
+	public RuleConfig(String ID, String defaultBaseIRI){
+		this.matrix = false;
+		this.id = ID;
+		this.defaultNS = defaultBaseIRI;
 	}
 	
 	public String getId() {
@@ -28,12 +35,19 @@ public class RuleConfig {
 		return this.matrix;
 	}
 
-	
+	public void setDefaultBaseIRI(String defaultBaseIRI) {
+		this.defaultNS = defaultBaseIRI;
+	}
+
+	public String getDefaultBaseIRI() {
+		return this.defaultNS;
+	}
+
 	static private String extractRuleConfigIDFromSentence(String blockRulesAsText) {
 		String data = "";
 
-		Matcher matcher = Utils.matchRegexOnString(EnumRegexList.SELECTRULEID.get(), blockRulesAsText);
-		data = matcher.group().replace("rule_config[", "");
+		Matcher matcher = Utils.matchRegexOnString(EnumRegexList.SELECTCONFIGRULEID.get(), blockRulesAsText);
+		data = matcher.group().replace("rule_config[", "").trim();
 		return data;
 	}
 
@@ -49,12 +63,12 @@ public class RuleConfig {
 		return identifiedRC;
 	}
 	
-	static private RuleConfig createRuleConfigFromString(String cbAsText) throws Exception {
-		Matcher matcher 				=	Utils.matchRegexOnString(EnumRegexList.SELECTSUBJECTLINE.get(), cbAsText);
-		String subjectLine 				=	Utils.splitByIndex(cbAsText, matcher.start())[0];
-		String predicatesLinesOneBlock 	= 	Utils.splitByIndex(cbAsText, matcher.start())[1];
+	static private RuleConfig createRuleConfigFromString(String rcAsText) throws Exception {
+		Matcher matcher 				=	Utils.matchRegexOnString(EnumRegexList.SELECTSUBJECTLINE.get(), rcAsText);
+		String subjectLine 				=	Utils.splitByIndex(rcAsText, matcher.start())[0];
+		String predicatesLinesOneBlock 	= 	Utils.splitByIndex(rcAsText, matcher.start())[1];
 
-		String ruleConfigId 		= 	extractRuleConfigIDFromSentence(subjectLine);
+		String ruleConfigId 			= 	extractRuleConfigIDFromSentence(subjectLine);
 
 
 		matcher = Utils.matchRegexOnString(EnumRegexList.SELECTPREDICATESDIVISIONS.get(), predicatesLinesOneBlock);
@@ -80,9 +94,9 @@ public class RuleConfig {
 			lineFromBlock 	= Utils.removeRegexFromContent(EnumRegexList.SELECTPREDICATE.get(), lineFromBlock);
 			String value 	= Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(lineFromBlock, EnumRegexList.SELECTALL.get());
 			
-			if(column.equals("matrix")) {
+			if(column.equals("default BaseIRI")) {
 				try {
-					rule.setMatrix(Boolean.parseBoolean(value));
+					rule.setDefaultBaseIRI(value);
 				}catch(Exception e) {
 					e.printStackTrace();
 					throw new Exception("One of the values inside rule_config block was not possible to understand. Rule Config block ID: " + ruleConfigId + " . Value found: " + value);

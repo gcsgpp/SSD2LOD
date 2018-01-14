@@ -21,6 +21,16 @@ public class AppTest
 	@org.junit.Rule
 	public ExpectedException thrown = ExpectedException.none();
 
+	private void createConfigRuleDefault(App app) throws Exception {
+
+		String sentence = "rule_config[default : \"default BaseIRI\" = \"http://www.example.org/onto/individual/\"]";
+
+		List<RuleConfig> listRuleConfig = RuleConfig.extractRuleConfigFromString(sentence);
+		for(RuleConfig rc : listRuleConfig){
+			app.ruleConfigs.put(rc.getId(), rc);
+		}
+	}
+
 	@Test
 	public void exctractConditionsFromString(){
 		String content = "condition_block[1: \"Category\" != \"KEGG_PATHWAY\", \"PValue\" < \"0.01\" ]";
@@ -89,6 +99,7 @@ public class AppTest
 
 		Rule rule1Extracted = null;
 		try {
+			createConfigRuleDefault(app);
 			rule1Extracted = app.createRulesFromBlock(ruleString);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -189,6 +200,7 @@ public class AppTest
 
 		Rule rule2Extracted = null;
 		try {
+			createConfigRuleDefault(app);
 			rule2Extracted = app.createRulesFromBlock(ruleString);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -290,6 +302,7 @@ public class AppTest
 
 		Rule rule2Extracted = null;
 		try {
+			createConfigRuleDefault(app);
 			rule2Extracted = app.createRulesFromBlock(ruleString);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -443,6 +456,7 @@ public class AppTest
 
 		Rule rule2Extracted = null;
 		try {
+			createConfigRuleDefault(app);
 			rule2Extracted = app.extractRulesFromString(ruleString).get(0);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -544,6 +558,7 @@ public class AppTest
 
 		Rule ruleExtracted = null;
 		try {
+			createConfigRuleDefault(app);
 			ruleExtracted = app.extractRulesFromString(ruleString).get(0);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -730,6 +745,7 @@ public class AppTest
 
 		Rule rule1Extracted = null;
 		try {
+			createConfigRuleDefault(app);
 			rule1Extracted = app.createRulesFromBlock(ruleString);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -884,6 +900,7 @@ public class AppTest
 		thrown.expect(ClassNotFoundInOntologyException.class);
 		thrown.expectMessage("Not found any ontology class with label 'Pudim'");
 		try {
+			createConfigRuleDefault(app);
 			app.createRulesFromBlock(ruleString);
 		} catch (Exception e) {
 			throw e;
@@ -905,6 +922,7 @@ public class AppTest
 		String message = " \"any property\" = \"PValue\" ]";
 		thrown.expectMessage("Property does not exist in ontology. Instruction: " + message);
 		try {
+			createConfigRuleDefault(app);
 			app.createRulesFromBlock(ruleString);
 		} catch (Exception e) {
 			throw e;
@@ -926,6 +944,7 @@ public class AppTest
 		String message = "/SP(, 1:p)";
 		thrown.expectMessage("Value specified as column number is not a number. Instruction: " + message);
 		try {
+			createConfigRuleDefault(app);
 			app.createRulesFromBlock(ruleString);
 		} catch (Exception e) {
 			throw e;
@@ -975,5 +994,25 @@ public class AppTest
 		} catch (Exception e) {
 			throw e;
 		}
+	}
+
+	@Test
+	public void extractRuleConfig(){
+		String 	sentence = "rule_config[default : \"default BaseIRI\" = \"http://www.example.org/onto/individual/\"]";
+
+		sentence = sentence.replace("\t", "").replaceAll("\n", "");
+
+		List<RuleConfig> rulesConfigExtracted = null;
+		try {
+			rulesConfigExtracted = RuleConfig.extractRuleConfigFromString(sentence);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		assertEquals(1, rulesConfigExtracted.size());
+		RuleConfig ruleConfig = rulesConfigExtracted.get(0);
+		assertEquals("default", ruleConfig.getId());
+		assertEquals("http://www.example.org/onto/individual/", ruleConfig.getDefaultBaseIRI());
+
 	}
 }

@@ -31,7 +31,6 @@ public class TriplesProcessing {
 	private MatrixLineNumberTracking currentLineNumberMatrixRules = new MatrixLineNumberTracking();
 	private Map<Integer, List<Resource>> simpleRuleAlreadyProcessed = new HashMap<>();
 	private long startTime;
-	private long endTime;
 
 	public 					TriplesProcessing(String relativePathOntologyFile) {
 		startTime = new Date().getTime();
@@ -76,13 +75,13 @@ public class TriplesProcessing {
 
  		for(Rule rule : regularRuleList){
 			//System.out.println("Processing rules...");
-			processRule(rule, defaultNs);
+			processRule(rule);
 		}
 
 		loadNamespacesFromOntology();
 	}
 
-	private List<Resource> 	processRule(Rule rule, String defaultNs) throws Exception {
+	private List<Resource> 	processRule(Rule rule) throws Exception {
 		System.out.println("Processing rules...");
 		List<Resource> subjectListToBeReturned = new LinkedList<>();
 		if(rule.isMatrix()){
@@ -96,8 +95,8 @@ public class TriplesProcessing {
 						}
 
 						// *** SUBJECT ***
-						List<Resource> subjectList = getSubject(rule, defaultNs, tsvLineNumber); //ONE SUBJECT FOR EACH ITEM IN THE CELL
-						subjectListToBeReturned.addAll(processPredicateAndObject(rule, tsvLineNumber, defaultNs, subjectList));
+						List<Resource> subjectList = getSubject(rule, tsvLineNumber); //ONE SUBJECT FOR EACH ITEM IN THE CELL
+						subjectListToBeReturned.addAll(processPredicateAndObject(rule, tsvLineNumber, subjectList));
 					} catch (CustomWarnings w) {
 						//System.out.println(w.getMessage());
 						continue;
@@ -115,8 +114,8 @@ public class TriplesProcessing {
 					}
 
 					// *** SUBJECT ***
-					List<Resource> subjectList = getSubject(rule, defaultNs, currentLineNumberMatrixRules.getLineNumber()); //ONE SUBJECT FOR EACH ITEM IN THE CELL
-					subjectListToBeReturned.addAll(processPredicateAndObject(rule, currentLineNumberMatrixRules.getLineNumber(), defaultNs, subjectList));
+					List<Resource> subjectList = getSubject(rule, currentLineNumberMatrixRules.getLineNumber()); //ONE SUBJECT FOR EACH ITEM IN THE CELL
+					subjectListToBeReturned.addAll(processPredicateAndObject(rule, currentLineNumberMatrixRules.getLineNumber(), subjectList));
 				} catch (CustomWarnings w) {
 					//System.out.println(w.getMessage());
 					return null;
@@ -131,7 +130,7 @@ public class TriplesProcessing {
 
 			if(simpleRuleAlreadyProcessed.get(Integer.parseInt(rule.getId())) == null){
 				// *** SUBJECT ***
-				List<Resource> subjectList = getSubject(rule, defaultNs, 1); //ONE SUBJECT FOR EACH ITEM IN THE CELL
+				List<Resource> subjectList = getSubject(rule, 1); //ONE SUBJECT FOR EACH ITEM IN THE CELL
 
 				for(Integer tsvLineNumber = 1; tsvLineNumber < fileReader.getLinesCount(); tsvLineNumber++) {
 					try {
@@ -140,7 +139,7 @@ public class TriplesProcessing {
 								return null;
 						}
 
-						List<Resource> subjectsProcessed = processPredicateAndObject(rule, tsvLineNumber, defaultNs, subjectList);
+						List<Resource> subjectsProcessed = processPredicateAndObject(rule, tsvLineNumber, subjectList);
 						simpleRuleAlreadyProcessed.put(Integer.parseInt(rule.getId()), subjectsProcessed);
 						subjectListToBeReturned = subjectsProcessed;
 
@@ -158,7 +157,7 @@ public class TriplesProcessing {
 		return subjectListToBeReturned;
 	}
 
-	private List<Resource> 	processPredicateAndObject(Rule rule, Integer tsvLineNumber, String defaultNs, List<Resource> subjectList) throws Exception {
+	private List<Resource> 	processPredicateAndObject(Rule rule, Integer tsvLineNumber, List<Resource> subjectList) throws Exception {
 
 		// *** PREDICATE AND OBJECT ***
 		Property predicate;
@@ -175,7 +174,7 @@ public class TriplesProcessing {
 					TripleObjectAsRule tripleObjectAsRule = (TripleObjectAsRule) predicateMapEntry.getValue();
 					for(ObjectAsRule objectAsRule : tripleObjectAsRule.getObject()){
 						if(assertConditionBlock(objectAsRule.getFlags(), tsvLineNumber)){
-							List<Resource> subjectsFromDependentRule = processRule(allRules.get(objectAsRule.getRuleNumber()), defaultNs);
+							List<Resource> subjectsFromDependentRule = processRule(allRules.get(objectAsRule.getRuleNumber()));
 							if(subjectsFromDependentRule != null){
 								for(Resource singleSubjectFromDependentRule : subjectsFromDependentRule){
 									addTripleToModel(subject, predicate, singleSubjectFromDependentRule);
@@ -366,25 +365,26 @@ public class TriplesProcessing {
 		return resultData;
 	}
 
-	private List<Resource> 	getSubject(Rule rule, String defaultNs, Integer lineNumber) throws Exception {
+	private List<Resource> 	getSubject(Rule rule, Integer lineNumber) throws Exception {
+		String baseIRI = rule.getDefaultBaseIRI();
 		List<Resource> subjectList = new ArrayList<Resource>();
 
 		Resource subjectType = model.createResource(rule.getSubject().getIRI().toString());
 
 		String baseIRIFlag = getBASEIRIFlag(rule.getSubjectTSVColumns());
 		if(baseIRIFlag != null){
-			defaultNs = baseIRIFlag;
+			baseIRI = baseIRIFlag;
 		}
 
 		String customIDFlag = getCustomIDFlag(rule.getSubjectTSVColumns());
 		if(customIDFlag != null) {
-			subjectList.add(model.createResource(defaultNs + customIDFlag, subjectType));
+			subjectList.add(model.createResource(baseIRI + customIDFlag, subjectType));
 
 
 		}else{
 			String fixedContentFlag = getFixedContentFlag(rule.getSubjectTSVColumns());
 			if(fixedContentFlag != null){
-				subjectList.add(model.createResource(defaultNs + fixedContentFlag, subjectType));
+				subjectList.add(model.createResource(baseIRI + fixedContentFlag, subjectType));
 
 			}else {
 				List<String> subjectContentRaw = extractDataFromTSVColumn(rule.getSubjectTSVColumns(), lineNumber);
@@ -395,7 +395,7 @@ public class TriplesProcessing {
 				}
 
 				for(String individualContent : subjectContent){
-					subjectList.add(model.createResource(defaultNs + individualContent, subjectType));
+					subjectList.add(model.createResource(baseIRI + individualContent, subjectType));
 				}
 			}
 		}
@@ -425,7 +425,7 @@ public class TriplesProcessing {
 		return null;
 	}
 
-	private Object 	getDataTypeContentFlag(TSVColumn column) {
+	private Object 			getDataTypeContentFlag(TSVColumn column) {
 		for(Flag flag : column.getFlags()){
 			if(flag instanceof FlagDataType){
 				return ((FlagDataType) flag).getDatatype();

@@ -49,4 +49,9 @@ public class Rule {
 		return config.getMatrix();
 	}
 
+	public String getDefaultBaseIRI() {
+		return config.getDefaultBaseIRI();
+	}
+
+
 }

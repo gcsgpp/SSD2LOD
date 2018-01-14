@@ -45,7 +45,7 @@ public class TriplesProcessing {
 		fileReader.addFilesToBeProcessed(relativePathDataFile);
 	}
 	@SuppressWarnings("unchecked")
-	public void 			createTriplesFromRules(List<Rule> listRules, Map<Integer, ConditionBlock> conditionBlocks, String defaultNs) throws Exception{
+	public void 			createTriplesFromRules(List<Rule> listRules, Map<Integer, ConditionBlock> conditionBlocks) throws Exception{
 
 		if(fileReader.getFilesAdded() <= 0)
 			throw new NoFilesAddedException("No files were added to be processed.");
@@ -63,8 +63,12 @@ public class TriplesProcessing {
 			for(Map.Entry<OWLProperty, TripleObject> predicateMapEntry : predicateObjectMAP.entrySet()){
 				if(predicateMapEntry.getValue() instanceof TripleObjectAsRule){
 					List<ObjectAsRule> listOfRulesAndFlagsOfAPredicate = (List<ObjectAsRule>) predicateMapEntry.getValue().getObject();
-					for(ObjectAsRule objectRulesWithFlags : listOfRulesAndFlagsOfAPredicate)
-						dependencyList.add(allRules.get(objectRulesWithFlags.getRuleNumber()));
+					for(ObjectAsRule objectRulesWithFlags : listOfRulesAndFlagsOfAPredicate) {
+						Rule objectRule = allRules.get(objectRulesWithFlags.getRuleNumber());
+						if(objectRule == null)
+							throw new RuleNotFound("Rule number " + objectRulesWithFlags.getRuleNumber() + " was not found/created check your file.");
+						dependencyList.add(objectRule);
+					}
 				}
 			}
 		}

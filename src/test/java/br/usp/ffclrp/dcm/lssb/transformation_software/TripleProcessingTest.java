@@ -338,6 +338,27 @@ public class TripleProcessingTest
 
     // ##################
 
+	private Rule createRuleAssertingConditionBlockThatDontExist(){
+		String id = "1";
+		RuleConfig ruleConfig = new RuleConfig("default");
+		ruleConfig.setMatrix(true);
+		OWLClass subjectClass = ontologyHelper.getClass("Term");
+		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
+		TSVColumn subject = new TSVColumn();
+
+		subject.setTitle("Category");
+
+		List<Flag> subjectFlags = new ArrayList<Flag>();
+		subjectFlags.add(new FlagConditionBlock(2));
+
+		subject.setFlags(subjectFlags);
+		subjectTSVColumns.add(subject);
+
+
+		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<OWLProperty, TripleObject>();
+
+		return new Rule(id,ruleConfig, subjectClass, subjectTSVColumns, predicateObjects );
+	}
 
 	@Test
 	public void assertingConditionBlockThatDontExist() throws Exception {
@@ -346,7 +367,7 @@ public class TripleProcessingTest
 		String ontologyPath = testFolderPath + "ontology.owl";
 
 		ontologyHelper.loadingOntologyFromFile(ontologyPath);
-		listRules.add(createRuleOne());
+		listRules.add(createRuleAssertingConditionBlockThatDontExist());
 
 		thrown.expect(ConditionBlockException.class);
 		thrown.expectMessage("No condition block created");

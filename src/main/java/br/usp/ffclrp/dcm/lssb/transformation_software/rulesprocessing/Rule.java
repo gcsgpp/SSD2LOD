@@ -13,14 +13,6 @@ public class Rule {
 	private List<TSVColumn> subjectTSVColumns = null;
 	private Map<OWLProperty, TripleObject> predicateObjects;
 
-	public Rule(String id, OWLClass subject, List<TSVColumn> subjectTSVColumns, Map<OWLProperty, TripleObject> predicateObjects){
-		this.id = id;
-		this.config = new RuleConfig("default");
-		this.subject = subject;
-		this.subjectTSVColumns = subjectTSVColumns;
-		this.predicateObjects = predicateObjects;
-	}
-	
 	public Rule(String id, RuleConfig ruleConfig, OWLClass subject, List<TSVColumn> subjectTSVColumns, Map<OWLProperty, TripleObject> predicateObjects){
 		this.id = id;
 		this.config = ruleConfig;

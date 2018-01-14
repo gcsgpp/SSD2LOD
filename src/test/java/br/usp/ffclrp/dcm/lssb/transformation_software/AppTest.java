@@ -1015,4 +1015,28 @@ public class AppTest
 		assertEquals("http://www.example.org/onto/individual/", ruleConfig.getDefaultBaseIRI());
 
 	}
+
+	@Test
+	public void extractRuleConfigWithMultipleRules(){
+		String 	sentence = 	"rule_config[default : \"default BaseIRI\" = \"http://www.example.org/onto/individual/\"]";
+				sentence += "simple_rule[1, \"microarray platform\" = \"A-BUGS-23_Comment[ArrayExpressAccession]_4\" :\n" +
+							"\t\"Title\" = \"A-BUGS-23_Array Design Name_1\" /DT(\"literal\"),\n" +
+							"\t\"depends on\" = 2\n ]" +
+							"simple_rule[2, \"organism\" = \"A-BUGS-23_Comment[Organism]_6\" ]";
+
+		sentence = sentence.replace("\t", "").replaceAll("\n", "");
+
+		List<RuleConfig> rulesConfigExtracted = null;
+		try {
+			rulesConfigExtracted = RuleConfig.extractRuleConfigFromString(sentence);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		assertEquals(1, rulesConfigExtracted.size());
+		RuleConfig ruleConfig = rulesConfigExtracted.get(0);
+		assertEquals("default", ruleConfig.getId());
+		assertEquals("http://www.example.org/onto/individual/", ruleConfig.getDefaultBaseIRI());
+
+	}
 }

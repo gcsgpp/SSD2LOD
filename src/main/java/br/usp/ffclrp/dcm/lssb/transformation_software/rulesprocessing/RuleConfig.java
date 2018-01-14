@@ -99,8 +99,8 @@ public class RuleConfig {
 	}
 	
 	static public List<RuleConfig> extractRuleConfigFromString(String fileContent) throws Exception {
-		List<String> ruleConfigListAsText = App.identifyBlocksFromString(fileContent);
-		List<RuleConfig> rcList = new ArrayList<RuleConfig>();
+		List<String> ruleConfigListAsText = App.identifyConfigBlocksFromString(fileContent);
+		List<RuleConfig> rcList = new ArrayList<>();
 
 		for(String rc : ruleConfigListAsText){
 			rcList.add(createRuleConfigFromString(rc));

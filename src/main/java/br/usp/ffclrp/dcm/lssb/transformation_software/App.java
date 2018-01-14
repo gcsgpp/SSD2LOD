@@ -75,7 +75,7 @@ public class App
 
 	public List<Rule> 		extractRulesFromString(String fileContent) throws Exception {
 
-		List<String> rulesListAsText = identifyBlocksFromString(fileContent);
+		List<String> rulesListAsText = identifyRuleBlocksFromString(fileContent);
 
 		List<Rule> ruleList = new ArrayList<Rule>();
 
@@ -414,7 +414,37 @@ public class App
 		return content;
 	}
 
-	public static List<String> 	identifyBlocksFromString(String fileContent) {
+	private List<String> identifyRuleBlocksFromString(String fileContent) throws Exception {
+		List<String> ruleBlocks = new ArrayList<>();
+		try {
+			List<String> identifiedBlocks = identifyBlocksFromString(fileContent);
+			for(String block : identifiedBlocks){
+				if(block.startsWith("simple_rule") || block.startsWith("matrix_rule"))
+					ruleBlocks.add(block);
+			}
+		}catch(Exception e){
+			throw new Exception("No rule block identified in your file of rules. Please check your file.");
+		}
+
+		return ruleBlocks;
+	}
+
+	public static List<String> identifyConfigBlocksFromString(String fileContent) throws Exception {
+		List<String> configBlocks = new ArrayList<>();
+		try {
+			List<String> identifiedBlocks = identifyBlocksFromString(fileContent);
+			for(String block : identifiedBlocks){
+				if(block.startsWith("rule_config"))
+					configBlocks.add(block);
+			}
+		}catch(Exception e){
+			throw new Exception("No config rule block identified in your file of rules. Please check your file.");
+		}
+
+		return configBlocks;
+	}
+
+	private static List<String> 	identifyBlocksFromString(String fileContent) {
 		Pattern patternToFind = Pattern.compile("(matrix_rule|simple_rule|rule_config)");
 		Matcher matcher = patternToFind.matcher(fileContent);
 		matcher.find();

@@ -28,9 +28,16 @@ public class RuleConfig {
 		return this.id;
 	}
 	
-	public void setMatrix(Boolean setting) {
+	public RuleConfig setMatrix(Boolean setting) {
+		RuleConfig rule = new RuleConfig(this.id, this.defaultNS);
+		rule.setMatrixProperty(setting);
+		return rule;
+	}
+
+	private void setMatrixProperty(Boolean setting) {
 		this.matrix = setting;
 	}
+
 
 	public Boolean getMatrix() {
 		return this.matrix;

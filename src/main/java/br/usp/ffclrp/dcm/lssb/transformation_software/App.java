@@ -105,7 +105,7 @@ public class App
 				throw new Exception("Not found a config rule block for rule id '" + ruleId + "' neither a 'default' config rule block.");
 		}
 		if(subjectLine.contains("matrix_rule[")) {
-			ruleConfig.setMatrix(true);
+			ruleConfig = ruleConfig.setMatrix(true);
 		}
 			
 		OWLClass ruleSubject 				= extractSubjectFromSentence(subjectLine);
@@ -169,8 +169,16 @@ public class App
 
 	public Rule 			extractRuleFromOneLineRuleBlock(String subjectLine) throws Exception {
 		String ruleId 						= extractRuleIDFromSentence(subjectLine);
-		RuleConfig ruleConfig				= new RuleConfig("default");
-		ruleConfig.setMatrix(true);
+		RuleConfig ruleConfig				= ruleConfigs.get(ruleId);
+		if(ruleConfig == null){
+			ruleConfig = ruleConfigs.get("default");
+			if(ruleConfig == null)
+				throw new Exception("Not found a config rule block for rule id '" + ruleId + "' neither a 'default' config rule block.");
+		}
+		if(subjectLine.contains("matrix_rule[")) {
+			ruleConfig = ruleConfig.setMatrix(true);
+		}
+
 		OWLClass ruleSubject 				= extractSubjectFromSentence(subjectLine);
 		subjectLine = Utils.removeRegexFromContent(EnumRegexList.SELECTSUBJECTCLASSNAME.get(), subjectLine);
 		List<TSVColumn> subjectTsvcolumns 	= extractTSVColumnsFromSentence(subjectLine);

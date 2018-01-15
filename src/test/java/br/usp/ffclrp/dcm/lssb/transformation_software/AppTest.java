@@ -402,6 +402,7 @@ public class AppTest
 
 		Rule rule3Extracted = null;
 		try {
+			createConfigRuleDefault(app);
 			rule3Extracted = app.createRulesFromBlock(ruleString);
 		} catch (Exception e) {
 			e.printStackTrace();

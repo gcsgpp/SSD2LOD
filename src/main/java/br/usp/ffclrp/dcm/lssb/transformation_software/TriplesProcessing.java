@@ -4,7 +4,8 @@ import br.usp.ffclrp.dcm.lssb.custom_exceptions.*;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.*;
 import openllet.jena.PelletReasonerFactory;
 import org.apache.jena.datatypes.BaseDatatype;
-import org.apache.jena.datatypes.xsd.XSDDatatype;
+import org.apache.jena.datatypes.RDFDatatype;
+import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.reasoner.Reasoner;
@@ -256,15 +257,30 @@ public class TriplesProcessing {
 		//System.out.println("S: " + subject.getURI() + " P: " + predicate.getURI() + " O: " + object.getURI());
 		subject.addProperty(predicate, object);		
 	}
-
 	private void 			addTripleToModel(Resource subject, Property predicate, String contentElement, Object datatype) {
 		//System.out.println("S: " + subject.getURI() + " P: " + predicate.getURI() + " O: " + contentElement);
-		if(datatype instanceof XSDDatatype)
-			subject.addProperty(predicate, contentElement, (XSDDatatype) datatype);
-		else if(datatype instanceof String && datatype.equals("Literal")) //defined in the FlagDataType
-			subject.addProperty(predicate, contentElement, new BaseDatatype("http://www.w3.org/2000/01/rdf-schema#Literal"));
-		else
-			subject.addProperty(predicate, contentElement);
+
+		if(datatype instanceof String && datatype.equals("Literal")) //defined in the FlagDataType
+			datatype = new BaseDatatype("http://www.w3.org/2000/01/rdf-schema#Literal");
+		else {
+			if(	model.contains(subject, predicate, contentElement))
+				return;
+			else{
+				subject.addProperty(predicate, contentElement);
+				return;
+			}
+		}
+
+		NodeIterator it = model.listObjectsOfProperty(subject, predicate);
+		while (it.hasNext()) {
+			Node rdfnode = it.next().asNode();
+			Boolean datatypeComparisson = rdfnode.getLiteralDatatype().getURI().equals(((RDFDatatype) datatype).getURI());
+			Boolean labelComparisson = rdfnode.getLiteralLexicalForm().toString().equals(contentElement);
+			if(datatypeComparisson && labelComparisson)
+				return;
+		}
+
+		subject.addProperty(predicate, contentElement, (RDFDatatype) datatype);
 	}
 
 	private List<String> 	extractDataFromTSVColumn(List<TSVColumn> listTSVColumn, Integer lineNumber) throws Exception {

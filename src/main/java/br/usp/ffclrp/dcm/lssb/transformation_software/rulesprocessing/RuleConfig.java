@@ -92,7 +92,7 @@ public class RuleConfig {
 			lineFromBlock 	= Utils.removeRegexFromContent(EnumRegexList.SELECTPREDICATE.get(), lineFromBlock);
 			String value 	= Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(lineFromBlock, EnumRegexList.SELECTALL.get());
 			
-			if(column.equals("default BaseIRI")) {
+			if(column.toLowerCase().equals("default baseiri")) {
 				try {
 					rule.setDefaultBaseIRI(value);
 				}catch(Exception e) {

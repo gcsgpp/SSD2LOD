@@ -190,11 +190,12 @@ public class TripleProcessingTest
 		listRules.add(createRuleOne());
 		listRules.add(createRuleThree());
 		createConditionBlocks();
+		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
 
 		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "ontology.owl");
 		processingClass.addFilesToBeProcessed(testFolderPath + "enrichedDataGOTerm.tsv");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks);
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks);
 		}catch(Exception e) {
 			fail();
 		}
@@ -243,11 +244,12 @@ public class TripleProcessingTest
 		listRules.add(createRuleTwo());
 		listRules.add(createRuleThree());
 		createConditionBlocks();
+		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
 
 		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "ontology.owl");
 		processingClass.addFilesToBeProcessed(testFolderPath + "enrichedDataKeggTerm.tsv");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks);
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks);
 		}catch(Exception e) {
 			fail();
 		}
@@ -314,10 +316,12 @@ public class TripleProcessingTest
 		ontologyHelper.loadingOntologyFromFile(ontologyPath);
 		listRules.add(createRuleWithNotMetadataFlag());
 
+		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
+
 		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "ontology.owl");
 		processingClass.addFilesToBeProcessed(testFolderPath + "NormalizedData.txt");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks);
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks);
 		}catch(Exception e) {
 			fail();
 		}
@@ -366,11 +370,13 @@ public class TripleProcessingTest
 
 		thrown.expect(ConditionBlockException.class);
 		thrown.expectMessage("No condition block created");
-		
+
+		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
+
 		TriplesProcessing processingClass = new TriplesProcessing( testFolderPath + "ontology.owl");
 		processingClass.addFilesToBeProcessed(testFolderPath + "enrichedDataGOTerm2.tsv");
 
-		processingClass.createTriplesFromRules(listRules, conditionsBlocks);
+		processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks);
 	}
 
 
@@ -405,11 +411,13 @@ public class TripleProcessingTest
 
 		ontologyHelper.loadingOntologyFromFile(ontologyPath);
 		listRules.add(createRuleWithFixedContentFlagOnSubjectLine());
-
+		
+		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
+		
 		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "ontology.owl");
 		processingClass.addFilesToBeProcessed(testFolderPath + "NormalizedData.txt");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks);
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks);
 		}catch(Exception e) {
 			fail();
 		}
@@ -463,10 +471,12 @@ public class TripleProcessingTest
 		ontologyHelper.loadingOntologyFromFile(ontologyPath);
 		listRules.add(createRuleWithFixedContentFlagOnObjectLine());
 
+		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
+
 		TriplesProcessing processingClass = new TriplesProcessing( testFolderPath + "ontology.owl");
 		processingClass.addFilesToBeProcessed(testFolderPath + "NormalizedData.txt");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks);
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks);
 		}catch(Exception e) {
 			e.printStackTrace();
 			fail();
@@ -518,10 +528,12 @@ public class TripleProcessingTest
 		ontologyHelper.loadingOntologyFromFile(ontologyPath);
 		listRules.add(createRuleWithCustomIDFlag());
 
+		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
+
 		TriplesProcessing processingClass = new TriplesProcessing( testFolderPath + "ontology.owl");
 		processingClass.addFilesToBeProcessed(testFolderPath + "NormalizedData.txt");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks);
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks);
 		}catch(Exception e) {
 			e.printStackTrace();
 			fail();
@@ -574,7 +586,9 @@ public class TripleProcessingTest
         thrown.expect(BaseIRIException.class);
         thrown.expectMessage("Some BaseIRI flag has an empty namespace field.");
 
-        processingClass.createTriplesFromRules(listRules, conditionsBlocks);
+		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
+
+        processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks);
 	}
 
 
@@ -614,7 +628,9 @@ public class TripleProcessingTest
 		thrown.expect(BaseIRIException.class);
 		thrown.expectMessage("Some BaseIRI flag has an empty IRI field.");
 
-		processingClass.createTriplesFromRules(listRules, conditionsBlocks);
+		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
+
+		processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks);
 	}
 
 
@@ -641,10 +657,12 @@ public class TripleProcessingTest
 			}
 		}
 
+		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
+
 		TriplesProcessing processingClass = new TriplesProcessing( testFolderPath + "ontology.owl");
 		processingClass.addFilesToBeProcessed(testFolderPath + "enrichedDataGOTerm.tsv");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks);
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks);
 		}catch(Exception e) {
 			fail();
 		}
@@ -712,10 +730,12 @@ public class TripleProcessingTest
 		listRules.add(createRuleThree());
 		createConditionBlockWithGreaterThanCondition();
 
+		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
+
 		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "ontology.owl");
 		processingClass.addFilesToBeProcessed(testFolderPath + "enrichedDataGOTerm3.tsv");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks);
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks);
 		}catch(Exception e) {
 			e.printStackTrace();
 		    fail();
@@ -765,11 +785,13 @@ public class TripleProcessingTest
         listRules.add(createRuleThree());
         createConditionBlocks();
 
+		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
+
         TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "ontology.owl");
         processingClass.addFilesToBeProcessed(testFolderPath + "enrichedDataGOTerm.tsv");
         processingClass.addFilesToBeProcessed(testFolderPath + "enrichedDataGOTerm3.tsv");
         try{
-            processingClass.createTriplesFromRules(listRules, conditionsBlocks);
+            processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks);
         }catch(Exception e) {
             e.printStackTrace();
             fail();
@@ -859,10 +881,12 @@ public class TripleProcessingTest
 		listRules.add(createSimpleRule());
 		createConditionBlockWithGreaterThanCondition();
 
+		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
+
 		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "ontology.owl");
 		processingClass.addFilesToBeProcessed(testFolderPath + "GSE67111.tsv");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks);
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks);
 		}catch(Exception e) {
 			e.printStackTrace();
 			fail();
@@ -960,11 +984,13 @@ public class TripleProcessingTest
 		listRules.addAll(createSimpleRuleInsideSimpleRuleAndOtherFile());
 		createConditionBlockWithGreaterThanCondition();
 
+		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
+
 		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "ontology.owl");
 		processingClass.addFilesToBeProcessed(testFolderPath + "GSE67111.tsv");
 		processingClass.addFilesToBeProcessed(testFolderPath + "GPL19921.tsv");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks);
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks);
 		}catch(Exception e) {
 			e.printStackTrace();
 			fail();
@@ -1077,11 +1103,13 @@ public class TripleProcessingTest
 		listRules.addAll(createSimpleRuleInsideMatrixRule());
 		createConditionBlockWithGreaterThanCondition();
 
+		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
+
 		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "ontology.owl");
 		processingClass.addFilesToBeProcessed(testFolderPath + "GSE67111.tsv");
 		processingClass.addFilesToBeProcessed(testFolderPath + "GPL19921.tsv");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks);
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks);
 		}catch(Exception e) {
 			e.printStackTrace();
 			fail();
@@ -1173,8 +1201,125 @@ public class TripleProcessingTest
 		thrown.expect(RuleNotFound.class);
 		thrown.expectMessage("Rule number 2 was not found/created check your file.");
 
-		processingClass.createTriplesFromRules(listRules, conditionsBlocks);
+		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
+
+		processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks);
 
 	}
 
+
+	// ##################
+
+
+	private List<Rule> createRuleWithSearchBlock(){
+		List<Rule> rules = new ArrayList<>();
+		//RULE 1
+		String id = "1";
+		RuleConfig ruleConfig = new RuleConfig(id, "http://example.org/onto/individual/").setMatrix(true);
+		OWLClass subjectClass = ontologyHelper.getClass("Platform Data");
+		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
+
+		TSVColumn 	subject = new TSVColumn();
+					subject.setTitle("GPL19921_ID");
+					subject.setFlags(new ArrayList<Flag>());
+
+		TSVColumn 	subject2 = new TSVColumn();
+					subject2.setTitle("GPL19921_ORF");
+					subject2.setFlags(new ArrayList<Flag>());
+
+		TSVColumn 	subject3 = new TSVColumn();
+					subject3.setTitle("GPL19921_Assay ID");
+					subject3.setFlags(new ArrayList<Flag>());
+
+		subjectTSVColumns.add(subject);
+		subjectTSVColumns.add(subject2);
+		subjectTSVColumns.add(subject3);
+
+		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<>();
+
+		OWLProperty 	idProperty 		= ontologyHelper.getProperty("ID");
+		TripleObject 	idTripleObject 	= new TripleObjectAsRule(new ObjectAsRule(2, new ArrayList<>()));
+
+		predicateObjects.put(idProperty, idTripleObject);
+
+		rules.add(new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects));
+
+
+		//RULE 2
+		id = "2";
+		ruleConfig = new RuleConfig(id, "http://example.org/onto/individual/").setMatrix(true);
+		subjectClass = ontologyHelper.getClass("genetic material");
+		subjectTSVColumns = new ArrayList<TSVColumn>();
+
+		subject = new TSVColumn();
+		subject.setTitle("GPL19921_ID");
+		List<Flag> subjectFlags = new ArrayList<Flag>();
+		subjectFlags.add(new FlagSearchBlock(1));
+		subject.setFlags(subjectFlags);
+
+		subjectTSVColumns.add(subject);
+
+		predicateObjects = new HashMap<>();
+
+		rules.add(new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects));
+
+		return rules;
+	}
+
+	@Test
+	public void processRuleWithSearchBlock()	{
+		ontologyHelper = new OntologyHelper();
+		String testFolderPath = "testFiles/unitTestsFiles/geo_preprocessed/";
+		String ontologyPath = testFolderPath + "ontology.owl";
+
+		ontologyHelper.loadingOntologyFromFile(ontologyPath);
+		listRules.addAll(createRuleWithSearchBlock());
+
+		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
+		SearchBlock searchBlock = new SearchBlock(1, "http://bio2rdf.org/sparql", "http://bio2rdf.org/ctd_vocabulary:gene-symbol");
+		searchBlocks.put(searchBlock.getId(), searchBlock);
+
+		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "ontology.owl");
+		processingClass.addFilesToBeProcessed(testFolderPath + "GSE67111.tsv");
+		processingClass.addFilesToBeProcessed(testFolderPath + "GPL19921.tsv");
+		try{
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks);
+		}catch(Exception e) {
+			e.printStackTrace();
+			fail();
+
+		}
+
+		Model model = processingClass.getModel();
+		List<Statement> statements = model.listStatements().toList();
+
+		int numberOfStatementsRule1 = 0;
+		int numberOfStatementsRule2 = 0;
+		int numberOfStatementsRule3 = 0;
+		for(Statement statement : statements) {
+			Triple triple = statement.asTriple();
+
+			if( 	triple.getPredicate().getURI().equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#type") 	||
+					triple.getPredicate().getURI().equals("http://www.w3.org/2000/01/rdf-schema#label")			||
+					triple.getPredicate().getURI().equals("http://www.w3.org/2000/01/rdf-schema#range")				) //is not interesting to check these predicates because there are other classes in the ontology if tested will get away from the objective of this method
+				continue;
+
+			if(triple.getSubject().getURI().equals("http://example.org/onto/individual/ABCA1_ABCA1_Hs00194045_m1")) {
+				if (	triple.getPredicate().getURI().equals("http://example.com/geo_experiments/id") 			&& triple.getObject().getURI().equals("http://bio2rdf.org/ncbigene:19"))
+					numberOfStatementsRule1++;
+			}else if(triple.getSubject().getURI().equals("http://example.org/onto/individual/ABCA10_ABCA10_Hs00365268_m1,Hs00739326_m1")) {
+				if (	triple.getPredicate().getURI().equals("http://example.com/geo_experiments/id") 			&& triple.getObject().getURI().equals("http://bio2rdf.org/ncbigene:10349"))
+					numberOfStatementsRule2++;
+			}else if(triple.getSubject().getURI().equals("http://example.org/onto/individual/ABCA12_ABCA12_Hs00292421_m1,Hs00252524_m1")) {
+				if (	triple.getPredicate().getURI().equals("http://example.com/geo_experiments/id") 			&& triple.getObject().getURI().equals("http://bio2rdf.org/ncbigene:26154"))
+					numberOfStatementsRule3++;
+			}else{
+				assert(false);
+			}
+		}
+
+		assertEquals(1, numberOfStatementsRule1);
+		assertEquals(1, numberOfStatementsRule2);
+		assertEquals(1, numberOfStatementsRule3);
+	}
 }

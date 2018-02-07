@@ -998,7 +998,7 @@ public class AppTest
 	}
 
 	@Test
-	public void extractRuleConfig(){
+	public void extractDefaultRuleConfig(){
 		String 	sentence = "rule_config[default : \"default BaseIRI\" = \"http://www.example.org/onto/individual/\"]";
 
 		sentence = sentence.replace("\t", "").replaceAll("\n", "");
@@ -1013,6 +1013,26 @@ public class AppTest
 		assertEquals(1, rulesConfigExtracted.size());
 		RuleConfig ruleConfig = rulesConfigExtracted.get(0);
 		assertEquals("default", ruleConfig.getId());
+		assertEquals("http://www.example.org/onto/individual/", ruleConfig.getDefaultBaseIRI());
+
+	}
+
+	@Test
+	public void extractRuleConfig(){
+		String 	sentence = "rule_config[10 : \"default BaseIRI\" = \"http://www.example.org/onto/individual/\"]";
+
+		sentence = sentence.replace("\t", "").replaceAll("\n", "");
+
+		List<RuleConfig> rulesConfigExtracted = null;
+		try {
+			rulesConfigExtracted = RuleConfig.extractRuleConfigFromString(sentence);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		assertEquals(1, rulesConfigExtracted.size());
+		RuleConfig ruleConfig = rulesConfigExtracted.get(0);
+		assertEquals("10", ruleConfig.getId());
 		assertEquals("http://www.example.org/onto/individual/", ruleConfig.getDefaultBaseIRI());
 
 	}
@@ -1038,6 +1058,32 @@ public class AppTest
 		RuleConfig ruleConfig = rulesConfigExtracted.get(0);
 		assertEquals("default", ruleConfig.getId());
 		assertEquals("http://www.example.org/onto/individual/", ruleConfig.getDefaultBaseIRI());
+
+	}
+
+	@Test
+	public void extractSearchBlockWithMultipleRules(){
+		String 	sentence = 	"search_block[1 : \"endpoint\" = \"http://bio2rdf.org/sparql\", \"predicate\" = \"http://bio2rdf.org/taxonomy_vocabulary:scientific-name\"]";
+		sentence += "simple_rule[1, \"microarray platform\" = \"A-BUGS-23_Comment[ArrayExpressAccession]_4\" :\n" +
+				"\t\"Title\" = \"A-BUGS-23_Array Design Name_1\" /DT(\"literal\"),\n" +
+				"\t\"depends on\" = 2\n ]" +
+				"simple_rule[2, \"organism\" = \"A-BUGS-23_Comment[Organism]_6\" ]";
+
+		sentence = sentence.replace("\t", "").replaceAll("\n", "");
+
+		List<SearchBlock> listSearchBlocks = new ArrayList<>();
+		try {
+			listSearchBlocks = SearchBlock.extractSearchBlockFromString(sentence);
+		}catch(Exception e){
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		}
+
+		assertEquals(1, listSearchBlocks.size());
+		SearchBlock searchBlock = listSearchBlocks.get(0);
+		assertEquals(1, searchBlock.getId());
+		assertEquals("http://bio2rdf.org/sparql", searchBlock.getEndpointIRI());
+		assertEquals("http://bio2rdf.org/taxonomy_vocabulary:scientific-name", searchBlock.getPredicateToSearch());
 
 	}
 
@@ -1069,7 +1115,7 @@ public class AppTest
 
 		List<RuleConfig> rulesConfigExtracted = null;
 		thrown.expect(Exception.class);
-		thrown.expectMessage("No config_rule, simple_rule or matrix_rule blocks identified in your file of rules. Please check your file");
+		thrown.expectMessage("No rule_config, simple_rule or matrix_rule blocks identified in your file of rules. Please check your file");
 		try {
 			rulesConfigExtracted = RuleConfig.extractRuleConfigFromString(sentence);
 		} catch (Exception e) {

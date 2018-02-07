@@ -18,6 +18,7 @@ import org.semanticweb.owlapi.model.OWLProperty;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.*;
+import java.util.regex.Pattern;
 
 public class TriplesProcessing {
 
@@ -27,6 +28,7 @@ public class TriplesProcessing {
 	private List<Rule> regularRuleList;
 	private List<Rule> dependencyList = new ArrayList<Rule>();
 	private Map<Integer, ConditionBlock> conditionBlocks;
+	private Map<Integer, SearchBlock> searchBlocks;
 	private Model ontology = null;
 	private String relativePathOntologyFile = null;
 	private MatrixLineNumberTracking currentLineNumberMatrixRules = new MatrixLineNumberTracking();
@@ -46,13 +48,14 @@ public class TriplesProcessing {
 		fileReader.addFilesToBeProcessed(relativePathDataFile);
 	}
 	@SuppressWarnings("unchecked")
-	public void 			createTriplesFromRules(List<Rule> listRules, Map<Integer, ConditionBlock> conditionBlocks) throws Exception{
+	public void 			createTriplesFromRules(List<Rule> listRules, Map<Integer, ConditionBlock> conditionBlocks, Map<Integer, SearchBlock> searchBlocks) throws Exception{
 
 		if(fileReader.getFilesAdded() <= 0)
 			throw new NoFilesAddedException("No files were added to be processed.");
 
-		this.regularRuleList = listRules;
-		this.conditionBlocks = conditionBlocks;
+		this.regularRuleList 	= listRules;
+		this.conditionBlocks 	= conditionBlocks;
+		this.searchBlocks 		= searchBlocks;
 
 		for(Rule rule : regularRuleList){	
 			allRules.put(Integer.parseInt(rule.getId()), rule);
@@ -257,6 +260,7 @@ public class TriplesProcessing {
 		//System.out.println("S: " + subject.getURI() + " P: " + predicate.getURI() + " O: " + object.getURI());
 		subject.addProperty(predicate, object);		
 	}
+
 	private void 			addTripleToModel(Resource subject, Property predicate, String contentElement, Object datatype) {
 		//System.out.println("S: " + subject.getURI() + " P: " + predicate.getURI() + " O: " + contentElement);
 
@@ -360,9 +364,11 @@ public class TriplesProcessing {
 	private String[] 		separateDataFromTSVColumn(FlagSeparator flag, String columnTitle, Integer lineNumber) throws Exception {
 		String rawData = fileReader.getData(columnTitle, lineNumber);
 
+		String flagTerm = Pattern.quote(flag.getTerm());
+
 		String[] splitData = null;
 		if(rawData.contains(flag.getTerm()))
-			splitData = rawData.split(flag.getTerm());
+			splitData = rawData.split(flagTerm);
 		else if(!rawData.isEmpty()) {
 			splitData = new String[1];
 			splitData[0] = rawData;
@@ -391,35 +397,50 @@ public class TriplesProcessing {
 
 		Resource subjectType = model.createResource(rule.getSubject().getIRI().toString());
 
-		String baseIRIFlag = getBASEIRIFlag(rule.getSubjectTSVColumns());
-		if(baseIRIFlag != null){
-			baseIRI = baseIRIFlag;
+		SearchBlock searchBlock = getSearchBlockFlag(rule.getSubjectTSVColumns());
+		if(searchBlock != null){
+
+			List<String> subjectContentRaw = extractDataFromTSVColumn(rule.getSubjectTSVColumns(), lineNumber);
+
+			List<String> subjectContent = new ArrayList<String>();
+			for (String content : subjectContentRaw) {
+				subjectContent.add(content.replaceAll(" ", "_"));
+			}
+
+			for (String individualContent : subjectContent) {
+				subjectList.add(model.createResource(searchBlock.getExternalNode(individualContent), subjectType));
+			}
+
+			return subjectList;
 		}
 
+		String baseIRIFlag = getBASEIRIFlag(rule.getSubjectTSVColumns());
+		if(baseIRIFlag != null)
+			baseIRI = baseIRIFlag;
+
 		String customIDFlag = getCustomIDFlag(rule.getSubjectTSVColumns());
-		if(customIDFlag != null) {
+		if (customIDFlag != null) {
 			subjectList.add(model.createResource(baseIRI + customIDFlag, subjectType));
 
 
-		}else{
+		} else {
 			String fixedContentFlag = getFixedContentFlag(rule.getSubjectTSVColumns());
-			if(fixedContentFlag != null){
+			if (fixedContentFlag != null) {
 				subjectList.add(model.createResource(baseIRI + fixedContentFlag, subjectType));
 
-			}else {
+			} else {
 				List<String> subjectContentRaw = extractDataFromTSVColumn(rule.getSubjectTSVColumns(), lineNumber);
 
 				List<String> subjectContent = new ArrayList<String>();
-				for(String content : subjectContentRaw){
+				for (String content : subjectContentRaw) {
 					subjectContent.add(content.replaceAll(" ", "_"));
 				}
 
-				for(String individualContent : subjectContent){
+				for (String individualContent : subjectContent) {
 					subjectList.add(model.createResource(baseIRI + individualContent, subjectType));
 				}
 			}
 		}
-
 		return subjectList;
 	}
 
@@ -472,6 +493,19 @@ public class TriplesProcessing {
 		return null;
 	}
 
+	private SearchBlock 	getSearchBlockFlag(List<TSVColumn> listTSVColumn) throws BaseIRIException {
+		for(TSVColumn column : listTSVColumn){
+			for(Flag flag : column.getFlags()){
+				if(flag instanceof FlagSearchBlock){
+					Integer searchBlockId = ((FlagSearchBlock) flag).getId();
+
+					return this.searchBlocks.get(searchBlockId);
+				}
+			}
+		}
+		return null;
+	}
+
 	private void 			loadNamespacesFromOntology() {
 		Set<String> namespacesUsed = new HashSet<String>();
 
@@ -504,9 +538,9 @@ public class TriplesProcessing {
 		try{
 			File f = new File(filename);
 			FileOutputStream fos = new FileOutputStream(f);
-			RDFDataMgr.write(fos, model, Lang.TRIG);
+			//RDFDataMgr.write(fos, model, Lang.TRIG);
 			//RDFDataMgr.write(fos, model, Lang.TURTLE);
-			//RDFDataMgr.write(fos, model, Lang.RDFXML);
+			RDFDataMgr.write(fos, model, Lang.RDFXML);
 			//RDFDataMgr.write(fos, model, Lang.NTRIPLES);
 			fos.close();
 
@@ -548,5 +582,4 @@ public class TriplesProcessing {
 	public Model 			getModel() {
 		return this.model;
 	}
-
 }

@@ -24,21 +24,38 @@ public class App
 {
 	public OntologyHelper ontologyHelper;
 	public List<Rule> rulesList;
-	public Map<Integer, ConditionBlock> conditionsBlocks 	= new HashMap<Integer, ConditionBlock>();
-	public Map<String, RuleConfig> ruleConfigs 			= new HashMap<>();
+	public Map<Integer	, ConditionBlock> 	conditionsBlocks 	= new HashMap<>();
+	public Map<String	, RuleConfig> 		ruleConfigs 		= new HashMap<>();
+	public Map<Integer	, SearchBlock> 		searchBlocks		= new HashMap<>();
 
 	public static void 		main( String[] args ){
 		App app = new App();
 		List<String> listOfOntologies = new ArrayList<String>();
-		listOfOntologies.add("testFiles/geo_preprocessed/attempt_1/ontology.owl");
+		//ArrayExpress ER paper test
+		// listOfOntologies.add("testFiles/arraye_preprocessed/ontology.owl");
+
+		//Local test
+		listOfOntologies.add("testFiles/geo_preprocessed/ontology.owl");
 		try {
-			app.extractRulesFromFile("testFiles/geo_preprocessed/attempt_1/rules.txt", listOfOntologies);
-			TriplesProcessing triplesProcessing = new TriplesProcessing("testFiles/geo_preprocessed/attempt_1/ontology.owl");
+			//ArrayExpress ER paper test
+			/*app.extractRulesFromFile("testFiles/arraye_preprocessed/Competency Questions/CompetencyQuestion5_rules.txt", listOfOntologies);
+			TriplesProcessing triplesProcessing = new TriplesProcessing("testFiles/arraye_preprocessed/ontology_simplified_version.owl");
+			triplesProcessing.addFilesToBeProcessed("testFiles/arraye_preprocessed/A-BUGS-23.adf.tsv");
+			triplesProcessing.addFilesToBeProcessed("testFiles/arraye_preprocessed/E-MTAB-5814.idf.tsv");
+			triplesProcessing.addFilesToBeProcessed("testFiles/arraye_preprocessed/E-MTAB-5814.sdrf.tsv");
+			*/
 
-			triplesProcessing.addFilesToBeProcessed("testFiles/geo_preprocessed/attempt_1/[GPL19921].tsv");
-			triplesProcessing.addFilesToBeProcessed("testFiles/geo_preprocessed/attempt_1/[GSE67111].tsv");
+			//Local test
+			app.extractRulesFromFile("testFiles/geo_preprocessed/rules-modified_searchblock.txt", listOfOntologies);
+			TriplesProcessing triplesProcessing = new TriplesProcessing("testFiles/geo_preprocessed/ontology.owl");
+			triplesProcessing.addFilesToBeProcessed("testFiles/geo_preprocessed/GPL19921.tsv");
+			triplesProcessing.addFilesToBeProcessed("testFiles/geo_preprocessed/GSE67111.tsv");
+			triplesProcessing.addFilesToBeProcessed("testFiles/geo_preprocessed/GSM1638971.tsv");
+			triplesProcessing.addFilesToBeProcessed("testFiles/geo_preprocessed/GSM1638972.tsv");
+			triplesProcessing.addFilesToBeProcessed("testFiles/geo_preprocessed/GSM1638973.tsv");
+			triplesProcessing.addFilesToBeProcessed("testFiles/geo_preprocessed/GSM1638979.tsv");
 
-			triplesProcessing.createTriplesFromRules(app.rulesList, app.conditionsBlocks, "http://www.example.org/onto/individual/");
+			triplesProcessing.createTriplesFromRules(app.rulesList, app.conditionsBlocks, app.searchBlocks);
 
 			triplesProcessing.writeRDF("RDFtriples.rdf");
 		} catch (CustomExceptions e) {
@@ -68,6 +85,11 @@ public class App
 		List<ConditionBlock> listConditionBlock = ConditionBlock.extractConditionsBlocksFromString(fileContent);
 		for(ConditionBlock conditionBlock : listConditionBlock){
 			conditionsBlocks.put(conditionBlock.getId(), conditionBlock);
+		}
+
+		List<SearchBlock> listSearchBlocks = SearchBlock.extractSearchBlockFromString(fileContent);
+		for(SearchBlock sb : listSearchBlocks){
+			searchBlocks.put(sb.getId(), sb);
 		}
 		
 		rulesList = extractRulesFromString(fileContent);
@@ -241,7 +263,9 @@ public class App
 								EnumRegexList.SELECTCONDITIONBLOCKFLAG.get() 	+ "|" +
 								EnumRegexList.SELECTBASEIRIFLAG.get() 			+ "|" +
 								EnumRegexList.SELECTFIXEDCONTENTFLAG.get() 		+ "|" +
-								EnumRegexList.SELECTDATATYPEFLAG.get();
+								EnumRegexList.SELECTDATATYPEFLAG.get()			+ "|" +
+								EnumRegexList.SELECTCUSTOMDIDFLAG.get()			+ "|" +
+								EnumRegexList.SELECTSEARCHBLOCKFLAG.get();
 
 
 		Matcher	matcher = Utils.matchRegexOnString(flagsToCheck, sentence);
@@ -257,6 +281,11 @@ public class App
 			else if(matcherString.contains("/CB")){
 				flagsList.add(extractDataFromFlagConditionFromSentence(sentence, EnumRegexList.SELECTCONDITIONBLOCKFLAG.get()));
 				sentence = Utils.removeRegexFromContent(EnumRegexList.SELECTCONDITIONBLOCKFLAG.get(), sentence);
+			}
+
+			else if(matcherString.contains("/SB")){
+				flagsList.add(extractDataFromFlagSearchBlockFromSentence(sentence, EnumRegexList.SELECTSEARCHBLOCKFLAG.get()));
+				sentence = Utils.removeRegexFromContent(EnumRegexList.SELECTSEARCHBLOCKFLAG.get(), sentence);
 			}
 
 			else if(matcherString.contains("/FX")){
@@ -331,6 +360,16 @@ public class App
 		int id = Integer.parseInt(matchedConditionSelected);
 
 		return new FlagConditionBlock(id);
+	}
+
+	private Flag 			extractDataFromFlagSearchBlockFromSentence(String sentence, String regex) {
+
+		String sbFlagTerm = Utils.matchRegexOnString(regex, sentence).group();
+		String matchedConditionSelected = Utils.matchRegexOnString("\\d+", sbFlagTerm).group();
+
+		int id = Integer.parseInt(matchedConditionSelected);
+
+		return new FlagSearchBlock(id);
 	}
 
 	private Flag 			extractDataFromFlagSeparatorFromSentence(String sentence, String regex) throws CustomExceptions {
@@ -442,7 +481,7 @@ public class App
 
 		List<String> identifiedBlocks = identifyBlocksFromString(fileContent);
 		if(identifiedBlocks.size() == 0)
-			throw new Exception("No config_rule, simple_rule or matrix_rule blocks identified in your file of rules. Please check your file.");
+			throw new Exception("No rule_config, simple_rule or matrix_rule blocks identified in your file of rules. Please check your file.");
 
 		for(String block : identifiedBlocks){
 			if(block.startsWith("rule_config"))
@@ -454,8 +493,8 @@ public class App
 		return configBlocks;
 	}
 
-	private static List<String> 	identifyBlocksFromString(String fileContent) {
-		Pattern patternToFind = Pattern.compile("(matrix_rule|simple_rule|rule_config)");
+	public static List<String> 	identifyBlocksFromString(String fileContent) {
+		Pattern patternToFind = Pattern.compile("(matrix_rule|simple_rule|rule_config|search_block)");
 		Matcher matcher = patternToFind.matcher(fileContent);
 		matcher.find();
 

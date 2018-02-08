@@ -400,12 +400,7 @@ public class TriplesProcessing {
 		SearchBlock searchBlock = getSearchBlockFlag(rule.getSubjectTSVColumns());
 		if(searchBlock != null){
 
-			List<String> subjectContentRaw = extractDataFromTSVColumn(rule.getSubjectTSVColumns(), lineNumber);
-
-			List<String> subjectContent = new ArrayList<String>();
-			for (String content : subjectContentRaw) {
-				subjectContent.add(content.replaceAll(" ", "_"));
-			}
+			List<String> subjectContent = extractDataFromTSVColumn(rule.getSubjectTSVColumns(), lineNumber);
 
 			for (String individualContent : subjectContent) {
 				subjectList.add(model.createResource(searchBlock.getExternalNode(individualContent), subjectType));

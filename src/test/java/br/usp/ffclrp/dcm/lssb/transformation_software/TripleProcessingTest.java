@@ -1322,4 +1322,56 @@ public class TripleProcessingTest
 		assertEquals(1, numberOfStatementsRule2);
 		assertEquals(1, numberOfStatementsRule3);
 	}
+
+	// ##################
+
+	private Rule createRuleWithColFlag() {
+		String id = "1";
+		RuleConfig ruleConfig = new RuleConfig("default", "http://example.org/onto/individual/");;
+		OWLClass subjectClass = ontologyHelper.getClass("Gene");
+		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
+
+		TSVColumn subject = new TSVColumn();
+		subject.setTitle("");
+		List<Flag> subjectFlags = new ArrayList<Flag>();
+		subjectFlags.add(new FlagCol("enrichedDataGOTerm.tsv", 5));
+		subject.setFlags(subjectFlags);
+
+		subjectTSVColumns.add(subject);
+
+		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<OWLProperty, TripleObject>();
+		return new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects);
+	}
+
+	@Test
+	public void processcreateRuleWithColFlag() {
+		ontologyHelper = new OntologyHelper();
+		String testFolderPath = "testFiles/unitTestsFiles/";
+		String ontologyPath = testFolderPath + "ontology.owl";
+
+		ontologyHelper.loadingOntologyFromFile(ontologyPath);
+		listRules.add(createRuleWithColFlag());
+
+		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
+
+		TriplesProcessing processingClass = new TriplesProcessing( testFolderPath + "ontology.owl");
+		processingClass.addFilesToBeProcessed(testFolderPath + "enrichedDataGOTerm.tsv");
+		processingClass.addFilesToBeProcessed(testFolderPath + "enrichedDataGOTerm2.tsv");
+		try{
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks);
+		}catch(Exception e) {
+			e.printStackTrace();
+			fail();
+		}
+
+		Model model = processingClass.getModel();
+		List<Statement> statements = model.listStatements().toList();
+
+		for(Statement statement : statements) {
+			Triple triple = statement.asTriple();
+
+			assert(triple.getSubject().getURI().equals("http://example.org/onto/individual/0.000397262")); //means that the software was able to find the column
+		}
+	}
+
 }

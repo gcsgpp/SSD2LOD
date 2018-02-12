@@ -1123,4 +1123,24 @@ public class AppTest
 		}
 
 	}
+
+	@Test
+	public void extractColFlag(){
+		String 	sentence = 	"simple_rule[1, \"investigation\" = \"\" /COL(\"E-MTAB-5814.idf.tsv\", 56)";
+
+		sentence = sentence.replace("\t", "").replaceAll("\n", "");
+
+		App app = new App();
+		List<Flag> flagsExtracted = null;
+		try {
+			flagsExtracted = app.extractFlagsFromSentence(sentence);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		assertEquals(1, flagsExtracted.size());
+		assertTrue(flagsExtracted.get(0) instanceof FlagCol);
+		assertEquals("E-MTAB-5814.idf.tsv", ((FlagCol) flagsExtracted.get(0)).getFilename() );
+		assertEquals("55", ((FlagCol) flagsExtracted.get(0)).getColPosition().toString() ); //one position less because of the array
+	}
 }

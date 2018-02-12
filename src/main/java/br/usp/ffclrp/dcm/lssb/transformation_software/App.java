@@ -265,7 +265,8 @@ public class App
 								EnumRegexList.SELECTFIXEDCONTENTFLAG.get() 		+ "|" +
 								EnumRegexList.SELECTDATATYPEFLAG.get()			+ "|" +
 								EnumRegexList.SELECTCUSTOMDIDFLAG.get()			+ "|" +
-								EnumRegexList.SELECTSEARCHBLOCKFLAG.get();
+								EnumRegexList.SELECTSEARCHBLOCKFLAG.get()		+ "|" +
+								EnumRegexList.SELECTCOLFLAG.get();
 
 
 		Matcher	matcher = Utils.matchRegexOnString(flagsToCheck, sentence);
@@ -313,6 +314,11 @@ public class App
 				sentence = Utils.removeRegexFromContent(EnumRegexList.SELECTDATATYPEFLAG.get(), sentence);
 			}
 
+			else if(matcherString.contains("/COL")){
+				flagsList.add(FlagCol.extractFlagColFromSentence(sentence));
+				sentence = Utils.removeRegexFromContent(EnumRegexList.SELECTCOLFLAG.get(), sentence);
+			}
+
 			matcher.find();
 		}
 
@@ -320,9 +326,9 @@ public class App
 	}
 
 	private Flag 			extractDataFromFlagDataTypeFromSentence(String sentence, String regex) throws Exception {
-		String contentFromQuotationMark = Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(sentence, regex);
-
+		String contentFromQuotationMark = null;
 		try{
+			contentFromQuotationMark = Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(sentence, regex);
 			return new FlagDataType(contentFromQuotationMark);
 		}catch (Exception e){
 			throw new Exception("Not found XSD datatype for '" + contentFromQuotationMark + "'");
@@ -376,7 +382,7 @@ public class App
 
 		sentence = Utils.matchRegexOnString(regex, sentence).group();
 		String contentFromQuotationMark = Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(sentence, regex);
-		String contentWithoutQuotationMark = removeDataFromFirstQuotationMarkBlockInsideRegex(sentence, regex);
+		String contentWithoutQuotationMark = Utils.removeDataFromFirstQuotationMarkBlockInsideRegex(sentence, regex);
 
 
 		List<Integer> columnsSelected = new ArrayList<Integer>();
@@ -444,24 +450,7 @@ public class App
 		return subject;
 	}
 
-	private String 			removeDataFromFirstQuotationMarkBlockInsideRegex(String content, String regex){
-		String data = null;
-
-		Matcher matcher = Utils.matchRegexOnString(regex, content);
-
-		try{
-			data = matcher.group(); 
-			int firstQuotationMark = data.indexOf("\"");
-			String quotationBlock = data.substring(firstQuotationMark, data.indexOf("\"", firstQuotationMark +1) + 1);
-			content = content.replace(quotationBlock, "");
-		}catch(IllegalStateException e){
-			//used just to identify when the matcher did not find anything.
-		}
-
-		return content;
-	}
-
-	private List<String> identifyRuleBlocksFromString(String fileContent) throws Exception {
+	private List<String> 	identifyRuleBlocksFromString(String fileContent) throws Exception {
 		List<String> ruleBlocks = new ArrayList<>();
 		try {
 			List<String> identifiedBlocks = identifyBlocksFromString(fileContent);

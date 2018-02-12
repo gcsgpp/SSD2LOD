@@ -27,6 +27,10 @@ public class FileToBeProcessed {
         }
     }
 
+    public String getFilename(){
+        return file.getName();
+    }
+
     public Map<String, Integer> getHeader(){
         return this.header;
     }

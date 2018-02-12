@@ -94,7 +94,7 @@ public class TriplesProcessing {
 		List<Resource> subjectListToBeReturned = new LinkedList<>();
 		if(rule.isMatrix()){
 			if(currentLineNumberMatrixRules.isEmpty()){
-				for(Integer tsvLineNumber = 1; tsvLineNumber < fileReader.getLinesCount(); tsvLineNumber++) {
+				for(Integer tsvLineNumber = rule.getStartLineNumber(); tsvLineNumber < fileReader.getLinesCount(); tsvLineNumber++) {
 					try {
 						currentLineNumberMatrixRules = new MatrixLineNumberTracking(tsvLineNumber, Integer.parseInt(rule.getId()));
 						for(TSVColumn ruleColumns : rule.getSubjectTSVColumns()){
@@ -138,9 +138,9 @@ public class TriplesProcessing {
 
 			if(simpleRuleAlreadyProcessed.get(Integer.parseInt(rule.getId())) == null){
 				// *** SUBJECT ***
-				List<Resource> subjectList = getSubject(rule, 1); //ONE SUBJECT FOR EACH ITEM IN THE CELL
+				List<Resource> subjectList = getSubject(rule, rule.getStartLineNumber()); //ONE SUBJECT FOR EACH ITEM IN THE CELL
 
-				for(Integer tsvLineNumber = 1; tsvLineNumber < fileReader.getLinesCount(); tsvLineNumber++) {
+				for(Integer tsvLineNumber = rule.getStartLineNumber(); tsvLineNumber < fileReader.getLinesCount(); tsvLineNumber++) {
 					try {
 						for (TSVColumn ruleColumns : rule.getSubjectTSVColumns()) {
 							if (!assertConditionBlock(ruleColumns.getFlags(), tsvLineNumber))
@@ -228,7 +228,7 @@ public class TriplesProcessing {
 				ConditionBlock conditionBlock = conditionBlocks.get(((FlagConditionBlock) flag).getId());
 
 				for(Condition condition : conditionBlock.getConditions()){
-					String contentTSVColumn = fileReader.getData(condition.getColumn(), tsvLineNumber);
+					String contentTSVColumn = fileReader.getData(condition, tsvLineNumber);
 					Boolean result = true;
 					if(condition.getOperation() == EnumOperationsConditionBlock.EQUAL){
 						result = contentTSVColumn.equals(condition.getConditionValue());
@@ -295,14 +295,13 @@ public class TriplesProcessing {
 		for(TSVColumn column : listTSVColumn){
 			Boolean extractedData = false;
 
-			//PROCESS THE SEPARATOR FLAG
 			for(Flag flag : column.getFlags()){
 				if(flag instanceof FlagSeparator){
-					dataColumnsSeparated.add(separateDataFromTSVColumn((FlagSeparator) flag, column.getTitle(), lineNumber));
+					dataColumnsSeparated.add(separateDataFromTSVColumn((FlagSeparator) flag, column, lineNumber));
 					extractedData = true;
 				}else if(flag instanceof FlagNotMetadata) {
 					String[] columnData = new String[1];
-					columnData[0] = fileReader.getData(column.getTitle(), 0);
+					columnData[0] = fileReader.getData(column, 0);
 					dataColumnsSeparated.add(columnData);
 					extractedData = true;
 				}else if(flag instanceof FlagFixedContent) {
@@ -316,7 +315,7 @@ public class TriplesProcessing {
 			//IF ANY OF THE SPECIAL CASES (FLAGS ABOVE) WERE MET, EXTRACT THE CONTENT NORMALLY. 
 			if(!extractedData){
 				String[] columnData = new String[1];
-				columnData[0] = fileReader.getData(column.getTitle(), lineNumber);
+				columnData[0] = fileReader.getData(column, lineNumber);
 				dataColumnsSeparated.add(columnData);
 			}
 		}
@@ -361,8 +360,8 @@ public class TriplesProcessing {
 		return objectContent;
 	}
 
-	private String[] 		separateDataFromTSVColumn(FlagSeparator flag, String columnTitle, Integer lineNumber) throws Exception {
-		String rawData = fileReader.getData(columnTitle, lineNumber);
+	private String[] 		separateDataFromTSVColumn(FlagSeparator flag, TSVColumn column, Integer lineNumber) throws Exception {
+		String rawData = fileReader.getData(column, lineNumber);
 
 		String flagTerm = Pattern.quote(flag.getTerm());
 
@@ -374,7 +373,7 @@ public class TriplesProcessing {
 			splitData[0] = rawData;
 		}else{
 				throw new SeparatorFlagException("There is no caractere '" + flag.getTerm() +
-						"' in the field '" + columnTitle + "' to be used as separator");
+						"' in the field '" + column.getTitle() + "' to be used as separator");
 		}
 
 		if(flag.getColumns().get(0).equals(Integer.MAX_VALUE))
@@ -488,7 +487,7 @@ public class TriplesProcessing {
 		return null;
 	}
 
-	private SearchBlock 	getSearchBlockFlag(List<TSVColumn> listTSVColumn) throws BaseIRIException {
+	private SearchBlock 	getSearchBlockFlag(List<TSVColumn> listTSVColumn) {
 		for(TSVColumn column : listTSVColumn){
 			for(Flag flag : column.getFlags()){
 				if(flag instanceof FlagSearchBlock){
@@ -523,7 +522,7 @@ public class TriplesProcessing {
 		});
 	}
 
-	public void 			writeRDF(String filename){
+	public 	void 			writeRDF(String filename){
 		if(!checkConsistency()){
 			return;
 		}
@@ -574,7 +573,7 @@ public class TriplesProcessing {
 		//System.out.println("\n ----- \n");
 	}
 
-	public Model 			getModel() {
+	public 	Model 			getModel() {
 		return this.model;
 	}
 }

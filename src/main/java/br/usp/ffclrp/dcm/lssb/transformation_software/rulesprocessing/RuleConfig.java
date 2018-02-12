@@ -12,16 +12,19 @@ public class RuleConfig {
 	private String id = null;
 	private Boolean matrix = null;
 	private String defaultNS = null;
+	private Boolean header = null;
 	
 	public RuleConfig(String ID) {
 		this.matrix = false;
 		this.id = ID;
+		this.header = true;
 	}
 
 	public RuleConfig(String ID, String defaultBaseIRI){
 		this.matrix = false;
 		this.id = ID;
 		this.defaultNS = defaultBaseIRI;
+		this.header = true;
 	}
 	
 	public String getId() {
@@ -37,7 +40,6 @@ public class RuleConfig {
 	private void setMatrixProperty(Boolean setting) {
 		this.matrix = setting;
 	}
-
 
 	public Boolean getMatrix() {
 		return this.matrix;
@@ -59,8 +61,12 @@ public class RuleConfig {
 		return data;
 	}
 
+	void setHeader(Boolean hasHeader){
+		this.header = hasHeader;
+	}
 
-	
+	Boolean getHeader(){ return this.header;	}
+
 	static private RuleConfig createRuleConfigFromString(String rcAsText) throws Exception {
 		Matcher matcher 				=	Utils.matchRegexOnString(EnumRegexList.SELECTSUBJECTLINE.get(), rcAsText);
 		String subjectLine 				=	Utils.splitByIndex(rcAsText, matcher.start())[0];

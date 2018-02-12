@@ -14,6 +14,7 @@ public enum EnumRegexList {
 	SELECTNAMESPACEBASEIRIFLAG("(,\\s*\"(.*)\")"),
 	SELECTFIXEDCONTENTFLAG("(\\/FX\\(\"(.*?)\"\\))"),
 	SELECTCONDITIONBLOCKFLAG("(\\/CB\\(\\d*?\\))"),
+	SELECTCOLFLAG("\\/COL\\(\\s*?\".*?\"\\s*?,\\s*?\\d*?\\s*?\\)"),
 	SELECTSEARCHBLOCKFLAG("(\\/SB\\(\\d*?\\))"),
 	SELECTSEPARATORFLAG("(\\/SP\\(\"(.*?)\"((,(.*?)\\))|\\)))"),
 	SELECTSEPARATORFLAGRANGENUMBERS("((\\d+\\s*:\\s*\\d+))"),

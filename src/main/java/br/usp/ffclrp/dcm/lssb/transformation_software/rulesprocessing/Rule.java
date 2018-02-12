@@ -45,5 +45,10 @@ public class Rule {
 		return config.getDefaultBaseIRI();
 	}
 
-
+	public Integer getStartLineNumber(){
+		if(this.config.getHeader())
+			return 1; //ignore the header and start processing at the row 1;
+		else
+			return 0;
+	}
 }

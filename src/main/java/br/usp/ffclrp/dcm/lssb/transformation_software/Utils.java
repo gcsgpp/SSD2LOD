@@ -42,5 +42,22 @@ public class Utils {
 
 		return matcher.replaceAll("").trim(); 
 	}
+
+	static public String 			removeDataFromFirstQuotationMarkBlockInsideRegex(String content, String regex){
+		String data = null;
+
+		Matcher matcher = Utils.matchRegexOnString(regex, content);
+
+		try{
+			data = matcher.group();
+			int firstQuotationMark = data.indexOf("\"");
+			String quotationBlock = data.substring(firstQuotationMark, data.indexOf("\"", firstQuotationMark +1) + 1);
+			content = content.replace(quotationBlock, "");
+		}catch(IllegalStateException e){
+			//used just to identify when the matcher did not find anything.
+		}
+
+		return content;
+	}
 	
 }

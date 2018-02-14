@@ -89,21 +89,7 @@ public class SemistructuredFileReader {
 	}
 	
 	public String getData(Condition condition, Integer lineNumber) throws ColumnNotFoundWarning {
-		String[] dataRow;
-		for(FileToBeProcessed file : filesToBeProcessed.values()) {
-			try {
-				dataRow = file.getAllRows().get(lineNumber);
-				String str = dataRow[file.getHeader().get(condition.getColumn())];
-				if (str.startsWith("\"") && str.endsWith("\""))
-					str = str.substring(1, str.length() - 1);
-				return str;
-			} catch (NullPointerException ex) {
-				continue;
-			} catch (IndexOutOfBoundsException ex2){
-				continue;
-			}
-		}
-		throw new ColumnNotFoundWarning("Not found the column required. Column tried to access: " + condition.getColumn() + ". This column may not exist.");
+		return getData(condition.getColumn(), lineNumber);
 	}
 	
 	public Integer getLinesCount(){

@@ -167,15 +167,30 @@ public class TripleProcessingTest
 	}
 
 	private void createConditionBlocks() {		
-		List<Condition> conditions = new ArrayList<Condition>();
-		conditions.add(new Condition("Category", EnumOperationsConditionBlock.DIFFERENT, "KEGG_PATHWAY"));
-		conditions.add(new Condition("PValue", EnumOperationsConditionBlock.LESSTHAN, "0.01"));
+		List<Condition> conditions = new ArrayList<>();
+		TSVColumn 	column = new TSVColumn();
+					column.setFlags(new ArrayList<>());
+					column.setTitle("Category");
+		conditions.add(new Condition(column, EnumOperationsConditionBlock.DIFFERENT, "KEGG_PATHWAY"));
+
+					column = new TSVColumn();
+					column.setFlags(new ArrayList<>());
+					column.setTitle("PValue");
+		conditions.add(new Condition(column, EnumOperationsConditionBlock.LESSTHAN, "0.01"));
 
 		conditionsBlocks.put(1, new ConditionBlock("1", conditions));
 
-		conditions = new ArrayList<Condition>();
-		conditions.add(new Condition("Category", EnumOperationsConditionBlock.EQUAL, "KEGG_PATHWAY"));
-		conditions.add(new Condition("PValue", EnumOperationsConditionBlock.LESSTHAN, "0.03"));
+		conditions = new ArrayList<>();
+
+					column = new TSVColumn();
+					column.setFlags(new ArrayList<>());
+					column.setTitle("Category");
+		conditions.add(new Condition(column, EnumOperationsConditionBlock.EQUAL, "KEGG_PATHWAY"));
+
+					column = new TSVColumn();
+					column.setFlags(new ArrayList<>());
+					column.setTitle("PValue");
+		conditions.add(new Condition(column, EnumOperationsConditionBlock.LESSTHAN, "0.03"));
 
 		conditionsBlocks.put(2, new ConditionBlock("2", conditions));
 	}
@@ -714,7 +729,10 @@ public class TripleProcessingTest
 
 	private void createConditionBlockWithGreaterThanCondition() {
 		List<Condition> conditions = new ArrayList<Condition>();
-		conditions.add(new Condition("Pop Hits", EnumOperationsConditionBlock.GREATERTHAN, "800"));
+		TSVColumn 	column = new TSVColumn();
+					column.setFlags(new ArrayList<>());
+					column.setTitle("Pop Hits");
+		conditions.add(new Condition(column, EnumOperationsConditionBlock.GREATERTHAN, "800"));
 
 		conditionsBlocks.put(1, new ConditionBlock("1", conditions));
 	}

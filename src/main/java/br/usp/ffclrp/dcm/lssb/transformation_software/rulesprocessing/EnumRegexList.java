@@ -5,7 +5,7 @@ public enum EnumRegexList {
 	SELECTCONFIGRULEID("((?:rule_config\\s*\\[\\s*).*)"),
 	SELECTSEARCHBLOCKID("((?:search_block\\s*\\[\\s*).*)"),
 	SELECTSUBJECTCLASSNAME("((\".*\")\\s?=)"), //old: \\[\\d+.*\"\\s?
-	SELECTSUBJECTLINE("(:(\\s*?)\"(\\w|\\d))"),
+	SELECTSUBJECTLINE("(:(\\s*?)\"(\\w|\\d|\"))"),
 	SELECTPREDICATESDIVISIONS("((:|,)\\s*?\"[^:,]*?\"\\s*=)"),
 	SELECTPREDICATE("((.*?)=)"),
 	SELECTCONTENTQUOTATIONMARK("((\"[^\"]*\"))"),
@@ -22,8 +22,8 @@ public enum EnumRegexList {
 	SELECTDATATYPEFLAG("(\\/DT\\(\"(.*?)\"\\))"),
 	SELECTNOTMETADATA("(\\/(NM)(?:\\W|\\s))"),
 	//CONDITION BLOCK REGEX:
-	SELECTCOLUMNCONDITIONBLOCK("((\".*\")\\s(=|!|>|<))"),
-	SELECTPREDICATESDIVISIONSCONDITIONBLOCK("((:|,)(\\s*?)\"(.*?)\"\\s?(=|!|>|<))"),
+	SELECTCOLUMNCONDITIONBLOCK("((\".*\")\\s*?(\\/COL\\(\".*\",\\s?\\d+\\))?\\s*?(==|!=|>|<))"),
+	SELECTPREDICATESDIVISIONSCONDITIONBLOCK("((:|,)(\\s*?)\"(.*?)\"(\\s*?)(\\/COL\\(\".*?\"\\s*?,\\s*?\\d+\\))?(\\s*?)(==|!=|>|<)\\s*?\"(.*?)\")"),
 	SELECTPREDICATESDIVISIONSSEARCHBLOCK("((:|,)(\\s*?)\"(.*?)\"\\s?(=|!|>|<))"),
 	SELECTOPERATIONCONDITIONBLOCK("(==|!=|>|<)"),
 	SELECTALL("(.+)");

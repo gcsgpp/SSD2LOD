@@ -32,7 +32,7 @@ public class AppTest
 	}
 
 	@Test
-	public void exctractConditionsFromString(){
+	public void exctractConditionsFromString() throws Exception {
 		String content = "condition_block[1: \"Category\" != \"KEGG_PATHWAY\", \"PValue\" < \"0.01\" ]";
 		content += "condition_block[2: \"Category\" == \"KEGG_PATHWAY\",	\"PValue\" < \"0.03\" ]";
 
@@ -52,11 +52,11 @@ public class AppTest
 
 					assertEquals(2, conditionBlock.getConditions().size());
 
-					if(condition.getColumn().equals("Category")){
+					if(condition.getColumn().getTitle().equals("Category")){
 						assertEquals(EnumOperationsConditionBlock.DIFFERENT, condition.getOperation());
 						assertEquals("KEGG_PATHWAY", condition.getConditionValue());
 
-					}else if(condition.getColumn().equals("PValue")){
+					}else if(condition.getColumn().getTitle().equals("PValue")){
 						assertEquals(EnumOperationsConditionBlock.LESSTHAN, condition.getOperation());
 						assertEquals("0.01", condition.getConditionValue());
 					}else{
@@ -67,11 +67,11 @@ public class AppTest
 
 					assertEquals(2, conditionBlock.getConditions().size());
 
-					if(condition.getColumn().equals("Category")){
+					if(condition.getColumn().getTitle().equals("Category")){
 						assertEquals(EnumOperationsConditionBlock.EQUAL, condition.getOperation());
 						assertEquals("KEGG_PATHWAY", condition.getConditionValue());
 
-					}else if(condition.getColumn().equals("PValue")){
+					}else if(condition.getColumn().getTitle().equals("PValue")){
 						assertEquals(EnumOperationsConditionBlock.LESSTHAN, condition.getOperation());
 						assertEquals("0.03", condition.getConditionValue());
 					}else{
@@ -720,7 +720,7 @@ public class AppTest
 	}
 
 	@Test
-	public void operationNotIdentifiedAtConditionBlock() throws ConditionBlockException {
+	public void operationNotIdentifiedAtConditionBlock() throws Exception {
 		String content = "condition_block[1: \"Category\" = \"KEGG_PATHWAY\", \"PValue\" < \"0.01\" ]";
 		thrown.expect(ConditionBlockException.class);
 		thrown.expectMessage("No valid condition operator identified in a condition block.");

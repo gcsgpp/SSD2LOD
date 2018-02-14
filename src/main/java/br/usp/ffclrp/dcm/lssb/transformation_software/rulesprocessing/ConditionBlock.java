@@ -6,6 +6,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import br.usp.ffclrp.dcm.lssb.custom_exceptions.ConditionBlockException;
+import br.usp.ffclrp.dcm.lssb.transformation_software.App;
 import br.usp.ffclrp.dcm.lssb.transformation_software.Utils;
 
 public class ConditionBlock extends Flag {
@@ -45,7 +46,7 @@ public class ConditionBlock extends Flag {
 		return identifiedCB;
 	}
 
-	static private ConditionBlock createConditionBlockFromString(String cbAsText) throws ConditionBlockException {
+	static private ConditionBlock createConditionBlockFromString(String cbAsText) throws Exception {
 		Matcher matcher 				=	Utils.matchRegexOnString(EnumRegexList.SELECTSUBJECTLINE.get(), cbAsText);
 		String subjectLine 				=	Utils.splitByIndex(cbAsText, matcher.start())[0];
 		String predicatesLinesOneBlock 	= 	Utils.splitByIndex(cbAsText, matcher.start())[1];
@@ -53,8 +54,29 @@ public class ConditionBlock extends Flag {
 		String conditionBlockId 		= 	extractConditionBlockIDFromSentence(subjectLine);
 
 
+		List<Condition> conditions = new ArrayList<Condition>();
 		matcher = Utils.matchRegexOnString(EnumRegexList.SELECTPREDICATESDIVISIONSCONDITIONBLOCK.get(), predicatesLinesOneBlock);
-		List<Integer> initialOfEachMatch = new ArrayList<Integer>();
+		while(!matcher.hitEnd()){
+			String lineFromBlock = matcher.group();
+
+			EnumOperationsConditionBlock operation = null;
+			try{
+				operation = retrieveOperation(lineFromBlock);
+			}catch(IllegalStateException e) {
+				throw new ConditionBlockException("No valid condition operator identified in a condition block.");
+			}
+
+			TSVColumn column = new TSVColumn();
+			column.setTitle(Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(lineFromBlock, EnumRegexList.SELECTCOLUMNCONDITIONBLOCK.get()));
+			column.setFlags(new App().extractFlagsFromSentence(lineFromBlock));
+
+			lineFromBlock 	= Utils.removeRegexFromContent(EnumRegexList.SELECTCOLUMNCONDITIONBLOCK.get(), lineFromBlock);
+			String value 	= Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(lineFromBlock, EnumRegexList.SELECTALL.get());
+			conditions.add(new Condition(column, operation, value));
+			matcher.find();
+		}
+
+		/*List<Integer> initialOfEachMatch = new ArrayList<Integer>();
 		while(!matcher.hitEnd()){
 			initialOfEachMatch.add(matcher.start());
 			matcher.find();
@@ -79,11 +101,15 @@ public class ConditionBlock extends Flag {
 				throw new ConditionBlockException("No valid condition operator identified in a condition block.");
 			}
 
-			String column 	= Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(lineFromBlock, EnumRegexList.SELECTCOLUMNCONDITIONBLOCK.get());
+			TSVColumn column = new TSVColumn();
+			column.setTitle(Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(lineFromBlock, EnumRegexList.SELECTCOLUMNCONDITIONBLOCK.get()));
+			column.setFlags(new App().extractFlagsFromSentence(lineFromBlock));
+
 			lineFromBlock 	= Utils.removeRegexFromContent(EnumRegexList.SELECTCOLUMNCONDITIONBLOCK.get(), lineFromBlock);
 			String value 	= Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(lineFromBlock, EnumRegexList.SELECTALL.get());
 			conditions.add(new Condition(column, operation, value));
-		}
+
+		}*/
 
 		return new ConditionBlock(conditionBlockId, conditions);
 	}
@@ -100,7 +126,7 @@ public class ConditionBlock extends Flag {
 		return null;
 	}
 	
-	static public List<ConditionBlock> extractConditionsBlocksFromString(String fileContent) throws ConditionBlockException {
+	static public List<ConditionBlock> extractConditionsBlocksFromString(String fileContent) throws Exception {
 		List<String> conditionsBlocksListAsText = identifyConditionBlocksFromString(fileContent);
 		List<ConditionBlock> cbList = new ArrayList<ConditionBlock>();
 

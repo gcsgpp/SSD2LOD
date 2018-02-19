@@ -23,7 +23,7 @@ public enum EnumRegexList {
 	SELECTNOTMETADATA("(\\/(NM)(?:\\W|\\s))"),
 	//CONDITION BLOCK REGEX:
 	SELECTCOLUMNCONDITIONBLOCK("((\".*\")\\s*?(\\/COL\\(\".*\",\\s?\\d+\\))?\\s*?(==|!=|>|<))"),
-	SELECTPREDICATESDIVISIONSCONDITIONBLOCK("((:|,)(\\s*?)\"(.*?)\"(\\s*?)(\\/COL\\(\".*?\"\\s*?,\\s*?\\d+\\))?(\\s*?)(==|!=|>|<)\\s*?\"(.*?)\")"),
+	SELECTPREDICATESDIVISIONSCONDITIONBLOCK("((:|,)(\\s*?)\"[^\"]*?\"(\\s*?)(\\/COL\\(\".*?\"\\s*?,\\s*?\\d+\\))?(\\s*?)((==)|(!=)|>|<)(\\s*?)\"(.*?)\")+?"),
 	SELECTPREDICATESDIVISIONSSEARCHBLOCK("((:|,)(\\s*?)\"(.*?)\"\\s?(=|!|>|<))"),
 	SELECTOPERATIONCONDITIONBLOCK("(==|!=|>|<)"),
 	SELECTALL("(.+)");

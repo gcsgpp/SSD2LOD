@@ -60,11 +60,9 @@ public class ConditionBlock extends Flag {
 			String lineFromBlock = matcher.group();
 
 			EnumOperationsConditionBlock operation = null;
-			try{
-				operation = retrieveOperation(lineFromBlock);
-			}catch(IllegalStateException e) {
-				throw new ConditionBlockException("No valid condition operator identified in a condition block.");
-			}
+
+			operation = retrieveOperation(lineFromBlock);
+
 
 			TSVColumn column = new TSVColumn();
 			column.setTitle(Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(lineFromBlock, EnumRegexList.SELECTCOLUMNCONDITIONBLOCK.get()));
@@ -111,19 +109,22 @@ public class ConditionBlock extends Flag {
 
 		}*/
 
+		if(conditions.size() == 0)
+			throw new ConditionBlockException("No conditions found in the condition block " + conditionBlockId);
+
 		return new ConditionBlock(conditionBlockId, conditions);
 	}
 	
-	static private EnumOperationsConditionBlock retrieveOperation(String lineFromBlock) {
+	static private EnumOperationsConditionBlock retrieveOperation(String lineFromBlock) throws ConditionBlockException {
 		String operation;
 		operation = Utils.matchRegexOnString(EnumRegexList.SELECTOPERATIONCONDITIONBLOCK.get(), lineFromBlock).group();
 
 
 		if(operation.equals(EnumOperationsConditionBlock.DIFFERENT.getOperation())) 	return EnumOperationsConditionBlock.DIFFERENT;
-		if(operation.equals(EnumOperationsConditionBlock.EQUAL.getOperation()))			return EnumOperationsConditionBlock.EQUAL;
-		if(operation.equals(EnumOperationsConditionBlock.GREATERTHAN.getOperation())) 	return EnumOperationsConditionBlock.GREATERTHAN;
-		if(operation.equals(EnumOperationsConditionBlock.LESSTHAN.getOperation()))		return EnumOperationsConditionBlock.LESSTHAN;
-		return null;
+		else if(operation.equals(EnumOperationsConditionBlock.EQUAL.getOperation()))			return EnumOperationsConditionBlock.EQUAL;
+		else if(operation.equals(EnumOperationsConditionBlock.GREATERTHAN.getOperation())) 	return EnumOperationsConditionBlock.GREATERTHAN;
+		else if(operation.equals(EnumOperationsConditionBlock.LESSTHAN.getOperation()))		return EnumOperationsConditionBlock.LESSTHAN;
+		else throw new ConditionBlockException("No valid condition operator identified in a condition block.");
 	}
 	
 	static public List<ConditionBlock> extractConditionsBlocksFromString(String fileContent) throws Exception {

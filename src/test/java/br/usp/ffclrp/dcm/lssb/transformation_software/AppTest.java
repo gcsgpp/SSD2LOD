@@ -721,9 +721,9 @@ public class AppTest
 
 	@Test
 	public void operationNotIdentifiedAtConditionBlock() throws Exception {
-		String content = "condition_block[1: \"Category\" = \"KEGG_PATHWAY\", \"PValue\" < \"0.01\" ]";
+		String content = "condition_block[1: \"Category\" = \"KEGG_PATHWAY\", \"PValue\" <! \"0.01\" ]";
 		thrown.expect(ConditionBlockException.class);
-		thrown.expectMessage("No valid condition operator identified in a condition block.");
+		thrown.expectMessage("No conditions found in the condition block 1");
 		@SuppressWarnings("unused")
 		List<ConditionBlock> conditionsExtracted = ConditionBlock.extractConditionsBlocksFromString(content);
 	}

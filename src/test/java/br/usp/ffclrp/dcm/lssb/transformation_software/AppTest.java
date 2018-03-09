@@ -6,6 +6,7 @@ import br.usp.ffclrp.dcm.lssb.custom_exceptions.PropertyNotExistException;
 import br.usp.ffclrp.dcm.lssb.custom_exceptions.SeparatorFlagException;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.*;
 import org.apache.jena.datatypes.xsd.XSDDatatype;
+import org.apache.jena.riot.Lang;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.semanticweb.owlapi.model.OWLProperty;
@@ -1039,7 +1040,7 @@ public class AppTest
 
 	@Test
 	public void extractRuleConfigWithMultipleRules(){
-		String 	sentence = 	"rule_config[default : \"default BaseIRI\" = \"http://www.example.org/onto/individual/\"]";
+		String 	sentence = 	"rule_config[default : \"default BaseIRI\" = \"http://www.example.org/onto/individual/\", \"export syntax\" = \"rdf/xml\"]";
 				sentence += "simple_rule[1, \"microarray platform\" = \"A-BUGS-23_Comment[ArrayExpressAccession]_4\" :\n" +
 							"\t\"Title\" = \"A-BUGS-23_Array Design Name_1\" /DT(\"literal\"),\n" +
 							"\t\"depends on\" = 2\n ]" +
@@ -1058,8 +1059,10 @@ public class AppTest
 		RuleConfig ruleConfig = rulesConfigExtracted.get(0);
 		assertEquals("default", ruleConfig.getId());
 		assertEquals("http://www.example.org/onto/individual/", ruleConfig.getDefaultBaseIRI());
+		assertEquals(Lang.RDFXML, ruleConfig.getSyntax());
 
 	}
+
 
 	@Test
 	public void extractSearchBlockWithMultipleRules(){

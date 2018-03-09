@@ -210,7 +210,7 @@ public class TripleProcessingTest
 		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "ontology.owl");
 		processingClass.addFilesToBeProcessed(testFolderPath + "enrichedDataGOTerm.tsv");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks);
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks, RuleConfig.getDefaultRuleConfigFromRuleList(listRules));
 		}catch(Exception e) {
 			fail();
 		}
@@ -264,7 +264,7 @@ public class TripleProcessingTest
 		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "ontology.owl");
 		processingClass.addFilesToBeProcessed(testFolderPath + "enrichedDataKeggTerm.tsv");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks);
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks, RuleConfig.getDefaultRuleConfigFromRuleList(listRules));
 		}catch(Exception e) {
 			fail();
 		}
@@ -336,7 +336,7 @@ public class TripleProcessingTest
 		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "ontology.owl");
 		processingClass.addFilesToBeProcessed(testFolderPath + "NormalizedData.txt");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks);
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks, RuleConfig.getDefaultRuleConfigFromRuleList(listRules));
 		}catch(Exception e) {
 			fail();
 		}
@@ -391,7 +391,7 @@ public class TripleProcessingTest
 		TriplesProcessing processingClass = new TriplesProcessing( testFolderPath + "ontology.owl");
 		processingClass.addFilesToBeProcessed(testFolderPath + "enrichedDataGOTerm2.tsv");
 
-		processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks);
+		processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks, RuleConfig.getDefaultRuleConfigFromRuleList(listRules));
 	}
 
 
@@ -432,7 +432,7 @@ public class TripleProcessingTest
 		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "ontology.owl");
 		processingClass.addFilesToBeProcessed(testFolderPath + "NormalizedData.txt");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks);
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks, RuleConfig.getDefaultRuleConfigFromRuleList(listRules));
 		}catch(Exception e) {
 			fail();
 		}
@@ -491,7 +491,7 @@ public class TripleProcessingTest
 		TriplesProcessing processingClass = new TriplesProcessing( testFolderPath + "ontology.owl");
 		processingClass.addFilesToBeProcessed(testFolderPath + "NormalizedData.txt");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks);
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks, RuleConfig.getDefaultRuleConfigFromRuleList(listRules));
 		}catch(Exception e) {
 			e.printStackTrace();
 			fail();
@@ -548,7 +548,7 @@ public class TripleProcessingTest
 		TriplesProcessing processingClass = new TriplesProcessing( testFolderPath + "ontology.owl");
 		processingClass.addFilesToBeProcessed(testFolderPath + "NormalizedData.txt");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks);
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks, RuleConfig.getDefaultRuleConfigFromRuleList(listRules));
 		}catch(Exception e) {
 			e.printStackTrace();
 			fail();
@@ -603,7 +603,7 @@ public class TripleProcessingTest
 
 		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
 
-        processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks);
+        processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks, RuleConfig.getDefaultRuleConfigFromRuleList(listRules));
 	}
 
 
@@ -645,7 +645,7 @@ public class TripleProcessingTest
 
 		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
 
-		processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks);
+		processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks, RuleConfig.getDefaultRuleConfigFromRuleList(listRules));
 	}
 
 
@@ -677,7 +677,7 @@ public class TripleProcessingTest
 		TriplesProcessing processingClass = new TriplesProcessing( testFolderPath + "ontology.owl");
 		processingClass.addFilesToBeProcessed(testFolderPath + "enrichedDataGOTerm.tsv");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks);
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks, RuleConfig.getDefaultRuleConfigFromRuleList(listRules));
 		}catch(Exception e) {
 			fail();
 		}
@@ -753,7 +753,7 @@ public class TripleProcessingTest
 		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "ontology.owl");
 		processingClass.addFilesToBeProcessed(testFolderPath + "enrichedDataGOTerm3.tsv");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks);
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks, RuleConfig.getDefaultRuleConfigFromRuleList(listRules));
 		}catch(Exception e) {
 			e.printStackTrace();
 		    fail();
@@ -809,7 +809,7 @@ public class TripleProcessingTest
         processingClass.addFilesToBeProcessed(testFolderPath + "enrichedDataGOTerm.tsv");
         processingClass.addFilesToBeProcessed(testFolderPath + "enrichedDataGOTerm3.tsv");
         try{
-            processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks);
+            processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks, RuleConfig.getDefaultRuleConfigFromRuleList(listRules));
         }catch(Exception e) {
             e.printStackTrace();
             fail();
@@ -904,7 +904,7 @@ public class TripleProcessingTest
 		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "ontology.owl");
 		processingClass.addFilesToBeProcessed(testFolderPath + "GSE67111.tsv");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks);
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks, RuleConfig.getDefaultRuleConfigFromRuleList(listRules));
 		}catch(Exception e) {
 			e.printStackTrace();
 			fail();
@@ -1008,7 +1008,7 @@ public class TripleProcessingTest
 		processingClass.addFilesToBeProcessed(testFolderPath + "GSE67111.tsv");
 		processingClass.addFilesToBeProcessed(testFolderPath + "GPL19921.tsv");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks);
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks, RuleConfig.getDefaultRuleConfigFromRuleList(listRules));
 		}catch(Exception e) {
 			e.printStackTrace();
 			fail();
@@ -1127,7 +1127,7 @@ public class TripleProcessingTest
 		processingClass.addFilesToBeProcessed(testFolderPath + "GSE67111.tsv");
 		processingClass.addFilesToBeProcessed(testFolderPath + "GPL19921.tsv");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks);
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks, RuleConfig.getDefaultRuleConfigFromRuleList(listRules));
 		}catch(Exception e) {
 			e.printStackTrace();
 			fail();
@@ -1221,7 +1221,7 @@ public class TripleProcessingTest
 
 		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
 
-		processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks);
+		processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks, RuleConfig.getDefaultRuleConfigFromRuleList(listRules));
 
 	}
 
@@ -1301,7 +1301,7 @@ public class TripleProcessingTest
 		processingClass.addFilesToBeProcessed(testFolderPath + "GSE67111.tsv");
 		processingClass.addFilesToBeProcessed(testFolderPath + "GPL19921.tsv");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks);
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks, RuleConfig.getDefaultRuleConfigFromRuleList(listRules));
 		}catch(Exception e) {
 			e.printStackTrace();
 			fail();
@@ -1376,7 +1376,7 @@ public class TripleProcessingTest
 		processingClass.addFilesToBeProcessed(testFolderPath + "enrichedDataGOTerm.tsv");
 		processingClass.addFilesToBeProcessed(testFolderPath + "enrichedDataGOTerm2.tsv");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks);
+			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks, RuleConfig.getDefaultRuleConfigFromRuleList(listRules));
 		}catch(Exception e) {
 			e.printStackTrace();
 			fail();

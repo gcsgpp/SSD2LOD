@@ -51,4 +51,6 @@ public class Rule {
 		else
 			return 0;
 	}
+
+	public RuleConfig getConfig() { return this.config;	}
 }

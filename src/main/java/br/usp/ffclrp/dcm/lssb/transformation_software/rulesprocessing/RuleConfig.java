@@ -7,12 +7,15 @@ import java.util.regex.Pattern;
 
 import br.usp.ffclrp.dcm.lssb.transformation_software.App;
 import br.usp.ffclrp.dcm.lssb.transformation_software.Utils;
+import openllet.core.utils.Bool;
+import org.apache.jena.riot.Lang;
 
 public class RuleConfig {
 	private String id = null;
 	private Boolean matrix = null;
 	private String defaultNS = null;
 	private Boolean header = null;
+	private Lang syntax = null;
 	
 	public RuleConfig(String ID) {
 		this.matrix = false;
@@ -53,7 +56,11 @@ public class RuleConfig {
 		return this.defaultNS;
 	}
 
-	static private String extractRuleConfigIDFromSentence(String blockRulesAsText) {
+	public Lang getSyntax() { return syntax; }
+
+	public void setSyntax(Lang syntax) { this.syntax = syntax;	}
+
+	private static String extractRuleConfigIDFromSentence(String blockRulesAsText) {
 		String data = "";
 
 		Matcher matcher = Utils.matchRegexOnString(EnumRegexList.SELECTCONFIGRULEID.get(), blockRulesAsText);
@@ -67,7 +74,7 @@ public class RuleConfig {
 
 	Boolean getHeader(){ return this.header;	}
 
-	static private RuleConfig createRuleConfigFromString(String rcAsText) throws Exception {
+	private static RuleConfig createRuleConfigFromString(String rcAsText) throws Exception {
 		Matcher matcher 				=	Utils.matchRegexOnString(EnumRegexList.SELECTSUBJECTLINE.get(), rcAsText);
 		String subjectLine 				=	Utils.splitByIndex(rcAsText, matcher.start())[0];
 		String predicatesLinesOneBlock 	= 	Utils.splitByIndex(rcAsText, matcher.start())[1];
@@ -105,6 +112,20 @@ public class RuleConfig {
 					e.printStackTrace();
 					throw new Exception("One of the values inside rule_config block was not possible to understand. Rule Config block ID: " + ruleConfigId + " . Value found: " + value);
 				}
+			}else if(column.toLowerCase().equals("has header")) {
+				try {
+					rule.setHeader(Boolean.parseBoolean(value));
+				}catch(Exception e) {
+					e.printStackTrace();
+					throw new Exception("One of the values inside rule_config block was not possible to understand. Rule Config block ID: " + ruleConfigId + " . Value found: " + value);
+				}
+			}else if(ruleConfigId.toLowerCase().equals("default") && column.toLowerCase().equals("export syntax")) {
+				if(		Lang.RDFXML	.getName().toLowerCase().equals(value))
+					rule.setSyntax(Lang.RDFXML);
+				else if(Lang.N3		.getName().toLowerCase().equals(value))
+					rule.setSyntax(Lang.N3);
+				else if(Lang.TURTLE	.getName().toLowerCase().equals(value))
+					rule.setSyntax(Lang.TURTLE);
 			}
 		}
 
@@ -120,5 +141,14 @@ public class RuleConfig {
 		}
 
 		return rcList;
+	}
+
+	static public RuleConfig getDefaultRuleConfigFromRuleList(List<Rule> ruleList) throws Exception {
+		for(Rule rule : ruleList){
+			if( rule.getConfig().getId().equals("default"));
+				return rule.getConfig();
+		}
+
+		throw new Exception("There is no default rule configuration component.");
 	}
 }

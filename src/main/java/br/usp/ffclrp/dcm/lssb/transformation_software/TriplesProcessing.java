@@ -29,6 +29,7 @@ public class TriplesProcessing {
 	private List<Rule> dependencyList = new ArrayList<Rule>();
 	private Map<Integer, ConditionBlock> conditionBlocks;
 	private Map<Integer, SearchBlock> searchBlocks;
+	private RuleConfig defaultRuleConfig;
 	private Model ontology = null;
 	private String relativePathOntologyFile = null;
 	private MatrixLineNumberTracking currentLineNumberMatrixRules = new MatrixLineNumberTracking();
@@ -48,7 +49,7 @@ public class TriplesProcessing {
 		fileReader.addFilesToBeProcessed(relativePathDataFile);
 	}
 	@SuppressWarnings("unchecked")
-	public void 			createTriplesFromRules(List<Rule> listRules, Map<Integer, ConditionBlock> conditionBlocks, Map<Integer, SearchBlock> searchBlocks) throws Exception{
+	public void 			createTriplesFromRules(List<Rule> listRules, Map<Integer, ConditionBlock> conditionBlocks, Map<Integer, SearchBlock> searchBlocks, RuleConfig defaultRuleConfig) throws Exception{
 
 		if(fileReader.getFilesAdded() <= 0)
 			throw new NoFilesAddedException("No files were added to be processed.");
@@ -56,6 +57,7 @@ public class TriplesProcessing {
 		this.regularRuleList 	= listRules;
 		this.conditionBlocks 	= conditionBlocks;
 		this.searchBlocks 		= searchBlocks;
+		this.defaultRuleConfig 	= defaultRuleConfig;
 
 		for(Rule rule : regularRuleList){	
 			allRules.put(Integer.parseInt(rule.getId()), rule);
@@ -534,8 +536,9 @@ public class TriplesProcessing {
 			FileOutputStream fos = new FileOutputStream(f);
 			//RDFDataMgr.write(fos, model, Lang.TRIG);
 			//RDFDataMgr.write(fos, model, Lang.TURTLE);
-			RDFDataMgr.write(fos, model, Lang.RDFXML);
+			//RDFDataMgr.write(fos, model, Lang.RDFXML);
 			//RDFDataMgr.write(fos, model, Lang.NTRIPLES);
+			RDFDataMgr.write(fos, model, defaultRuleConfig.getSyntax());
 			fos.close();
 
 		} catch (Exception e) {

@@ -54,8 +54,9 @@ public class App
 			triplesProcessing.addFilesToBeProcessed("testFiles/geo_preprocessed/GSM1638972.tsv");
 			triplesProcessing.addFilesToBeProcessed("testFiles/geo_preprocessed/GSM1638973.tsv");
 			triplesProcessing.addFilesToBeProcessed("testFiles/geo_preprocessed/GSM1638979.tsv");
+			*/
 
-			triplesProcessing.createTriplesFromRules(app.rulesList, app.conditionsBlocks, app.searchBlocks);
+			triplesProcessing.createTriplesFromRules(app.rulesList, app.conditionsBlocks, app.searchBlocks, app.ruleConfigs.get("default"));
 
 			triplesProcessing.writeRDF("RDFtriples.rdf");
 		} catch (CustomExceptions e) {
@@ -491,7 +492,7 @@ public class App
 		while(matcher.find()){
 			identifiedRules.add(matcher.group());
 		}
-		
+
 		return identifiedRules;
 	}
 

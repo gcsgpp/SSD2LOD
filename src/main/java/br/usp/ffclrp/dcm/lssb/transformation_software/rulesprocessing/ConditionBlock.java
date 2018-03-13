@@ -6,7 +6,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import br.usp.ffclrp.dcm.lssb.custom_exceptions.ConditionBlockException;
-import br.usp.ffclrp.dcm.lssb.transformation_software.App;
+import br.usp.ffclrp.dcm.lssb.transformation_software.RuleInterpretor;
 import br.usp.ffclrp.dcm.lssb.transformation_software.Utils;
 
 public class ConditionBlock extends Flag {
@@ -66,7 +66,7 @@ public class ConditionBlock extends Flag {
 
 			TSVColumn column = new TSVColumn();
 			column.setTitle(Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(lineFromBlock, EnumRegexList.SELECTCOLUMNCONDITIONBLOCK.get()));
-			column.setFlags(new App().extractFlagsFromSentence(lineFromBlock));
+			column.setFlags(new RuleInterpretor().extractFlagsFromSentence(lineFromBlock));
 
 			lineFromBlock 	= Utils.removeRegexFromContent(EnumRegexList.SELECTCOLUMNCONDITIONBLOCK.get(), lineFromBlock);
 			String value 	= Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(lineFromBlock, EnumRegexList.SELECTALL.get());

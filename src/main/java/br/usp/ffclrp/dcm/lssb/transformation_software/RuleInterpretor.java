@@ -20,7 +20,7 @@ import java.util.stream.Stream;
  * Hello world!
  *
  */
-public class App
+public class RuleInterpretor
 {
 	public OntologyHelper ontologyHelper;
 	public List<Rule> rulesList;
@@ -29,34 +29,37 @@ public class App
 	public Map<Integer	, SearchBlock> 		searchBlocks		= new HashMap<>();
 
 	public static void 		main( String[] args ){
-		App app = new App();
 		List<String> listOfOntologies = new ArrayList<String>();
-		//ArrayExpress ER paper test
-		// listOfOntologies.add("testFiles/arraye_preprocessed/ontology.owl");
+		listOfOntologies.add("testFiles/teste_5/onto_teste_5.owl");
+		String rulesFilePath = "testFiles/teste_5/rules_teste_5.txt";
+		List<String> dataPaths = new ArrayList<>();
+		dataPaths.add("testFiles/teste_5/teste_5_cleaned.tsv");
 
-		//Local test
-		listOfOntologies.add("testFiles/geo_preprocessed/ontology.owl");
+		new RuleInterpretor().startTransformation(listOfOntologies, rulesFilePath, "testFiles/teste_5/onto_teste_5.owl", dataPaths );
+	}
+
+	public void				startTransformation(List<String> listOfOntologies, String rulesFilePath, String relativePathOntologyFile, List<String> dataPaths){
+		RuleInterpretor ruleInterpretor = new RuleInterpretor();
 		try {
-			//ArrayExpress ER paper test
-			/*app.extractRulesFromFile("testFiles/arraye_preprocessed/Competency Questions/CompetencyQuestion5_rules.txt", listOfOntologies);
-			TriplesProcessing triplesProcessing = new TriplesProcessing("testFiles/arraye_preprocessed/ontology_simplified_version.owl");
-			triplesProcessing.addFilesToBeProcessed("testFiles/arraye_preprocessed/A-BUGS-23.adf.tsv");
-			triplesProcessing.addFilesToBeProcessed("testFiles/arraye_preprocessed/E-MTAB-5814.idf.tsv");
-			triplesProcessing.addFilesToBeProcessed("testFiles/arraye_preprocessed/E-MTAB-5814.sdrf.tsv");
-			*/
+			ruleInterpretor.extractRulesFromFile(rulesFilePath, listOfOntologies);
+			TriplesProcessing triplesProcessing = new TriplesProcessing(relativePathOntologyFile);
+			for(String path : dataPaths) {
+				triplesProcessing.addDatasetToBeProcessed(path);
+			}
+
 
 			//Local test
-			app.extractRulesFromFile("testFiles/geo_preprocessed/rules-modified_searchblock.txt", listOfOntologies);
+			/*app.extractRulesFromFile("testFiles/geo_preprocessed/rules-modified_searchblock.txt", listOfOntologies);
 			TriplesProcessing triplesProcessing = new TriplesProcessing("testFiles/geo_preprocessed/ontology.owl");
-			triplesProcessing.addFilesToBeProcessed("testFiles/geo_preprocessed/GPL19921.tsv");
-			triplesProcessing.addFilesToBeProcessed("testFiles/geo_preprocessed/GSE67111.tsv");
-			triplesProcessing.addFilesToBeProcessed("testFiles/geo_preprocessed/GSM1638971.tsv");
-			triplesProcessing.addFilesToBeProcessed("testFiles/geo_preprocessed/GSM1638972.tsv");
-			triplesProcessing.addFilesToBeProcessed("testFiles/geo_preprocessed/GSM1638973.tsv");
-			triplesProcessing.addFilesToBeProcessed("testFiles/geo_preprocessed/GSM1638979.tsv");
+			triplesProcessing.addDatasetToBeProcessed("testFiles/geo_preprocessed/GPL19921.tsv");
+			triplesProcessing.addDatasetToBeProcessed("testFiles/geo_preprocessed/GSE67111.tsv");
+			triplesProcessing.addDatasetToBeProcessed("testFiles/geo_preprocessed/GSM1638971.tsv");
+			triplesProcessing.addDatasetToBeProcessed("testFiles/geo_preprocessed/GSM1638972.tsv");
+			triplesProcessing.addDatasetToBeProcessed("testFiles/geo_preprocessed/GSM1638973.tsv");
+			triplesProcessing.addDatasetToBeProcessed("testFiles/geo_preprocessed/GSM1638979.tsv");
 			*/
 
-			triplesProcessing.createTriplesFromRules(app.rulesList, app.conditionsBlocks, app.searchBlocks, app.ruleConfigs.get("default"));
+			triplesProcessing.createTriplesFromRules(ruleInterpretor.rulesList, ruleInterpretor.conditionsBlocks, ruleInterpretor.searchBlocks, ruleInterpretor.ruleConfigs.get("default"));
 
 			triplesProcessing.writeRDF("RDFtriples.rdf");
 		} catch (CustomExceptions e) {
@@ -509,4 +512,5 @@ public class App
 
 		return fileContent;
 	}
+
 }

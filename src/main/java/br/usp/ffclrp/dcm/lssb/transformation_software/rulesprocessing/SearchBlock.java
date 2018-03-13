@@ -2,7 +2,7 @@ package br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing;
 
 import br.usp.ffclrp.dcm.lssb.custom_exceptions.NotFoundExternalNodeException;
 import br.usp.ffclrp.dcm.lssb.custom_exceptions.SearchBlockException;
-import br.usp.ffclrp.dcm.lssb.transformation_software.App;
+import br.usp.ffclrp.dcm.lssb.transformation_software.RuleInterpretor;
 import br.usp.ffclrp.dcm.lssb.transformation_software.Utils;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
@@ -75,7 +75,7 @@ public class SearchBlock {
     public static List<String> identifySearchBlocksFromString(String fileContent) throws Exception {
         List<String> searchBlocks = new ArrayList<>();
 
-        List<String> identifiedBlocks = App.identifyBlocksFromString(fileContent);
+        List<String> identifiedBlocks = RuleInterpretor.identifyBlocksFromString(fileContent);
 
         for(String block : identifiedBlocks){
             if(block.startsWith("search_block"))

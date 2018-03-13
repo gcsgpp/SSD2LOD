@@ -22,13 +22,13 @@ public class AppTest
 	@org.junit.Rule
 	public ExpectedException thrown = ExpectedException.none();
 
-	private void createConfigRuleDefault(App app) throws Exception {
+	private void createConfigRuleDefault(RuleInterpretor ruleInterpretor) throws Exception {
 
 		String sentence = "rule_config[default : \"default BaseIRI\" = \"http://www.example.org/onto/individual/\"]";
 
 		List<RuleConfig> listRuleConfig = RuleConfig.extractRuleConfigFromString(sentence);
 		for(RuleConfig rc : listRuleConfig){
-			app.ruleConfigs.put(rc.getId(), rc);
+			ruleInterpretor.ruleConfigs.put(rc.getId(), rc);
 		}
 	}
 
@@ -94,14 +94,14 @@ public class AppTest
 
 		ruleString = ruleString.replace("\t", "").replaceAll("\n", "");
 
-		App app = new App();
-		app.ontologyHelper = new OntologyHelper();
-		app.ontologyHelper.loadingOntologyFromFile("testFiles/unitTestsFiles/ontology.owl");
+		RuleInterpretor ruleInterpretor = new RuleInterpretor();
+		ruleInterpretor.ontologyHelper = new OntologyHelper();
+		ruleInterpretor.ontologyHelper.loadingOntologyFromFile("testFiles/unitTestsFiles/ontology.owl");
 
 		Rule rule1Extracted = null;
 		try {
-			createConfigRuleDefault(app);
-			rule1Extracted = app.createRulesFromBlock(ruleString);
+			createConfigRuleDefault(ruleInterpretor);
+			rule1Extracted = ruleInterpretor.createRulesFromBlock(ruleString);
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail();
@@ -195,14 +195,14 @@ public class AppTest
 
 		ruleString = ruleString.replace("\t", "").replaceAll("\n", "");
 
-		App app = new App();
-		app.ontologyHelper = new OntologyHelper();
-		app.ontologyHelper.loadingOntologyFromFile("testFiles/unitTestsFiles/ontology.owl");
+		RuleInterpretor ruleInterpretor = new RuleInterpretor();
+		ruleInterpretor.ontologyHelper = new OntologyHelper();
+		ruleInterpretor.ontologyHelper.loadingOntologyFromFile("testFiles/unitTestsFiles/ontology.owl");
 
 		Rule rule2Extracted = null;
 		try {
-			createConfigRuleDefault(app);
-			rule2Extracted = app.createRulesFromBlock(ruleString);
+			createConfigRuleDefault(ruleInterpretor);
+			rule2Extracted = ruleInterpretor.createRulesFromBlock(ruleString);
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail();
@@ -297,14 +297,14 @@ public class AppTest
 
 		ruleString = ruleString.replace("\t", "").replaceAll("\n", "");
 
-		App app = new App();
-		app.ontologyHelper = new OntologyHelper();
-		app.ontologyHelper.loadingOntologyFromFile("testFiles/unitTestsFiles/ontology.owl");
+		RuleInterpretor ruleInterpretor = new RuleInterpretor();
+		ruleInterpretor.ontologyHelper = new OntologyHelper();
+		ruleInterpretor.ontologyHelper.loadingOntologyFromFile("testFiles/unitTestsFiles/ontology.owl");
 
 		Rule rule2Extracted = null;
 		try {
-			createConfigRuleDefault(app);
-			rule2Extracted = app.createRulesFromBlock(ruleString);
+			createConfigRuleDefault(ruleInterpretor);
+			rule2Extracted = ruleInterpretor.createRulesFromBlock(ruleString);
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail();
@@ -397,14 +397,14 @@ public class AppTest
 
 		ruleString = ruleString.replace("\t", "").replaceAll("\n", "");
 
-		App app = new App();
-		app.ontologyHelper = new OntologyHelper();
-		app.ontologyHelper.loadingOntologyFromFile("testFiles/unitTestsFiles/ontology.owl");
+		RuleInterpretor ruleInterpretor = new RuleInterpretor();
+		ruleInterpretor.ontologyHelper = new OntologyHelper();
+		ruleInterpretor.ontologyHelper.loadingOntologyFromFile("testFiles/unitTestsFiles/ontology.owl");
 
 		Rule rule3Extracted = null;
 		try {
-			createConfigRuleDefault(app);
-			rule3Extracted = app.createRulesFromBlock(ruleString);
+			createConfigRuleDefault(ruleInterpretor);
+			rule3Extracted = ruleInterpretor.createRulesFromBlock(ruleString);
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail();
@@ -452,14 +452,14 @@ public class AppTest
 
 		ruleString = ruleString.replace("\t", "").replaceAll("\n", "");
 
-		App app = new App();
-		app.ontologyHelper = new OntologyHelper();
-		app.ontologyHelper.loadingOntologyFromFile("testFiles/unitTestsFiles/ontology.owl");
+		RuleInterpretor ruleInterpretor = new RuleInterpretor();
+		ruleInterpretor.ontologyHelper = new OntologyHelper();
+		ruleInterpretor.ontologyHelper.loadingOntologyFromFile("testFiles/unitTestsFiles/ontology.owl");
 
 		Rule rule2Extracted = null;
 		try {
-			createConfigRuleDefault(app);
-			rule2Extracted = app.extractRulesFromString(ruleString).get(0);
+			createConfigRuleDefault(ruleInterpretor);
+			rule2Extracted = ruleInterpretor.extractRulesFromString(ruleString).get(0);
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail();
@@ -554,14 +554,14 @@ public class AppTest
 
 		ruleString = ruleString.replace("\t", "").replaceAll("\n", "");
 
-		App app = new App();
-		app.ontologyHelper = new OntologyHelper();
-		app.ontologyHelper.loadingOntologyFromFile("testFiles/unitTestsFiles/ontology.owl");
+		RuleInterpretor ruleInterpretor = new RuleInterpretor();
+		ruleInterpretor.ontologyHelper = new OntologyHelper();
+		ruleInterpretor.ontologyHelper.loadingOntologyFromFile("testFiles/unitTestsFiles/ontology.owl");
 
 		Rule ruleExtracted = null;
 		try {
-			createConfigRuleDefault(app);
-			ruleExtracted = app.extractRulesFromString(ruleString).get(0);
+			createConfigRuleDefault(ruleInterpretor);
+			ruleExtracted = ruleInterpretor.extractRulesFromString(ruleString).get(0);
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail();
@@ -652,10 +652,10 @@ public class AppTest
 	public void extractFixedContentFlag() {	
 		String sentence = "\\\"name\\\" = \\\"Term\\\" /FX(\"fixed content test\"), ";
 
-		App app = new App();
+		RuleInterpretor ruleInterpretor = new RuleInterpretor();
 		List<Flag> flagsExtracted = null;
 		try {
-			flagsExtracted = app.extractFlagsFromSentence(sentence);
+			flagsExtracted = ruleInterpretor.extractFlagsFromSentence(sentence);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -676,10 +676,10 @@ public class AppTest
 	public void extractNotMetadataFlag() {	
 		String sentence = "\\\"name\\\" = \\\"Term\\\" /NM, ";
 
-		App app = new App();
+		RuleInterpretor ruleInterpretor = new RuleInterpretor();
 		List<Flag> flagsExtracted = null;
 		try {
-			flagsExtracted = app.extractFlagsFromSentence(sentence);
+			flagsExtracted = ruleInterpretor.extractFlagsFromSentence(sentence);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -700,10 +700,10 @@ public class AppTest
 	public void extractDatatypeContentFlag() {	
 		String sentence = "\\\"name\\\" = \\\"Term\\\" /DT(\"string\"), ";
 
-		App app = new App();
+		RuleInterpretor ruleInterpretor = new RuleInterpretor();
 		List<Flag> flagsExtracted = null;
 		try {
-			flagsExtracted = app.extractFlagsFromSentence(sentence);
+			flagsExtracted = ruleInterpretor.extractFlagsFromSentence(sentence);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -738,17 +738,17 @@ public class AppTest
 
 		ruleString = ruleString.replace("\t", "").replaceAll("\n", "");
 
-		App app = new App();
-		app.ontologyHelper = new OntologyHelper();
+		RuleInterpretor ruleInterpretor = new RuleInterpretor();
+		ruleInterpretor.ontologyHelper = new OntologyHelper();
 		List<String> ontologiesPaths = new ArrayList<String>();
 		ontologiesPaths.add("testFiles/unitTestsFiles/ontology.owl");
 		ontologiesPaths.add("testFiles/unitTestsFiles/ontology2.owl");
-		app.ontologyHelper.loadingOntologyFromFile(ontologiesPaths);
+		ruleInterpretor.ontologyHelper.loadingOntologyFromFile(ontologiesPaths);
 
 		Rule rule1Extracted = null;
 		try {
-			createConfigRuleDefault(app);
-			rule1Extracted = app.createRulesFromBlock(ruleString);
+			createConfigRuleDefault(ruleInterpretor);
+			rule1Extracted = ruleInterpretor.createRulesFromBlock(ruleString);
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail();
@@ -833,10 +833,10 @@ public class AppTest
 	public void extractMultipleTSVColumnsFromSentence() {
 		String sentence = " \"column1\" ; \"column2\" /R ; \"column3\" /BASEIRI(\"http://teste.com\", \"test\") ";
 
-		App app = new App();
+		RuleInterpretor ruleInterpretor = new RuleInterpretor();
 		List<TSVColumn> tsvColumns = null;
 		try {
-			tsvColumns = app.extractTSVColumnsFromSentence(sentence);
+			tsvColumns = ruleInterpretor.extractTSVColumnsFromSentence(sentence);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -865,10 +865,10 @@ public class AppTest
 	public void separatorFlagColumnsAsRange() {
 		String sentence = "\\\"name\\\" = \\\"Term\\\" /SP(\"teste\", 1:3)";
 
-		App app = new App();
+		RuleInterpretor ruleInterpretor = new RuleInterpretor();
 		List<Flag> flagsExtracted = null;
 		try {
-			flagsExtracted = app.extractFlagsFromSentence(sentence);
+			flagsExtracted = ruleInterpretor.extractFlagsFromSentence(sentence);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -895,15 +895,15 @@ public class AppTest
 
 		ruleString = ruleString.replace("\t", "").replaceAll("\n", "");
 
-		App app = new App();
-		app.ontologyHelper = new OntologyHelper();
-		app.ontologyHelper.loadingOntologyFromFile("testFiles/unitTestsFiles/ontology.owl");
+		RuleInterpretor ruleInterpretor = new RuleInterpretor();
+		ruleInterpretor.ontologyHelper = new OntologyHelper();
+		ruleInterpretor.ontologyHelper.loadingOntologyFromFile("testFiles/unitTestsFiles/ontology.owl");
 
 		thrown.expect(ClassNotFoundInOntologyException.class);
 		thrown.expectMessage("Not found any ontology class with label 'Pudim'");
 		try {
-			createConfigRuleDefault(app);
-			app.createRulesFromBlock(ruleString);
+			createConfigRuleDefault(ruleInterpretor);
+			ruleInterpretor.createRulesFromBlock(ruleString);
 		} catch (Exception e) {
 			throw e;
 		}
@@ -916,16 +916,16 @@ public class AppTest
 
 		ruleString = ruleString.replace("\t", "").replaceAll("\n", "");
 
-		App app = new App();
-		app.ontologyHelper = new OntologyHelper();
-		app.ontologyHelper.loadingOntologyFromFile("testFiles/unitTestsFiles/ontology.owl");
+		RuleInterpretor ruleInterpretor = new RuleInterpretor();
+		ruleInterpretor.ontologyHelper = new OntologyHelper();
+		ruleInterpretor.ontologyHelper.loadingOntologyFromFile("testFiles/unitTestsFiles/ontology.owl");
 
 		thrown.expect(PropertyNotExistException.class);
 		String message = " \"any property\" = \"PValue\" ]";
 		thrown.expectMessage("Property does not exist in ontology. Instruction: " + message);
 		try {
-			createConfigRuleDefault(app);
-			app.createRulesFromBlock(ruleString);
+			createConfigRuleDefault(ruleInterpretor);
+			ruleInterpretor.createRulesFromBlock(ruleString);
 		} catch (Exception e) {
 			throw e;
 		}
@@ -938,16 +938,16 @@ public class AppTest
 
 		ruleString = ruleString.replace("\t", "").replaceAll("\n", "");
 
-		App app = new App();
-		app.ontologyHelper = new OntologyHelper();
-		app.ontologyHelper.loadingOntologyFromFile("testFiles/unitTestsFiles/ontology.owl");
+		RuleInterpretor ruleInterpretor = new RuleInterpretor();
+		ruleInterpretor.ontologyHelper = new OntologyHelper();
+		ruleInterpretor.ontologyHelper.loadingOntologyFromFile("testFiles/unitTestsFiles/ontology.owl");
 
 		thrown.expect(SeparatorFlagException.class);
 		String message = "/SP(, 1:p)";
 		thrown.expectMessage("Value specified as column number is not a number. Instruction: " + message);
 		try {
-			createConfigRuleDefault(app);
-			app.createRulesFromBlock(ruleString);
+			createConfigRuleDefault(ruleInterpretor);
+			ruleInterpretor.createRulesFromBlock(ruleString);
 		} catch (Exception e) {
 			throw e;
 		}
@@ -959,10 +959,10 @@ public class AppTest
 
 		sentence = sentence.replace("\t", "").replaceAll("\n", "");
 
-		App app = new App();
+		RuleInterpretor ruleInterpretor = new RuleInterpretor();
 		List<Flag> flagsExtracted = null;
 		try {
-			flagsExtracted = app.extractFlagsFromSentence(sentence);
+			flagsExtracted = ruleInterpretor.extractFlagsFromSentence(sentence);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -986,13 +986,13 @@ public class AppTest
 
 		sentence = sentence.replace("\t", "").replaceAll("\n", "");
 
-		App app = new App();
+		RuleInterpretor ruleInterpretor = new RuleInterpretor();
 		List<Flag> flagsExtracted = null;
 
 		thrown.expect(Exception.class);
 		thrown.expectMessage("Not found XSD datatype for 'strng'");
 		try {
-			flagsExtracted = app.extractFlagsFromSentence(sentence);
+			flagsExtracted = ruleInterpretor.extractFlagsFromSentence(sentence);
 		} catch (Exception e) {
 			throw e;
 		}
@@ -1133,10 +1133,10 @@ public class AppTest
 
 		sentence = sentence.replace("\t", "").replaceAll("\n", "");
 
-		App app = new App();
+		RuleInterpretor ruleInterpretor = new RuleInterpretor();
 		List<Flag> flagsExtracted = null;
 		try {
-			flagsExtracted = app.extractFlagsFromSentence(sentence);
+			flagsExtracted = ruleInterpretor.extractFlagsFromSentence(sentence);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

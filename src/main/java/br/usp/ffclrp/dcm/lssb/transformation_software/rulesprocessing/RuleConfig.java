@@ -3,11 +3,9 @@ package br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import br.usp.ffclrp.dcm.lssb.transformation_software.App;
+import br.usp.ffclrp.dcm.lssb.transformation_software.RuleInterpretor;
 import br.usp.ffclrp.dcm.lssb.transformation_software.Utils;
-import openllet.core.utils.Bool;
 import org.apache.jena.riot.Lang;
 
 public class RuleConfig {
@@ -133,7 +131,7 @@ public class RuleConfig {
 	}
 	
 	static public List<RuleConfig> extractRuleConfigFromString(String fileContent) throws Exception {
-		List<String> ruleConfigListAsText = App.identifyConfigBlocksFromString(fileContent);
+		List<String> ruleConfigListAsText = RuleInterpretor.identifyConfigBlocksFromString(fileContent);
 		List<RuleConfig> rcList = new ArrayList<>();
 
 		for(String rc : ruleConfigListAsText){

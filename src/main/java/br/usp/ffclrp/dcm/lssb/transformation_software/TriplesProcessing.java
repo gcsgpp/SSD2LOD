@@ -11,7 +11,6 @@ import org.apache.jena.rdf.model.*;
 import org.apache.jena.reasoner.Reasoner;
 import org.apache.jena.reasoner.ValidityReport;
 import org.apache.jena.reasoner.ValidityReport.Report;
-import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.semanticweb.owlapi.model.OWLProperty;
 
@@ -45,7 +44,7 @@ public class TriplesProcessing {
 		fileReader = new SemistructuredFileReader();
 	}
 
-	public void 			addFilesToBeProcessed(String relativePathDataFile){
+	public void 			addDatasetToBeProcessed(String relativePathDataFile){
 		fileReader.addFilesToBeProcessed(relativePathDataFile);
 	}
 	@SuppressWarnings("unchecked")
@@ -579,4 +578,5 @@ public class TriplesProcessing {
 	public 	Model 			getModel() {
 		return this.model;
 	}
+
 }

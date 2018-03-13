@@ -4,6 +4,7 @@ import br.usp.ffclrp.dcm.lssb.custom_exceptions.ClassNotFoundInOntologyException
 import br.usp.ffclrp.dcm.lssb.custom_exceptions.CustomExceptions;
 import br.usp.ffclrp.dcm.lssb.custom_exceptions.PropertyNotExistException;
 import br.usp.ffclrp.dcm.lssb.custom_exceptions.SeparatorFlagException;
+import br.usp.ffclrp.dcm.lssb.transformation_manager.TransformationFileSystemManager;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.*;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLProperty;
@@ -22,26 +23,38 @@ import java.util.stream.Stream;
  */
 public class RuleInterpretor
 {
-	public OntologyHelper ontologyHelper;
-	public List<Rule> rulesList;
-	public Map<Integer	, ConditionBlock> 	conditionsBlocks 	= new HashMap<>();
-	public Map<String	, RuleConfig> 		ruleConfigs 		= new HashMap<>();
-	public Map<Integer	, SearchBlock> 		searchBlocks		= new HashMap<>();
+	public 	OntologyHelper ontologyHelper;
+	public 	List<Rule> rulesList;
+	public 	Map<Integer	, ConditionBlock> 	conditionsBlocks 	= new HashMap<>();
+	public 	Map<String	, RuleConfig> 		ruleConfigs 		= new HashMap<>();
+	public 	Map<Integer	, SearchBlock> 		searchBlocks		= new HashMap<>();
 
-	public static void 		main( String[] args ){
-		List<String> listOfOntologies = new ArrayList<String>();
+	public RuleInterpretor(){
+
+	}
+
+	public static void 		main( String[] args ) throws Exception {
+		List<String> listOfOntologies 	= new TransformationFileSystemManager().getAllOntologies("123");
 		listOfOntologies.add("testFiles/teste_5/onto_teste_5.owl");
 		String rulesFilePath = "testFiles/teste_5/rules_teste_5.txt";
 		List<String> dataPaths = new ArrayList<>();
 		dataPaths.add("testFiles/teste_5/teste_5_cleaned.tsv");
 
-		new RuleInterpretor().startTransformation(listOfOntologies, rulesFilePath, "testFiles/teste_5/onto_teste_5.owl", dataPaths );
+		new RuleInterpretor().startTransformation("",
+													listOfOntologies,
+													rulesFilePath,
+													"testFiles/teste_5/onto_teste_5.owl",
+													dataPaths );
 	}
 
-	public void				startTransformation(List<String> listOfOntologies, String rulesFilePath, String relativePathOntologyFile, List<String> dataPaths){
-		RuleInterpretor ruleInterpretor = new RuleInterpretor();
+	public void				startTransformation(String transformationId,
+												   List<String> listOfOntologies,
+												   String rulesFilePath,
+												   String relativePathOntologyFile,
+												   List<String> dataPaths){
+
 		try {
-			ruleInterpretor.extractRulesFromFile(rulesFilePath, listOfOntologies);
+			extractRulesFromFile(rulesFilePath, listOfOntologies);
 			TriplesProcessing triplesProcessing = new TriplesProcessing(relativePathOntologyFile);
 			for(String path : dataPaths) {
 				triplesProcessing.addDatasetToBeProcessed(path);
@@ -59,9 +72,10 @@ public class RuleInterpretor
 			triplesProcessing.addDatasetToBeProcessed("testFiles/geo_preprocessed/GSM1638979.tsv");
 			*/
 
-			triplesProcessing.createTriplesFromRules(ruleInterpretor.rulesList, ruleInterpretor.conditionsBlocks, ruleInterpretor.searchBlocks, ruleInterpretor.ruleConfigs.get("default"));
+			triplesProcessing.createTriplesFromRules(rulesList, conditionsBlocks, searchBlocks, ruleConfigs.get("default"));
+			triplesProcessing.checkConsistency();
 
-			triplesProcessing.writeRDF("RDFtriples.rdf");
+			new TransformationFileSystemManager().writeRDF(triplesProcessing, transformationId);
 		} catch (CustomExceptions e) {
 			e.getMessage();
 			System.out.println(e);

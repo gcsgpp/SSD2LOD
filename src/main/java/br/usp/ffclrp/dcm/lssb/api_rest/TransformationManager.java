@@ -3,6 +3,7 @@ package br.usp.ffclrp.dcm.lssb.api_rest;
 import br.usp.ffclrp.dcm.lssb.custom_exceptions.DirectoryCreationFailedException;
 import br.usp.ffclrp.dcm.lssb.custom_exceptions.TransformationActivityNotFoundException;
 import br.usp.ffclrp.dcm.lssb.transformation_manager.TransformationFileSystemManager;
+import br.usp.ffclrp.dcm.lssb.transformation_software.RuleInterpretor;
 import org.glassfish.jersey.media.multipart.BodyPartEntity;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataParam;
@@ -10,6 +11,7 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.ArrayList;
 import java.util.List;
 
 @Path("")
@@ -26,7 +28,7 @@ public class TransformationManager {
     public Response createNewTransformation(){
         StringBuffer buffer = new StringBuffer();
         try {
-            buffer.append(new TransformationFileSystemManager().newTransformation());
+            buffer.append("Transformation ID: " + new TransformationFileSystemManager().newTransformation());
         }catch (DirectoryCreationFailedException e){
             e.printStackTrace();
             buffer.append(e.getMessage());
@@ -78,6 +80,27 @@ public class TransformationManager {
         return Response.ok(buffer.toString()).build();
     }
 
+    @POST
+    @Path("/setrules/{transformationId}")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    public Response setRules(@FormDataParam("rules") FormDataBodyPart rules,
+                                @PathParam("transformationId") String transformationId){
+        StringBuffer buffer = new StringBuffer();
+
+        TransformationFileSystemManager fileSystemManager = new TransformationFileSystemManager();
+
+        try {
+            BodyPartEntity entity = (BodyPartEntity) rules.getEntity();
+            fileSystemManager.addRulesToTransformation(transformationId, entity.getInputStream());
+            buffer.append("Rules uploaded: '" + rules.getContentDisposition().getFileName() + "'");
+        } catch (TransformationActivityNotFoundException e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
+
+        return Response.ok(buffer.toString()).build();
+    }
+
 
     @POST
     @Path("/new-transformation")
@@ -107,6 +130,35 @@ public class TransformationManager {
         }
 
         return Response.ok(buffer.toString()).build();
+    }
+
+
+    @GET
+    @Path("start-transformation/{transformationId}")
+    public Response startTransformation(@PathParam("transformationId") String transformationId){
+        List<String> ontologiesList = new ArrayList<>();
+        List<String> datasetsList   = new ArrayList<>();
+        String       rulesFilePath  = "";
+
+        StringBuffer buffer = new StringBuffer();
+        try {
+            TransformationFileSystemManager fileSystemManager = new TransformationFileSystemManager();
+            ontologiesList =   fileSystemManager.getAllOntologies(transformationId);
+            datasetsList   =   fileSystemManager.getAllDatasets(transformationId);
+            rulesFilePath  =   fileSystemManager.getRulesFile(transformationId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
+
+        RuleInterpretor ruleInterpretor = new RuleInterpretor();
+        ruleInterpretor.startTransformation(transformationId,
+                                            ontologiesList,
+                                            rulesFilePath,
+                                            ontologiesList.get(0),
+                                            datasetsList);
+
+        return Response.ok().build();
     }
 }
 

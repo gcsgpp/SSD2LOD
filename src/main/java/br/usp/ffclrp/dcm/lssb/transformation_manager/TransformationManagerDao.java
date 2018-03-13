@@ -13,5 +13,7 @@ public interface TransformationManagerDao {
 
     public void addDataSetToTransformation(String transformationId, InputStream dataset, String filename ) throws Exception;
 
+    public void addRulesToTransformation(String transformationId, InputStream rules) throws Exception;
+
     public void deleteTransformation(String transformationId) throws Exception;
 }

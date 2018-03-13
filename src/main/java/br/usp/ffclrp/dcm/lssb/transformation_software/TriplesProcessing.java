@@ -11,11 +11,8 @@ import org.apache.jena.rdf.model.*;
 import org.apache.jena.reasoner.Reasoner;
 import org.apache.jena.reasoner.ValidityReport;
 import org.apache.jena.reasoner.ValidityReport.Report;
-import org.apache.jena.riot.RDFDataMgr;
 import org.semanticweb.owlapi.model.OWLProperty;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -28,12 +25,12 @@ public class TriplesProcessing {
 	private List<Rule> dependencyList = new ArrayList<Rule>();
 	private Map<Integer, ConditionBlock> conditionBlocks;
 	private Map<Integer, SearchBlock> searchBlocks;
-	private RuleConfig defaultRuleConfig;
+	public 	RuleConfig defaultRuleConfig;
 	private Model ontology = null;
 	private String relativePathOntologyFile = null;
 	private MatrixLineNumberTracking currentLineNumberMatrixRules = new MatrixLineNumberTracking();
 	private Map<Integer, List<Resource>> simpleRuleAlreadyProcessed = new HashMap<>();
-	private long startTime;
+	public 	long startTime;
 
 	public 					TriplesProcessing(String relativePathOntologyFile) {
 		startTime = new Date().getTime();
@@ -523,35 +520,7 @@ public class TriplesProcessing {
 		});
 	}
 
-	public 	void 			writeRDF(String filename){
-		if(!checkConsistency()){
-			return;
-		}
-
-		System.out.println("#####################################\nWriting RDF...");
-		long startTime = System.currentTimeMillis();
-		try{
-			File f = new File(filename);
-			FileOutputStream fos = new FileOutputStream(f);
-			//RDFDataMgr.write(fos, model, Lang.TRIG);
-			//RDFDataMgr.write(fos, model, Lang.TURTLE);
-			//RDFDataMgr.write(fos, model, Lang.RDFXML);
-			//RDFDataMgr.write(fos, model, Lang.NTRIPLES);
-			RDFDataMgr.write(fos, model, defaultRuleConfig.getSyntax());
-			fos.close();
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		long stopTime = System.currentTimeMillis();
-		long elapsedTime = stopTime - startTime;
-		System.out.println("Wrote RDF in " + elapsedTime / 1000 + " secs");
-		elapsedTime = stopTime - this.startTime;
-		System.out.println("Processed in " + elapsedTime / 1000 + " secs");
-	}
-
-	private Boolean 		checkConsistency() {
+	public Boolean 		checkConsistency() {
 		System.out.println("#####################################\nChecking consistency...");
 		Reasoner openPellet = PelletReasonerFactory.theInstance().create().bindSchema(ontology);
 		InfModel inf = ModelFactory.createInfModel(openPellet, model);

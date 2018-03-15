@@ -1,7 +1,11 @@
 package br.usp.ffclrp.dcm.lssb.transformation_software;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 public class Utils {
 	
@@ -59,5 +63,18 @@ public class Utils {
 
 		return content;
 	}
-	
+
+	static public String 			readFile(String pathfile){
+		String fileContent = "";
+		try(Stream<String> stream = Files.lines(Paths.get(pathfile))){
+
+			for(String line : stream.toArray(String[]::new)){
+				fileContent += line.replace("\n", "");
+			}
+		}catch(IOException e){
+			e.printStackTrace();
+		}
+
+		return fileContent;
+	}
 }

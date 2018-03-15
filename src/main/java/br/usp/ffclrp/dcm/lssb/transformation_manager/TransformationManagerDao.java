@@ -1,5 +1,7 @@
 package br.usp.ffclrp.dcm.lssb.transformation_manager;
 
+import br.usp.ffclrp.dcm.lssb.custom_exceptions.StatusFileException;
+
 import java.io.File;
 import java.io.InputStream;
 
@@ -16,4 +18,6 @@ public interface TransformationManagerDao {
     public void addRulesToTransformation(String transformationId, InputStream rules) throws Exception;
 
     public void deleteTransformation(String transformationId) throws Exception;
+
+    public Boolean isReady(String transformationId) throws StatusFileException;
 }

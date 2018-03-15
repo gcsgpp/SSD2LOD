@@ -1,27 +1,21 @@
 package br.usp.ffclrp.dcm.lssb.transformation_software;
 
-import br.usp.ffclrp.dcm.lssb.custom_exceptions.ClassNotFoundInOntologyException;
-import br.usp.ffclrp.dcm.lssb.custom_exceptions.CustomExceptions;
-import br.usp.ffclrp.dcm.lssb.custom_exceptions.PropertyNotExistException;
-import br.usp.ffclrp.dcm.lssb.custom_exceptions.SeparatorFlagException;
-import br.usp.ffclrp.dcm.lssb.transformation_manager.TransformationFileSystemManager;
+import br.usp.ffclrp.dcm.lssb.custom_exceptions.*;
+import br.usp.ffclrp.dcm.lssb.transformation_manager.EnumActivityState;
+import br.usp.ffclrp.dcm.lssb.transformation_manager.TransformationManagerImpl;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.*;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLProperty;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 /**
  * Hello world!
  *
  */
-public class RuleInterpretor
+public class RuleInterpretor implements Runnable
 {
 	public 	OntologyHelper ontologyHelper;
 	public 	List<Rule> rulesList;
@@ -29,34 +23,55 @@ public class RuleInterpretor
 	public 	Map<String	, RuleConfig> 		ruleConfigs 		= new HashMap<>();
 	public 	Map<Integer	, SearchBlock> 		searchBlocks		= new HashMap<>();
 
+	//Parameters needed to implement Run()
+	String 			transformationId;
+	List<String> 	listOfOntologies;
+	String 			rulesFilePath;
+	String 			relativePathOntologyFile;
+	List<String> 	dataPaths;
+
 	public RuleInterpretor(){
 
 	}
 
 	public static void 		main( String[] args ) throws Exception {
-		List<String> listOfOntologies 	= new TransformationFileSystemManager().getAllOntologies("123");
+		List<String> listOfOntologies 	= new TransformationManagerImpl().getAllOntologies("123");
 		listOfOntologies.add("testFiles/teste_5/onto_teste_5.owl");
 		String rulesFilePath = "testFiles/teste_5/rules_teste_5.txt";
 		List<String> dataPaths = new ArrayList<>();
 		dataPaths.add("testFiles/teste_5/teste_5_cleaned.tsv");
 
-		new RuleInterpretor().startTransformation("",
+		RuleInterpretor ruleInterpretor = new RuleInterpretor();
+		ruleInterpretor.setTransformationParameters("",
 													listOfOntologies,
 													rulesFilePath,
 													"testFiles/teste_5/onto_teste_5.owl",
 													dataPaths );
+		ruleInterpretor.run();
 	}
 
-	public void				startTransformation(String transformationId,
-												   List<String> listOfOntologies,
-												   String rulesFilePath,
-												   String relativePathOntologyFile,
-												   List<String> dataPaths){
+	public void 			setTransformationParameters(String transformationId,
+											List<String> listOfOntologies,
+											String rulesFilePath,
+											String relativePathOntologyFile,
+											List<String> dataPaths){
+		this.transformationId = transformationId;
+		this.listOfOntologies = listOfOntologies;
+		this.rulesFilePath = rulesFilePath;
+		this.relativePathOntologyFile = relativePathOntologyFile;
+		this.dataPaths = dataPaths;
+
+	}
+
+	@Override
+	public void 			run() {
+
+		TransformationManagerImpl fileSystemManager = new TransformationManagerImpl();
 
 		try {
 			extractRulesFromFile(rulesFilePath, listOfOntologies);
 			TriplesProcessing triplesProcessing = new TriplesProcessing(relativePathOntologyFile);
-			for(String path : dataPaths) {
+			for (String path : dataPaths) {
 				triplesProcessing.addDatasetToBeProcessed(path);
 			}
 
@@ -75,21 +90,29 @@ public class RuleInterpretor
 			triplesProcessing.createTriplesFromRules(rulesList, conditionsBlocks, searchBlocks, ruleConfigs.get("default"));
 			triplesProcessing.checkConsistency();
 
-			new TransformationFileSystemManager().writeRDF(triplesProcessing, transformationId);
-		} catch (CustomExceptions e) {
-			e.getMessage();
-			System.out.println(e);
+			fileSystemManager.writeRDF(triplesProcessing, transformationId);
 		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			System.out.println("Finished!");
+			try {
+				fileSystemManager.updateStatus(transformationId, EnumActivityState.FAILED);
+			} catch (StatusFileException w) {
+				System.out.println(w.getMessage());
+			}
+			System.out.println(e.getMessage());
 		}
+
+		try {
+			fileSystemManager.updateStatus(transformationId, EnumActivityState.SUCCEEDED);
+		} catch (StatusFileException w) {
+			System.out.println(w.getMessage());
+		}
+
+		System.out.println("Finished!");
 	}
 
 	public void 			extractRulesFromFile(String rulesRelativePath, List<String> listOfOntologies) throws Exception{
 		ontologyHelper = new OntologyHelper();
 		ontologyHelper.loadingOntologyFromFile(listOfOntologies);
-		String fileContent = readFile(rulesRelativePath);
+		String fileContent = Utils.readFile(rulesRelativePath);
 
 		fileContent = fileContent.replaceAll("\n", "").replaceAll("\t", "");
 
@@ -512,19 +535,4 @@ public class RuleInterpretor
 
 		return identifiedRules;
 	}
-
-	private String 			readFile(String pathfile){
-		String fileContent = "";
-		try(Stream<String> stream = Files.lines(Paths.get(pathfile))){
-
-			for(String line : stream.toArray(String[]::new)){
-				fileContent += line.replace("\n", "");
-			}
-		}catch(IOException e){
-			e.printStackTrace();
-		}
-
-		return fileContent;
-	}
-
 }

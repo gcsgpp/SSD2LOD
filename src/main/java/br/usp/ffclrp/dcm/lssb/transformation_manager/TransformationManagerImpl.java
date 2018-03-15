@@ -1,8 +1,10 @@
 package br.usp.ffclrp.dcm.lssb.transformation_manager;
 
 import br.usp.ffclrp.dcm.lssb.custom_exceptions.DirectoryCreationFailedException;
+import br.usp.ffclrp.dcm.lssb.custom_exceptions.StatusFileException;
 import br.usp.ffclrp.dcm.lssb.custom_exceptions.TransformationActivityNotFoundException;
 import br.usp.ffclrp.dcm.lssb.transformation_software.TriplesProcessing;
+import br.usp.ffclrp.dcm.lssb.transformation_software.Utils;
 import org.apache.commons.io.FileUtils;
 import org.apache.jena.riot.RDFDataMgr;
 
@@ -18,17 +20,17 @@ import java.util.Properties;
 import java.util.UUID;
 
 
-public class TransformationFileSystemManager implements TransformationManagerDao {
+public class TransformationManagerImpl implements TransformationManagerDao {
 
     public File localStorage = null;
     Properties properties = null;
 
-    public TransformationFileSystemManager(){
+    public TransformationManagerImpl(){
         properties = new Properties();
 
         try {
             properties.load(
-                    TransformationFileSystemManager.class
+                    TransformationManagerImpl.class
                             .getResourceAsStream("/FileSystemDAO.properties"));
         } catch (IOException e) {
             // TODO Auto-generated catch block
@@ -120,7 +122,7 @@ public class TransformationFileSystemManager implements TransformationManagerDao
     }
 
     @Override
-    public void addRulesToTransformation(String transformationId, InputStream rules) throws TransformationActivityNotFoundException {
+    public void addRulesToTransformation(String transformationId, InputStream rules) throws TransformationActivityNotFoundException, StatusFileException {
         File transformationRoot = new File(localStorage, transformationId);
 
         if (transformationRoot.exists()){
@@ -131,13 +133,16 @@ public class TransformationFileSystemManager implements TransformationManagerDao
 
             saveFile(rules, new File(inputRulesSubdirectory, "rules").toPath());
 
+            isReady(transformationId);
+
         } else {
             throw new TransformationActivityNotFoundException(transformationId);
         }
     }
 
     @Override
-    public void addOntologyToTransformation(String transformationId, InputStream ontology, String filename ) throws TransformationActivityNotFoundException {
+    public void addOntologyToTransformation(String transformationId, InputStream ontology, String filename )
+            throws TransformationActivityNotFoundException, StatusFileException {
         File transformationRoot = new File(localStorage, transformationId);
 
         if (transformationRoot.exists()){
@@ -147,6 +152,7 @@ public class TransformationFileSystemManager implements TransformationManagerDao
 
 
             saveFile(ontology, new File(inputOntologiesSubdirectory, filename).toPath());
+            isReady(transformationId);
 
         } else {
             throw new TransformationActivityNotFoundException(transformationId);
@@ -154,7 +160,8 @@ public class TransformationFileSystemManager implements TransformationManagerDao
     }
 
     @Override
-    public void addDataSetToTransformation(String transformationId, InputStream dataset, String filename) throws TransformationActivityNotFoundException  {
+    public void addDataSetToTransformation(String transformationId, InputStream dataset, String filename)
+            throws TransformationActivityNotFoundException, StatusFileException  {
         File transformationRoot = new File(localStorage, transformationId);
 
         if (transformationRoot.exists()){
@@ -163,6 +170,7 @@ public class TransformationFileSystemManager implements TransformationManagerDao
                             "transformations.inputDataSetsSubpath"));
 
             saveFile(dataset, new File(inputsDataSetSubdirectory, filename).toPath());
+            isReady(transformationId);
 
         } else {
             throw new TransformationActivityNotFoundException(transformationId);
@@ -180,6 +188,71 @@ public class TransformationFileSystemManager implements TransformationManagerDao
         }
     }
 
+    @Override
+    public Boolean isReady(String transformationId) throws StatusFileException {
+        Boolean ready;
+
+        File transformationRoot = new File(localStorage, transformationId);
+
+        File transformationStateFile = new File(transformationRoot, "metadata/state");
+        if(getStatus(transformationId).equals(EnumActivityState.READY.toString()))
+            return true;
+
+        File datasetsDirectory = new File(transformationRoot, properties.getProperty("transformations.inputDataSetsSubpath"));
+        File ontologiesDirectory = new File(transformationRoot, properties.getProperty("transformations.inputOntologiesSubpath"));
+        File rulesDirectory = new File(transformationRoot, properties.getProperty("transformations.inputRulesSubpath"));
+
+        ready = datasetsDirectory.listFiles().length > 0;
+        ready = ready && ontologiesDirectory.listFiles().length > 0;
+        ready = ready && rulesDirectory.listFiles().length == 1;
+
+        if(ready){
+            updateStatus(transformationId, EnumActivityState.READY);
+        }
+
+        return ready;
+    }
+
+    public void updateStatus(String transformationId, EnumActivityState newState) throws StatusFileException{
+        File transformationRoot = new File(localStorage, transformationId);
+
+        File transformationStateFile = new File(transformationRoot, "metadata/state");
+
+        // update state file
+        try{
+            FileUtils.write(transformationStateFile, newState.toString(), "utf-8");
+        }catch (Exception e){
+            throw new StatusFileException(e.getMessage());
+        }
+    }
+
+    public String getStatus(String transformationId) throws StatusFileException {
+        File transformationRoot = new File(localStorage, transformationId);
+        File transformationStateFile = new File(transformationRoot, "metadata/state");
+
+        String fileContent;
+        try {
+             fileContent = Utils.readFile(transformationStateFile.getAbsolutePath());
+        }catch (Exception e){
+            throw new StatusFileException(e.getMessage());
+        }
+
+        if(fileContent.equals(EnumActivityState.CREATED.toString()))
+            return EnumActivityState.CREATED.toString();
+        if(fileContent.equals(EnumActivityState.READY.toString()))
+            return EnumActivityState.READY.toString();
+        if(fileContent.equals(EnumActivityState.RUNNING.toString()))
+            return EnumActivityState.RUNNING.toString();
+        if(fileContent.equals(EnumActivityState.SUCCEEDED.toString()))
+            return EnumActivityState.SUCCEEDED.toString();
+        if(fileContent.equals(EnumActivityState.FAILED.toString()))
+            return EnumActivityState.FAILED.toString();
+        if(fileContent.equals(EnumActivityState.REMOVED.toString()))
+            return EnumActivityState.REMOVED.toString();
+
+        throw new StatusFileException("Unable to recovery the state.");
+    }
+
     public List<String> getAllOntologies(String transformationId) throws Exception {
         List<String> ontologiesList = new ArrayList<>();
         File transformationRoot = new File(localStorage, transformationId);
@@ -191,7 +264,6 @@ public class TransformationFileSystemManager implements TransformationManagerDao
                                 "transformations.inputOntologiesSubpath"));
 
                 File[] files = inputOntologiesSubdirectory.listFiles();
-                System.out.println(inputOntologiesSubdirectory.list());
 
                 for(File f : files){
                     ontologiesList.add(f.getAbsolutePath());
@@ -217,7 +289,6 @@ public class TransformationFileSystemManager implements TransformationManagerDao
                                 "transformations.inputDataSetsSubpath"));
 
                 File[] files = inputDatasetsSubdirectory.listFiles();
-                System.out.println(inputDatasetsSubdirectory.list());
 
                 for(File f : files){
                     datasetsList.add(f.getAbsolutePath());

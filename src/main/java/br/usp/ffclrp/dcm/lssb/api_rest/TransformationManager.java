@@ -183,5 +183,18 @@ public class TransformationManager {
         return Response.ok().build();
     }
 
+    @GET
+    @Path("delete-transformation/{transformationId}")
+    public Response delete(@PathParam("transformationId") String transformationId){
+        try {
+            fileSystemManager.deleteTransformation(transformationId);
+            fileSystemManager.updateStatus(transformationId, EnumActivityState.REMOVED);
+        } catch (TransformationActivityNotFoundException | StatusFileException e) {
+            return Response.serverError().build();
+        }
+
+        return Response.ok("Transformation " + transformationId + " successfully deleted.").build();
+    }
+
 }
 

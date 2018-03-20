@@ -35,17 +35,19 @@ public class RuleInterpretor implements Runnable
 	}
 
 	public static void 		main( String[] args ) throws Exception {
-		List<String> listOfOntologies 	= new TransformationManagerImpl().getAllOntologies("123");
-		listOfOntologies.add("testFiles/teste_5/onto_teste_5.owl");
-		String rulesFilePath = "testFiles/teste_5/rules_teste_5.txt";
+		List<String> listOfOntologies 	= new ArrayList<>();
+		listOfOntologies.add("testFiles/arraye_preprocessed/ontology.owl");
+		String rulesFilePath = "testFiles/arraye_preprocessed/rules.txt";
 		List<String> dataPaths = new ArrayList<>();
-		dataPaths.add("testFiles/teste_5/teste_5_cleaned.tsv");
+		dataPaths.add("testFiles/arraye_preprocessed/Competency Questions/A-BUGS-23.adf.tsv");
+		dataPaths.add("testFiles/arraye_preprocessed/Competency Questions/E-MTAB-5814.idf.tsv");
+		dataPaths.add("testFiles/arraye_preprocessed/Competency Questions/E-MTAB-5814.sdrf.tsv");
 
 		RuleInterpretor ruleInterpretor = new RuleInterpretor();
 		ruleInterpretor.setTransformationParameters("",
 													listOfOntologies,
 													rulesFilePath,
-													"testFiles/teste_5/onto_teste_5.owl",
+													"testFiles/arraye_preprocessed/ontology.owl",
 													dataPaths );
 		ruleInterpretor.run();
 	}
@@ -91,19 +93,23 @@ public class RuleInterpretor implements Runnable
 			triplesProcessing.checkConsistency();
 
 			fileSystemManager.writeRDF(triplesProcessing, transformationId);
-		} catch (Exception e) {
+
 			try {
-				fileSystemManager.updateStatus(transformationId, EnumActivityState.FAILED);
+				fileSystemManager.updateStatus(transformationId, EnumActivityState.SUCCEEDED);
+				fileSystemManager.log(transformationId, null);
 			} catch (StatusFileException w) {
 				System.out.println(w.getMessage());
 			}
-			System.out.println(e.getMessage());
-		}
 
-		try {
-			fileSystemManager.updateStatus(transformationId, EnumActivityState.SUCCEEDED);
-		} catch (StatusFileException w) {
-			System.out.println(w.getMessage());
+		} catch (Exception e) {
+			try {
+				fileSystemManager.updateStatus(transformationId, EnumActivityState.FAILED);
+				fileSystemManager.log(transformationId, e);
+
+			} catch (StatusFileException | ErrorFileException w) {
+				System.out.println(w.getMessage());
+			}
+			System.out.println(e.getMessage());
 		}
 
 		System.out.println("Finished!");
@@ -524,7 +530,7 @@ public class RuleInterpretor implements Runnable
 	}
 
 	public static List<String> 	identifyBlocksFromString(String fileContent) {
-		Pattern patternToFind = Pattern.compile("(matrix_rule|simple_rule|rule_config|search_block)\\[.*?\\]");
+		Pattern patternToFind = Pattern.compile("(matrix_rule|simple_rule|rule_config|search_block)\\[.*?(\\d+|\"|\\)|\\/NM|\\s+)\\]");
 		Matcher matcher = patternToFind.matcher(fileContent);
 		//matcher.find();
 

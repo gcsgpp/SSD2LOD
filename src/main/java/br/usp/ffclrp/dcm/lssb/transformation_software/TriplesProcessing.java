@@ -13,6 +13,7 @@ import org.apache.jena.reasoner.ValidityReport;
 import org.apache.jena.reasoner.ValidityReport.Report;
 import org.semanticweb.owlapi.model.OWLProperty;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -41,7 +42,7 @@ public class TriplesProcessing {
 		fileReader = new SemistructuredFileReader();
 	}
 
-	public void 			addDatasetToBeProcessed(String relativePathDataFile){
+	public void 			addDatasetToBeProcessed(String relativePathDataFile) throws IOException {
 		fileReader.addFilesToBeProcessed(relativePathDataFile);
 	}
 	@SuppressWarnings("unchecked")

@@ -1,6 +1,7 @@
 package br.usp.ffclrp.dcm.lssb.transformation_manager;
 
 import br.usp.ffclrp.dcm.lssb.custom_exceptions.DirectoryCreationFailedException;
+import br.usp.ffclrp.dcm.lssb.custom_exceptions.ErrorFileException;
 import br.usp.ffclrp.dcm.lssb.custom_exceptions.StatusFileException;
 import br.usp.ffclrp.dcm.lssb.custom_exceptions.TransformationActivityNotFoundException;
 import br.usp.ffclrp.dcm.lssb.transformation_software.TriplesProcessing;
@@ -29,9 +30,12 @@ public class TransformationManagerImpl implements TransformationManagerDao {
         properties = new Properties();
 
         try {
-            properties.load(
-                    TransformationManagerImpl.class
-                            .getResourceAsStream("/FileSystemDAO.properties"));
+
+            InputStream propertiesFile = TransformationManagerImpl.class
+                    .getResourceAsStream("/FileSystemDAO.properties");
+            properties.load(propertiesFile);
+            propertiesFile.close();
+
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -88,6 +92,12 @@ public class TransformationManagerImpl implements TransformationManagerDao {
             if (!transformationStateFile.exists()) {
                 FileUtils.write(transformationStateFile,
                         EnumActivityState.CREATED.toString(), "utf-8");
+            }
+
+            // create error file
+            File transformationErrorFile = new File(transformationRoot, "metadata/error");
+            if (!transformationErrorFile.exists()) {
+                transformationErrorFile.createNewFile();
             }
 
             return newTransformationId.toString();
@@ -226,6 +236,23 @@ public class TransformationManagerImpl implements TransformationManagerDao {
         }
     }
 
+    public void log(String transformationId, Exception exception) throws ErrorFileException {
+
+        if(exception == null)
+            exception = new Exception("");
+
+        File transformationRoot = new File(localStorage, transformationId);
+
+        File transformationErrorFile = new File(transformationRoot, "metadata/error");
+
+        // update error file
+        try{
+            FileUtils.write(transformationErrorFile, exception.getMessage(), "utf-8");
+        }catch (Exception e){
+            throw new ErrorFileException(e.getMessage());
+        }
+    }
+
     public String getStatus(String transformationId) throws StatusFileException {
         File transformationRoot = new File(localStorage, transformationId);
         File transformationStateFile = new File(transformationRoot, "metadata/state");
@@ -327,13 +354,13 @@ public class TransformationManagerImpl implements TransformationManagerDao {
     private void saveFile(InputStream file, Path path){
         try{
             Files.copy(file, path);
-
+            file.close();
         }catch (IOException e){
             e.printStackTrace();
         }
     }
 
-    public 	void 			writeRDF(TriplesProcessing triplesProcessing, String transformationId){
+    public 	void 			writeRDF(TriplesProcessing triplesProcessing, String transformationId) throws Exception {
         System.out.println("#####################################\nWriting RDF...");
         long startTime = System.currentTimeMillis();
         try{
@@ -348,6 +375,7 @@ public class TransformationManagerImpl implements TransformationManagerDao {
 
         } catch (Exception e) {
             e.printStackTrace();
+            throw new Exception(e.getMessage());
         }
 
         long stopTime = System.currentTimeMillis();
@@ -355,5 +383,19 @@ public class TransformationManagerImpl implements TransformationManagerDao {
         System.out.println("Wrote RDF in " + elapsedTime / 1000 + " secs");
         elapsedTime = stopTime - triplesProcessing.startTime;
         System.out.println("Processed in " + elapsedTime / 1000 + " secs");
+    }
+
+    public String getErrorFileContent(String transformationId) throws ErrorFileException{
+        File transformationRoot = new File(localStorage, transformationId);
+        File transformationStateFile = new File(transformationRoot, "metadata/error");
+
+        String fileContent = "";
+        try {
+            fileContent = Utils.readFile(transformationStateFile.getAbsolutePath());
+        }catch (Exception e){
+            throw new ErrorFileException(e.getMessage());
+        }
+
+        return fileContent;
     }
 }

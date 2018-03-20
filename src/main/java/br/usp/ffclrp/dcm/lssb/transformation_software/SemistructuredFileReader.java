@@ -1,9 +1,5 @@
 package br.usp.ffclrp.dcm.lssb.transformation_software;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
 import br.usp.ffclrp.dcm.lssb.custom_exceptions.ColumnNotFoundWarning;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Condition;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagCol;
@@ -11,10 +7,10 @@ import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TSVColumn;
 import com.univocity.parsers.tsv.TsvParser;
 import com.univocity.parsers.tsv.TsvParserSettings;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.*;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class SemistructuredFileReader {
 	
@@ -27,28 +23,28 @@ public class SemistructuredFileReader {
 		
 	}
 
-	public void addFilesToBeProcessed(String relativePathDataFile) {
+	public void addFilesToBeProcessed(String relativePathDataFile) throws IOException {
 		File file = new File(relativePathDataFile);
 		List<String[]> dataRows = getAllFileData(file);
 
 		filesToBeProcessed.put(file.getName(), new FileToBeProcessed(file, dataRows));
 	}
 
-	public SemistructuredFileReader(String relativePathTsv){
+	public List<String[]> getAllFileData(File file) throws IOException {
+		List<String[]> rows = null;
+		try(Reader fileReader = getReader(file)) {
+			TsvParserSettings settings = new TsvParserSettings();
+			settings.getFormat().setLineSeparator("\r\n");
+			settings.setMaxCharsPerColumn(999999);
+			settings.setMaxColumns(99999);
 
-	}
-	
-	public List<String[]> getAllFileData(File file) {
+			TsvParser parser = new TsvParser(settings);
+			rows = parser.parseAll(fileReader);
+		}catch (IOException e) {
+			throw e;
+		}
 
-		Reader fileReader = getReader(file);
-		TsvParserSettings settings = new TsvParserSettings();
-		settings.getFormat().setLineSeparator("\r\n");
-		settings.setMaxCharsPerColumn(999999);
-		settings.setMaxColumns(99999);
-
-		TsvParser parser = new TsvParser(settings);
-
-		return parser.parseAll(fileReader); // parses all rows in one go.
+		return rows; // parses all rows in one go.
 	}
 
 	public String getData(TSVColumn tsvColumn, Integer lineNumber) throws ColumnNotFoundWarning {

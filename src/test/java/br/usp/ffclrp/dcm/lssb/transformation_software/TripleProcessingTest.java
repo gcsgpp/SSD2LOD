@@ -196,7 +196,7 @@ public class TripleProcessingTest
 	}
 
 	@Test
-	public void processRuleWithConditionblockflagBaseiriflagSeparatorflag()	{
+	public void processRuleWithConditionblockflagBaseiriflagSeparatorflag() throws Exception	{
 		ontologyHelper = new OntologyHelper();
 		String testFolderPath = "testFiles/unitTestsFiles/";
 		String ontologyPath = testFolderPath + "ontology.owl";
@@ -250,7 +250,7 @@ public class TripleProcessingTest
 
 
 	@Test
-	public void processRuleWithColonAsSeparator()	{
+	public void processRuleWithColonAsSeparator() throws Exception {
 		ontologyHelper = new OntologyHelper();
 		String testFolderPath = "testFiles/unitTestsFiles/";
 		String ontologyPath = testFolderPath + "ontology.owl";
@@ -323,7 +323,7 @@ public class TripleProcessingTest
 	}
 
 	@Test
-	public void processRuleWithNotMetadataFlag() {		
+	public void processRuleWithNotMetadataFlag() throws Exception {
 		ontologyHelper = new OntologyHelper();
 		String testFolderPath = "testFiles/unitTestsFiles/normalizedFiles/";
 		String ontologyPath = testFolderPath + "ontology.owl";
@@ -419,7 +419,7 @@ public class TripleProcessingTest
 	}
 
 	@Test
-	public void processRuleWithFixedContentFlagOnSubjectLine() {		
+	public void processRuleWithFixedContentFlagOnSubjectLine() throws Exception {
 		ontologyHelper = new OntologyHelper();
 		String testFolderPath = "testFiles/unitTestsFiles/normalizedFiles/";
 		String ontologyPath = testFolderPath + "ontology.owl";
@@ -478,7 +478,7 @@ public class TripleProcessingTest
 	}
 
 	@Test
-	public void processRuleWithFixedContentFlagOnObjectLine() {		
+	public void processRuleWithFixedContentFlagOnObjectLine() throws Exception {
 		ontologyHelper = new OntologyHelper();
 		String testFolderPath = "testFiles/unitTestsFiles/normalizedFiles/";
 		String ontologyPath = testFolderPath + "ontology.owl";
@@ -535,7 +535,7 @@ public class TripleProcessingTest
 	}
 
 	@Test
-	public void processRuleWithCustomIDFlag() {
+	public void processRuleWithCustomIDFlag() throws Exception {
 		ontologyHelper = new OntologyHelper();
 		String testFolderPath = "testFiles/unitTestsFiles/normalizedFiles/";
 		String ontologyPath = testFolderPath + "ontology.owl";
@@ -653,7 +653,7 @@ public class TripleProcessingTest
 
 
 	@Test
-	public void processRuleWithConditionBlockNotMet()	{
+	public void processRuleWithConditionBlockNotMet() throws Exception {
 		ontologyHelper = new OntologyHelper();
 		String testFolderPath = "testFiles/unitTestsFiles/";
 		String ontologyPath = testFolderPath + "ontology.owl";
@@ -738,7 +738,7 @@ public class TripleProcessingTest
 	}
 
 	@Test
-	public void processRuleWithConditionblockWithGreaterThanCondition()	{
+	public void processRuleWithConditionblockWithGreaterThanCondition() throws Exception {
 		ontologyHelper = new OntologyHelper();
 		String testFolderPath = "testFiles/unitTestsFiles/";
 		String ontologyPath = testFolderPath + "ontology.owl";
@@ -793,7 +793,7 @@ public class TripleProcessingTest
     // ##################
 
     @Test
-    public void multipleFiles()	{
+    public void multipleFiles() throws Exception {
         ontologyHelper = new OntologyHelper();
         String testFolderPath = "testFiles/unitTestsFiles/";
         String ontologyPath = testFolderPath + "ontology.owl";
@@ -890,7 +890,7 @@ public class TripleProcessingTest
 	}
 
 	@Test
-	public void processSimpleRule()	{
+	public void processSimpleRule() throws Exception {
 		ontologyHelper = new OntologyHelper();
 		String testFolderPath = "testFiles/unitTestsFiles/geo_preprocessed/";
 		String ontologyPath = testFolderPath + "ontology.owl";
@@ -993,7 +993,7 @@ public class TripleProcessingTest
 	}
 
 	@Test
-	public void processSimpleRuleInsideSimpleRuleAndOtherFile()	{
+	public void processSimpleRuleInsideSimpleRuleAndOtherFile() throws Exception {
 		ontologyHelper = new OntologyHelper();
 		String testFolderPath = "testFiles/unitTestsFiles/geo_preprocessed/";
 		String ontologyPath = testFolderPath + "ontology.owl";
@@ -1112,7 +1112,7 @@ public class TripleProcessingTest
 	}
 
 	@Test
-	public void processSimpleRuleInsideMatrixRule()	{
+	public void processSimpleRuleInsideMatrixRule() throws Exception {
 		ontologyHelper = new OntologyHelper();
 		String testFolderPath = "testFiles/unitTestsFiles/geo_preprocessed/";
 		String ontologyPath = testFolderPath + "ontology.owl";
@@ -1285,7 +1285,7 @@ public class TripleProcessingTest
 	}
 
 	@Test
-	public void processRuleWithSearchBlock()	{
+	public void processRuleWithSearchBlock() throws Exception {
 		ontologyHelper = new OntologyHelper();
 		String testFolderPath = "testFiles/unitTestsFiles/geo_preprocessed/";
 		String ontologyPath = testFolderPath + "ontology.owl";
@@ -1362,7 +1362,7 @@ public class TripleProcessingTest
 	}
 
 	@Test
-	public void processcreateRuleWithColFlag() {
+	public void processcreateRuleWithColFlag() throws Exception {
 		ontologyHelper = new OntologyHelper();
 		String testFolderPath = "testFiles/unitTestsFiles/";
 		String ontologyPath = testFolderPath + "ontology.owl";

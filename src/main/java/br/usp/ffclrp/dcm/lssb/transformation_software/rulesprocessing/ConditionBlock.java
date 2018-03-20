@@ -1,13 +1,13 @@
 package br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing;
 
+import br.usp.ffclrp.dcm.lssb.custom_exceptions.ConditionBlockException;
+import br.usp.ffclrp.dcm.lssb.transformation_software.RuleInterpretor;
+import br.usp.ffclrp.dcm.lssb.transformation_software.Utils;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import br.usp.ffclrp.dcm.lssb.custom_exceptions.ConditionBlockException;
-import br.usp.ffclrp.dcm.lssb.transformation_software.RuleInterpretor;
-import br.usp.ffclrp.dcm.lssb.transformation_software.Utils;
 
 public class ConditionBlock extends Flag {
 	private Integer id;

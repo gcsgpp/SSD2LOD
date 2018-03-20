@@ -85,7 +85,7 @@ public class AppTest
 	}
 
 	@Test
-	public void creatingRuleFromStringWithBaseIRISeparatorConditionBlock(){
+	public void creatingRuleFromStringWithBaseIRISeparatorConditionBlock() throws Exception {
 
 		String 	ruleString = "matrix_rule[1, \"Term\" = \"Term\" /SP(\"~\", 1) /BASEIRI(\"http://amigo1.geneontology.org/cgi-bin/amigo/term_details?term=\", \"go\") /CB(1) :" +
 				" \"has_pvalue\" = \"PValue\", " +
@@ -184,7 +184,7 @@ public class AppTest
 	}
 
 	@Test
-	public void creatingRuleFromStringUsingColonAsSeparator(){
+	public void creatingRuleFromStringUsingColonAsSeparator() throws Exception {
 
 		String 	ruleString = " matrix_rule[2, \"Term\" = \"Term\" /SP(\":\", 1) /BASEIRI(\"http://www.kegg.jp/entry/\", \"kegg\") /CB(2) : " +
 				" \"has_pvalue\" = \"PValue\", " +
@@ -286,7 +286,7 @@ public class AppTest
 	}
 
 	@Test
-	public void creatingRuleFromStringUsingCommaAsSeparator(){
+	public void creatingRuleFromStringUsingCommaAsSeparator() throws Exception {
 
 		String 	ruleString = " matrix_rule[2, \"Term\" = \"Term\" /SP(\",\", 1) /BASEIRI(\"http://www.kegg.jp/entry/\", \"kegg\") /CB(2) : " +
 				" \"has_pvalue\" = \"PValue\", " +
@@ -391,7 +391,7 @@ public class AppTest
 	}
 
 	@Test
-	public void creatingRuleFromStringWithNoPredicatesAndObjects(){
+	public void creatingRuleFromStringWithNoPredicatesAndObjects() throws Exception {
 
 		String 	ruleString = " matrix_rule[3, \"Gene\" = \"Genes\" /SP(\", \") /BASEIRI(\"http://www.genecards.org/cgi-bin/carddisp.pl?gene=\", \"genecard\") ] ";
 
@@ -441,7 +441,7 @@ public class AppTest
 	}
 
 	@Test
-	public void creatingRuleFromStringWithTwoEqualPredicatesPointingToDifferentRules() {
+	public void creatingRuleFromStringWithTwoEqualPredicatesPointingToDifferentRules() throws Exception {
 		String 	ruleString = " matrix_rule[2, \"Term\" = \"Term\" /SP(\":\", 1) /BASEIRI(\"http://www.kegg.jp/entry/\", \"kegg\") /CB(2) : " +
 				" \"has_pvalue\" = \"PValue\", " +
 				" \"name\" = \"Term\" /SP(\":\", 2), " +
@@ -544,7 +544,7 @@ public class AppTest
 	}
 
 	@Test
-	public void creatingRuleFromStringWithTwoEqualPredicatesPointingToDifferentTSVColumns() {
+	public void creatingRuleFromStringWithTwoEqualPredicatesPointingToDifferentTSVColumns() throws Exception {
 		String 	ruleString = "matrix_rule[1, \"Term\" = \"Term\" /SP(\"~\", 1) /BASEIRI(\"http://amigo1.geneontology.org/cgi-bin/amigo/term_details?term=\", \"go\") /CB(1) :" +
 				" \"has_pvalue\" = \"PValue\", " +
 				" \"name\" = \"Term\" /SP(\"~\", 2), " +
@@ -730,7 +730,7 @@ public class AppTest
 	}
 
 	@Test
-	public void creatingRuleFromMultipleOntologies() {
+	public void creatingRuleFromMultipleOntologies() throws Exception {
 		String 	ruleString = "matrix_rule[1, \"Term2\" = \"Term\" /SP(\"~\", 1) /BASEIRI(\"http://amigo1.geneontology.org/cgi-bin/amigo/term_details?term=\", \"go\") /CB(1) :" +
 				" \"has_pvalue\" = \"PValue\", " +
 				" \"name2\" = \"Term\" /SP(\"~\", 2), " +

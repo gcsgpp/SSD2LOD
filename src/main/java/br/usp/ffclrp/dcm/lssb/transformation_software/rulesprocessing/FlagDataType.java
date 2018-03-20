@@ -1,7 +1,6 @@
 package br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing;
 
 import org.apache.jena.datatypes.xsd.XSDDatatype;
-import org.apache.jena.vocabulary.RDFS;
 
 public class FlagDataType extends Flag {
 	XSDDatatype datatype = null;

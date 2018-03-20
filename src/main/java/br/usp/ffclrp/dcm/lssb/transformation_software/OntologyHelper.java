@@ -1,30 +1,19 @@
 package br.usp.ffclrp.dcm.lssb.transformation_software;
 
+import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.EnumTypeOfProperty;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.search.EntitySearcher;
+
+import javax.annotation.Nonnull;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
-
-import javax.annotation.Nonnull;
-
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.OWLDataProperty;
-import org.semanticweb.owlapi.model.OWLEntity;
-import org.semanticweb.owlapi.model.OWLNamedIndividual;
-import org.semanticweb.owlapi.model.OWLObjectProperty;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.model.OWLProperty;
-import org.semanticweb.owlapi.search.EntitySearcher;
-import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.EnumTypeOfProperty;
 
 public class OntologyHelper {
 	public List<OWLOntology> ontologies = new ArrayList<OWLOntology>();
@@ -39,31 +28,29 @@ public class OntologyHelper {
 
 	}
 
-	public void loadingOntologyFromFile(String path){
+	public void loadingOntologyFromFile(String path) throws OWLOntologyCreationException, IOException {
 		loadOntology(path);
 		addClassesAndPredicatesToMap();
 	}
 
-	public void loadingOntologyFromFile(List<String> ontologiesPaths) {
+	public void loadingOntologyFromFile(List<String> ontologiesPaths) throws OWLOntologyCreationException, IOException {
 		for(String path : ontologiesPaths) {
 			loadOntology(path);
 		}
 		addClassesAndPredicatesToMap();
 	}
 
-	private void loadOntology(String path) {
-		try {
+	private void loadOntology(String path) throws OWLOntologyCreationException, IOException {
+		try(InputStream is = new FileInputStream(path)) {
 			
-			InputStream is = new FileInputStream(path);
+			;
 			OWLOntology ontology = m.loadOntologyFromOntologyDocument(is);
 			
 			m.directImports(ontology).forEach(o -> ontologies.add(o));
 			ontologies.add(ontology);
 
-		} catch (OWLOntologyCreationException e) {
-			e.printStackTrace();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+		} catch (OWLOntologyCreationException | IOException e) {
+			throw e;
 		}
 	}
 
@@ -77,15 +64,17 @@ public class OntologyHelper {
 
 		for(OWLOntology onto : ontologies) {
 
-			Stream<OWLDataProperty> dataProperties = onto.dataPropertiesInSignature();
-			dataProperties.forEach(p -> {//System.out.println(labelFor(p) + " -> " + p);
-				mappingPredicatesAnnotations.put(labelFor(p), p);
-			});
+			try(Stream<OWLDataProperty> dataProperties = onto.dataPropertiesInSignature()){
+				dataProperties.forEach(p -> {//System.out.println(labelFor(p) + " -> " + p);
+					mappingPredicatesAnnotations.put(labelFor(p), p);
+				});
+			}
 
-			Stream<OWLObjectProperty> objectProperties = onto.objectPropertiesInSignature();
-			objectProperties.forEach(p -> {//System.out.println(labelFor(p) + " -> " + p);
-				mappingPredicatesAnnotations.put(labelFor(p), p);
-			});
+			try(Stream<OWLObjectProperty> objectProperties = onto.objectPropertiesInSignature()) {
+				objectProperties.forEach(p -> {//System.out.println(labelFor(p) + " -> " + p);
+					mappingPredicatesAnnotations.put(labelFor(p), p);
+				});
+			}
 		}
 	}
 
@@ -93,8 +82,9 @@ public class OntologyHelper {
 
 		mappingClassesAnnotations = new HashMap<String, OWLClass>();
 		for(OWLOntology onto : ontologies) {
-			Stream<OWLClass> stream = onto.classesInSignature();
-			stream.forEach(c -> mappingClassesAnnotations.put(labelFor(c), c));
+			try(Stream<OWLClass> stream = onto.classesInSignature()) {
+				stream.forEach(c -> mappingClassesAnnotations.put(labelFor(c), c));
+			}
 		}
 	}
 
@@ -118,10 +108,10 @@ public class OntologyHelper {
 
 	public void printClasses(){
 		for(OWLOntology onto : ontologies) {
-			Stream<OWLClass> stream = onto.classesInSignature();
-
-			stream.forEach(
-					e -> System.out.println(e + " -> " + e.getIRI()));
+			try(Stream<OWLClass> stream = onto.classesInSignature()) {
+				stream.forEach(
+						e -> System.out.println(e + " -> " + e.getIRI()));
+			}
 		}
 	}
 
@@ -151,10 +141,10 @@ public class OntologyHelper {
 
 	public void printIndividuals(){
 		for(OWLOntology onto : ontologies) {
-			Stream<OWLNamedIndividual> stream = onto.individualsInSignature();
-
-			stream.forEach(
-					e -> System.out.println(e));
+			try(Stream<OWLNamedIndividual> stream = onto.individualsInSignature()) {
+				stream.forEach(
+						e -> System.out.println(e));
+			}
 		}
 	}
 

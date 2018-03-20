@@ -1,12 +1,12 @@
 package br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-
 import br.usp.ffclrp.dcm.lssb.transformation_software.RuleInterpretor;
 import br.usp.ffclrp.dcm.lssb.transformation_software.Utils;
 import org.apache.jena.riot.Lang;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
 
 public class RuleConfig {
 	private String id = null;
@@ -126,6 +126,9 @@ public class RuleConfig {
 					rule.setSyntax(Lang.TURTLE);
 			}
 		}
+
+		if(ruleConfigId.toLowerCase().equals("default") && rule.getSyntax() == null)
+			rule.setSyntax(Lang.RDFXML);
 
 		return rule;
 	}

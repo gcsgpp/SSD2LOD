@@ -1,10 +1,10 @@
 package br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing;
 
-import java.util.List;
-import java.util.Map;
-
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLProperty;
+
+import java.util.List;
+import java.util.Map;
 
 public class Rule {
 	private String id;

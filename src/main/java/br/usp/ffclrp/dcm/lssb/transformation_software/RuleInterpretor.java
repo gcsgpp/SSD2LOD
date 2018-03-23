@@ -3,10 +3,15 @@ package br.usp.ffclrp.dcm.lssb.transformation_software;
 import br.usp.ffclrp.dcm.lssb.custom_exceptions.*;
 import br.usp.ffclrp.dcm.lssb.transformation_manager.EnumActivityState;
 import br.usp.ffclrp.dcm.lssb.transformation_manager.TransformationManagerImpl;
+import br.usp.ffclrp.dcm.lssb.transformation_manager.custom_exceptions.ErrorFileException;
+import br.usp.ffclrp.dcm.lssb.transformation_manager.custom_exceptions.StatusFileException;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.*;
+import org.apache.jena.riot.RDFDataMgr;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLProperty;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -24,17 +29,18 @@ public class RuleInterpretor implements Runnable
 	public 	Map<Integer	, SearchBlock> 		searchBlocks		= new HashMap<>();
 
 	//Parameters needed to implement Run()
-	String 			transformationId;
-	List<String> 	listOfOntologies;
-	String 			rulesFilePath;
-	String 			relativePathOntologyFile;
-	List<String> 	dataPaths;
+	TransformationManagerImpl	fileSystemManager;
+	String 						transformationId;
+	List<String> 				listOfOntologies;
+	String 						rulesFilePath;
+	String 						relativePathOntologyFile;
+	List<String> 				dataPaths;
 
 	public RuleInterpretor(){
 
 	}
 
-	public static void 		main( String[] args ) throws Exception {
+	/*public static void 		main( String[] args ) throws Exception {
 		List<String> listOfOntologies 	= new ArrayList<>();
 		listOfOntologies.add("testFiles/arraye_preprocessed/ontology.owl");
 		String rulesFilePath = "testFiles/arraye_preprocessed/rules.txt";
@@ -49,6 +55,14 @@ public class RuleInterpretor implements Runnable
 													rulesFilePath,
 													"testFiles/arraye_preprocessed/ontology.owl",
 													dataPaths );
+		ruleInterpretor.run();
+	}*/
+
+	public static void main (String[] args) {
+		RuleInterpretor ruleInterpretor = new RuleInterpretor();
+		ruleInterpretor.transformationId = args[0];
+		//ruleInterpretor.transformationId = "850ed3f2-aa22-4e0c-9ab7-ed6af275caca";
+		System.out.println("=============== Transformation ID: " + ruleInterpretor.transformationId);
 		ruleInterpretor.run();
 	}
 
@@ -65,14 +79,32 @@ public class RuleInterpretor implements Runnable
 
 	}
 
+	public void 			setTransformationParameters() throws Exception {
+		fileSystemManager = new TransformationManagerImpl();
+
+		try{
+
+			List<String> ontologiesList = fileSystemManager.getAllOntologies(transformationId);
+
+
+			this.listOfOntologies 			= ontologiesList;
+			this.dataPaths   				= fileSystemManager.getAllDatasets(transformationId);
+			this.rulesFilePath  			= fileSystemManager.getRulesFile(transformationId);
+			this.relativePathOntologyFile	= ontologiesList.get(0);
+		} catch (Exception e) {
+			throw e;
+		}
+	}
+
 	@Override
 	public void 			run() {
 
-		TransformationManagerImpl fileSystemManager = new TransformationManagerImpl();
-
 		try {
+			setTransformationParameters();
+
+			System.out.println("=============== Ontology file: " + relativePathOntologyFile);
 			extractRulesFromFile(rulesFilePath, listOfOntologies);
-			TriplesProcessing triplesProcessing = new TriplesProcessing(relativePathOntologyFile);
+			TriplesProcessing triplesProcessing = new TriplesProcessing();
 			for (String path : dataPaths) {
 				triplesProcessing.addDatasetToBeProcessed(path);
 			}
@@ -89,17 +121,14 @@ public class RuleInterpretor implements Runnable
 			triplesProcessing.addDatasetToBeProcessed("testFiles/geo_preprocessed/GSM1638979.tsv");
 			*/
 
-			triplesProcessing.createTriplesFromRules(rulesList, conditionsBlocks, searchBlocks, ruleConfigs.get("default"));
+			triplesProcessing.createTriplesFromRules(rulesList, conditionsBlocks, searchBlocks, ruleConfigs.get("default"), listOfOntologies);
 			triplesProcessing.checkConsistency();
 
-			fileSystemManager.writeRDF(triplesProcessing, transformationId);
+			writeRDF(triplesProcessing, transformationId);
 
-			try {
-				fileSystemManager.updateStatus(transformationId, EnumActivityState.SUCCEEDED);
-				fileSystemManager.log(transformationId, null);
-			} catch (StatusFileException w) {
-				System.out.println(w.getMessage());
-			}
+
+			fileSystemManager.updateStatus(transformationId, EnumActivityState.SUCCEEDED);
+			fileSystemManager.log(transformationId, null);
 
 		} catch (Exception e) {
 			try {
@@ -540,5 +569,30 @@ public class RuleInterpretor implements Runnable
 		}
 
 		return identifiedRules;
+	}
+
+	public 	void 			writeRDF(TriplesProcessing triplesProcessing, String transformationId) throws Exception {
+		System.out.println("#####################################\nWriting RDF...");
+		long startTime = System.currentTimeMillis();
+		try{
+			File f = new File(new TransformationManagerImpl().localStorage, transformationId + "/RDFTriples.rdf");
+			FileOutputStream fos = new FileOutputStream(f);
+			//RDFDataMgr.write(fos, model, Lang.TRIG);
+			//RDFDataMgr.write(fos, model, Lang.TURTLE);
+			//RDFDataMgr.write(fos, model, Lang.RDFXML);
+			//RDFDataMgr.write(fos, model, Lang.NTRIPLES);
+			RDFDataMgr.write(fos, triplesProcessing.getModel(), triplesProcessing.defaultRuleConfig.getSyntax());
+			fos.close();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new Exception(e.getMessage());
+		}
+
+		long stopTime = System.currentTimeMillis();
+		long elapsedTime = stopTime - startTime;
+		System.out.println("Wrote RDF in " + elapsedTime / 1000 + " secs");
+		elapsedTime = stopTime - triplesProcessing.startTime;
+		System.out.println("Processed in " + elapsedTime / 1000 + " secs");
 	}
 }

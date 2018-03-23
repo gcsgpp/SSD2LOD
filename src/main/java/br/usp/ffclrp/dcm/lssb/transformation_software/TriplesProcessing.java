@@ -13,6 +13,7 @@ import org.apache.jena.reasoner.ValidityReport;
 import org.apache.jena.reasoner.ValidityReport.Report;
 import org.semanticweb.owlapi.model.OWLProperty;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -27,18 +28,15 @@ public class TriplesProcessing {
 	private Map<Integer, ConditionBlock> conditionBlocks;
 	private Map<Integer, SearchBlock> searchBlocks;
 	public 	RuleConfig defaultRuleConfig;
-	private Model ontology = null;
-	private String relativePathOntologyFile = null;
 	private MatrixLineNumberTracking currentLineNumberMatrixRules = new MatrixLineNumberTracking();
 	private Map<Integer, List<Resource>> simpleRuleAlreadyProcessed = new HashMap<>();
 	public 	long startTime;
+	private List<String> ontologiesList = new ArrayList<>();
 
-	public 					TriplesProcessing(String relativePathOntologyFile) {
+	public 					TriplesProcessing() {
 		startTime = new Date().getTime();
 		this.model = ModelFactory.createDefaultModel();
 		//model.read(relativePathOntologyFile); //load ontology and add its axioms to the linked graph
-        this.relativePathOntologyFile = relativePathOntologyFile;
-		this.ontology = ModelFactory.createOntologyModel().read(relativePathOntologyFile);
 		fileReader = new SemistructuredFileReader();
 	}
 
@@ -46,7 +44,11 @@ public class TriplesProcessing {
 		fileReader.addFilesToBeProcessed(relativePathDataFile);
 	}
 	@SuppressWarnings("unchecked")
-	public void 			createTriplesFromRules(List<Rule> listRules, Map<Integer, ConditionBlock> conditionBlocks, Map<Integer, SearchBlock> searchBlocks, RuleConfig defaultRuleConfig) throws Exception{
+	public void 			createTriplesFromRules(List<Rule> listRules,
+												  Map<Integer, ConditionBlock> conditionBlocks,
+												  Map<Integer, SearchBlock> searchBlocks,
+												  RuleConfig defaultRuleConfig,
+												  List<String> ontologiesList) throws Exception{
 
 		if(fileReader.getFilesAdded() <= 0)
 			throw new NoFilesAddedException("No files were added to be processed.");
@@ -55,6 +57,7 @@ public class TriplesProcessing {
 		this.conditionBlocks 	= conditionBlocks;
 		this.searchBlocks 		= searchBlocks;
 		this.defaultRuleConfig 	= defaultRuleConfig;
+		this.ontologiesList		= ontologiesList;
 
 		for(Rule rule : regularRuleList){	
 			allRules.put(Integer.parseInt(rule.getId()), rule);
@@ -512,37 +515,43 @@ public class TriplesProcessing {
 
 		//namespacesUsed.forEach(n -> System.out.println(n));
 
-		Model tempModel = ModelFactory.createDefaultModel();
-		tempModel.read(relativePathOntologyFile);
+		for(String ontology : ontologiesList) {
+			Model tempModel = ModelFactory.createDefaultModel();
+			tempModel.read(ontology);
 
-		tempModel.getNsPrefixMap().forEach((k, v) -> {
-			if(namespacesUsed.contains(v))
-				model.setNsPrefix(k, v);
-		});
+			tempModel.getNsPrefixMap().forEach((k, v) -> {
+				if (namespacesUsed.contains(v))
+					model.setNsPrefix(k, v);
+			});
+		}
 	}
 
-	public Boolean 		checkConsistency() {
+	public Boolean 			checkConsistency() throws Exception {
 		System.out.println("#####################################\nChecking consistency...");
-		Reasoner openPellet = PelletReasonerFactory.theInstance().create().bindSchema(ontology);
-		InfModel inf = ModelFactory.createInfModel(openPellet, model);
+		for(String ontologyPath : ontologiesList) {
+			Model ontology = ModelFactory.createOntologyModel().read(ontologyPath);
+			Reasoner openPellet = PelletReasonerFactory.theInstance().create().bindSchema(ontology);
+			InfModel inf = ModelFactory.createInfModel(openPellet, model);
 
-		ValidityReport report = inf.validate();
+			ValidityReport report = inf.validate();
 
-		System.out.println("Is Clean?:" + report.isClean());
+			System.out.println("Is Clean?:" + report.isClean());
 
-		System.out.println("Is valid?:" + report.isValid());
+			System.out.println("Is valid?:" + report.isValid());
 
-		if(!report.isValid()) {
-			System.out.println("--------> Conflicts:");
-			for(Iterator<Report> i = report.getReports(); i.hasNext(); ) {
-				System.out.println("-> "+ i.next());
+			if (!report.isValid()) {
+				String conflicts = "Ontology conflicts:\n";
+
+				File file = new File(ontologyPath);
+				conflicts += file.getName() + "\n";
+
+				for (Iterator<Report> i = report.getReports(); i.hasNext(); ) {
+					conflicts += "-> " + i.next() + "\n";
+				}
+				throw new Exception(conflicts);
 			}
-			return false;
-		}else{
-			return true;
 		}
-
-		//System.out.println("\n ----- \n");
+		return true;
 	}
 
 	public 	Model 			getModel() {

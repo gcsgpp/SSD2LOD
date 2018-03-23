@@ -21,8 +21,9 @@ import static org.junit.Assert.fail;
 public class TripleProcessingTest 
 {
 	private OntologyHelper ontologyHelper;
-	private Map<Integer, ConditionBlock> conditionsBlocks = new HashMap<Integer, ConditionBlock>();
-	private List<Rule> listRules = new ArrayList<>();
+	private Map<Integer, ConditionBlock> conditionsBlocks;
+	private List<Rule> listRules;
+	private List<String> ontologiesList;
 
 
 	@org.junit.Rule
@@ -33,6 +34,7 @@ public class TripleProcessingTest
 		ontologyHelper = null;
 		conditionsBlocks = new HashMap<>();
 		listRules = new ArrayList<>();
+		ontologiesList = new ArrayList<>();
 	}
 
 	private Rule createRuleOne() {
@@ -44,7 +46,7 @@ public class TripleProcessingTest
 
 		subject.setTitle("Term");
 
-		List<Flag> subjectFlags = new ArrayList<Flag>();
+		List<Flag> subjectFlags = new ArrayList<>();
 		List<Integer> separatorCols = new ArrayList<Integer>();
 		separatorCols.add(0);
 		subjectFlags.add(new FlagSeparator("~", separatorCols));
@@ -54,13 +56,13 @@ public class TripleProcessingTest
 		subject.setFlags(subjectFlags);
 		subjectTSVColumns.add(subject);
 
-		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<OWLProperty, TripleObject>();
+		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<>();
 
 		/* has_pvalue predicate */
 		TSVColumn pvalueColumn = new TSVColumn();
 		pvalueColumn.setTitle("PValue");
 
-		List<Flag> pvalueFlags = new ArrayList<Flag>();
+		List<Flag> pvalueFlags = new ArrayList<>();
 		pvalueColumn.setFlags(pvalueFlags);
 
 		predicateObjects.put(ontologyHelper.getProperty("has_pvalue"), new TripleObjectAsColumns(pvalueColumn));
@@ -69,7 +71,7 @@ public class TripleProcessingTest
 		TSVColumn nameColumn = new TSVColumn();
 		nameColumn.setTitle("Term");
 
-		List<Flag> nameFlags = new ArrayList<Flag>();
+		List<Flag> nameFlags = new ArrayList<>();
 		separatorCols = new ArrayList<Integer>();
 		separatorCols.add(1);
 		nameFlags.add(new FlagSeparator("~", separatorCols));
@@ -81,7 +83,7 @@ public class TripleProcessingTest
 		TSVColumn participantColumn = new TSVColumn();
 		participantColumn.setTitle("Genes");
 
-		List<Flag> participantFlags = new ArrayList<Flag>();
+		List<Flag> participantFlags = new ArrayList<>();
 		participantColumn.setFlags(participantFlags);
 
 		predicateObjects.put(ontologyHelper.getProperty("has participant"), new TripleObjectAsRule(new ObjectAsRule(3, participantFlags)));
@@ -91,14 +93,14 @@ public class TripleProcessingTest
 
 	private Rule createRuleTwo() {
 		String id = "2";
-		RuleConfig ruleConfig = new RuleConfig("default").setMatrix(true);;
+		RuleConfig ruleConfig = new RuleConfig("default").setMatrix(true);
 		OWLClass subjectClass = ontologyHelper.getClass("Term");
 		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
 		TSVColumn subject = new TSVColumn();
 
 		subject.setTitle("Term");
 
-		List<Flag> subjectFlags = new ArrayList<Flag>();
+		List<Flag> subjectFlags = new ArrayList<>();
 		List<Integer> separatorCols = new ArrayList<Integer>();
 		separatorCols.add(0);
 		subjectFlags.add(new FlagSeparator(":", separatorCols));
@@ -108,13 +110,13 @@ public class TripleProcessingTest
 		subject.setFlags(subjectFlags);
 		subjectTSVColumns.add(subject);
 
-		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<OWLProperty, TripleObject>();
+		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<>();
 
 		/* has_pvalue predicate */
 		TSVColumn pvalueColumn = new TSVColumn();
 		pvalueColumn.setTitle("PValue");
 
-		List<Flag> pvalueFlags = new ArrayList<Flag>();
+		List<Flag> pvalueFlags = new ArrayList<>();
 		pvalueColumn.setFlags(pvalueFlags);
 
 		predicateObjects.put(ontologyHelper.getProperty("has_pvalue"), new TripleObjectAsColumns(pvalueColumn));
@@ -123,7 +125,7 @@ public class TripleProcessingTest
 		TSVColumn nameColumn = new TSVColumn();
 		nameColumn.setTitle("Term");
 
-		List<Flag> nameFlags = new ArrayList<Flag>();
+		List<Flag> nameFlags = new ArrayList<>();
 		separatorCols = new ArrayList<Integer>();
 		separatorCols.add(1);
 		nameFlags.add(new FlagSeparator(":", separatorCols));
@@ -135,7 +137,7 @@ public class TripleProcessingTest
 		TSVColumn participantColumn = new TSVColumn();
 		participantColumn.setTitle("Term");
 
-		List<Flag> participantFlags = new ArrayList<Flag>();
+		List<Flag> participantFlags = new ArrayList<>();
 		participantColumn.setFlags(participantFlags);
 
 		predicateObjects.put(ontologyHelper.getProperty("has participant"), new TripleObjectAsRule(new ObjectAsRule(3, participantFlags)));
@@ -152,7 +154,7 @@ public class TripleProcessingTest
 
 		subject.setTitle("Genes");
 
-		List<Flag> subjectFlags = new ArrayList<Flag>();
+		List<Flag> subjectFlags = new ArrayList<>();
 		List<Integer> separatorCols = new ArrayList<Integer>();
 		separatorCols.add(Integer.MAX_VALUE);
 		subjectFlags.add(new FlagSeparator(", ", separatorCols));
@@ -161,7 +163,7 @@ public class TripleProcessingTest
 		subject.setFlags(subjectFlags);
 		subjectTSVColumns.add(subject);
 
-		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<OWLProperty, TripleObject>();
+		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<>();
 
 		return new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects);
 	}
@@ -206,11 +208,17 @@ public class TripleProcessingTest
 		listRules.add(createRuleThree());
 		createConditionBlocks();
 		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
+		ontologiesList.add(ontologyPath);
 
-		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "ontology.owl");
+		TriplesProcessing processingClass = new TriplesProcessing();;
 		processingClass.addDatasetToBeProcessed(testFolderPath + "enrichedDataGOTerm.tsv");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks, RuleConfig.getDefaultRuleConfigFromRuleList(listRules));
+			processingClass.createTriplesFromRules(listRules,
+													conditionsBlocks,
+													searchBlocks,
+													RuleConfig.getDefaultRuleConfigFromRuleList(listRules),
+													ontologiesList
+													);
 		}catch(Exception e) {
 			fail();
 		}
@@ -260,11 +268,16 @@ public class TripleProcessingTest
 		listRules.add(createRuleThree());
 		createConditionBlocks();
 		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
+		ontologiesList.add(ontologyPath);
 
-		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "ontology.owl");
+		TriplesProcessing processingClass = new TriplesProcessing();;
 		processingClass.addDatasetToBeProcessed(testFolderPath + "enrichedDataKeggTerm.tsv");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks, RuleConfig.getDefaultRuleConfigFromRuleList(listRules));
+			processingClass.createTriplesFromRules(listRules,
+													conditionsBlocks,
+													searchBlocks,
+													RuleConfig.getDefaultRuleConfigFromRuleList(listRules),
+													ontologiesList);
 		}catch(Exception e) {
 			fail();
 		}
@@ -304,20 +317,20 @@ public class TripleProcessingTest
 
 	private Rule createRuleWithNotMetadataFlag() {
 		String id = "1";
-		RuleConfig ruleConfig = new RuleConfig("default", "http://example.org/onto/individual#").setMatrix(true);;
+		RuleConfig ruleConfig = new RuleConfig("default", "http://example.org/onto/individual#").setMatrix(true);
 		OWLClass subjectClass = ontologyHelper.getClass("geo sample");
-		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
+		List<TSVColumn> subjectTSVColumns = new ArrayList<>();
 		TSVColumn subject = new TSVColumn();
 
 		subject.setTitle("GSM1243183");
 
-		List<Flag> subjectFlags = new ArrayList<Flag>();
+		List<Flag> subjectFlags = new ArrayList<>();
 		subjectFlags.add(new FlagNotMetadata(true));
 
 		subject.setFlags(subjectFlags);
 		subjectTSVColumns.add(subject);
 
-		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<OWLProperty, TripleObject>();
+		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<>();
 
 		return new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects);
 	}
@@ -332,11 +345,16 @@ public class TripleProcessingTest
 		listRules.add(createRuleWithNotMetadataFlag());
 
 		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
+		ontologiesList.add(ontologyPath);
 
-		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "ontology.owl");
+		TriplesProcessing processingClass = new TriplesProcessing();;
 		processingClass.addDatasetToBeProcessed(testFolderPath + "NormalizedData.txt");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks, RuleConfig.getDefaultRuleConfigFromRuleList(listRules));
+			processingClass.createTriplesFromRules(listRules,
+													conditionsBlocks,
+													searchBlocks,
+													RuleConfig.getDefaultRuleConfigFromRuleList(listRules),
+													ontologiesList);
 		}catch(Exception e) {
 			fail();
 		}
@@ -355,21 +373,21 @@ public class TripleProcessingTest
 
 	private Rule createRuleAssertingConditionBlockThatDontExist(){
 		String id = "1";
-		RuleConfig ruleConfig = new RuleConfig("default").setMatrix(true);;
+		RuleConfig ruleConfig = new RuleConfig("default").setMatrix(true);
 		OWLClass subjectClass = ontologyHelper.getClass("Term");
-		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
+		List<TSVColumn> subjectTSVColumns = new ArrayList<>();
 		TSVColumn subject = new TSVColumn();
 
 		subject.setTitle("Category");
 
-		List<Flag> subjectFlags = new ArrayList<Flag>();
+		List<Flag> subjectFlags = new ArrayList<>();
 		subjectFlags.add(new FlagConditionBlock(2));
 
 		subject.setFlags(subjectFlags);
 		subjectTSVColumns.add(subject);
 
 
-		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<OWLProperty, TripleObject>();
+		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<>();
 
 		return new Rule(id,ruleConfig, subjectClass, subjectTSVColumns, predicateObjects );
 	}
@@ -387,11 +405,16 @@ public class TripleProcessingTest
 		thrown.expectMessage("No condition block created");
 
 		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
+		ontologiesList.add(ontologyPath);
 
-		TriplesProcessing processingClass = new TriplesProcessing( testFolderPath + "ontology.owl");
+		TriplesProcessing processingClass = new TriplesProcessing();;
 		processingClass.addDatasetToBeProcessed(testFolderPath + "enrichedDataGOTerm2.tsv");
 
-		processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks, RuleConfig.getDefaultRuleConfigFromRuleList(listRules));
+		processingClass.createTriplesFromRules(listRules,
+												conditionsBlocks,
+												searchBlocks,
+												RuleConfig.getDefaultRuleConfigFromRuleList(listRules),
+												ontologiesList);
 	}
 
 
@@ -400,20 +423,20 @@ public class TripleProcessingTest
 
 	private Rule createRuleWithFixedContentFlagOnSubjectLine() {
 		String id = "1";
-		RuleConfig ruleConfig = new RuleConfig("default", "http://example.org/onto/individual#").setMatrix(true);;
+		RuleConfig ruleConfig = new RuleConfig("default", "http://example.org/onto/individual#").setMatrix(true);
 		OWLClass subjectClass = ontologyHelper.getClass("geo sample");
-		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
+		List<TSVColumn> subjectTSVColumns = new ArrayList<>();
 		TSVColumn subject = new TSVColumn();
 
 		subject.setTitle("");
 
-		List<Flag> subjectFlags = new ArrayList<Flag>();
+		List<Flag> subjectFlags = new ArrayList<>();
 		subjectFlags.add(new FlagFixedContent("NormalizedData"));
 
 		subject.setFlags(subjectFlags);
 		subjectTSVColumns.add(subject);
 
-		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<OWLProperty, TripleObject>();
+		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<>();
 
 		return new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects);
 	}
@@ -428,11 +451,16 @@ public class TripleProcessingTest
 		listRules.add(createRuleWithFixedContentFlagOnSubjectLine());
 		
 		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
-		
-		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "ontology.owl");
+		ontologiesList.add(ontologyPath);
+
+		TriplesProcessing processingClass = new TriplesProcessing();;
 		processingClass.addDatasetToBeProcessed(testFolderPath + "NormalizedData.txt");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks, RuleConfig.getDefaultRuleConfigFromRuleList(listRules));
+			processingClass.createTriplesFromRules(listRules,
+													conditionsBlocks,
+													searchBlocks,
+													RuleConfig.getDefaultRuleConfigFromRuleList(listRules),
+													ontologiesList);
 		}catch(Exception e) {
 			fail();
 		}
@@ -455,20 +483,20 @@ public class TripleProcessingTest
 		String id = "1";
 		RuleConfig ruleConfig = new RuleConfig("default").setMatrix(true);
 		OWLClass subjectClass = ontologyHelper.getClass("geo sample");
-		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
+		List<TSVColumn> subjectTSVColumns = new ArrayList<>();
 		TSVColumn subject = new TSVColumn();
 
 		subject.setTitle("GSM1243183");
-		List<Flag> subjectFlags = new ArrayList<Flag>();
+		List<Flag> subjectFlags = new ArrayList<>();
 		subjectFlags.add(new FlagNotMetadata(true));
 		subject.setFlags(subjectFlags);
 		subjectTSVColumns.add(subject);
 
-		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<OWLProperty, TripleObject>();
+		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<>();
 		
 		OWLProperty enrichmentProperty = ontologyHelper.getProperty("has enrichement");
 		
-		List<Flag> objectFlags = new ArrayList<Flag>();
+		List<Flag> objectFlags = new ArrayList<>();
 		objectFlags.add(new FlagFixedContent("test fixed content"));
 		TripleObject object = new TripleObjectAsColumns(new TSVColumn("GSM1243183", objectFlags));
 		
@@ -487,11 +515,15 @@ public class TripleProcessingTest
 		listRules.add(createRuleWithFixedContentFlagOnObjectLine());
 
 		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
+		ontologiesList.add(ontologyPath);
 
-		TriplesProcessing processingClass = new TriplesProcessing( testFolderPath + "ontology.owl");
+		TriplesProcessing processingClass = new TriplesProcessing();;
 		processingClass.addDatasetToBeProcessed(testFolderPath + "NormalizedData.txt");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks, RuleConfig.getDefaultRuleConfigFromRuleList(listRules));
+			processingClass.createTriplesFromRules(listRules,
+													conditionsBlocks,
+													searchBlocks, RuleConfig.getDefaultRuleConfigFromRuleList(listRules),
+													ontologiesList);
 		}catch(Exception e) {
 			e.printStackTrace();
 			fail();
@@ -502,13 +534,17 @@ public class TripleProcessingTest
 		assertEquals(2, statements.size()); // the triple with rdfs:type and with the "test fixed content";
 		for(Statement statement : statements) {
 			Triple triple = statement.asTriple();
-			if(triple.getPredicate().getURI().equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")) {
-				assertEquals("http://www.purl.org/g/classes#geo_sample", triple.getObject().getURI());
-			} else if(triple.getPredicate().getURI().equals("http://www.purl.org/g/properties#enrichment")) {
-				assertEquals("test fixed content", triple.getObject().getLiteralValue());
-			} else {
-				fail();
-			}			
+			switch (triple.getPredicate().getURI()) {
+				case "http://www.w3.org/1999/02/22-rdf-syntax-ns#type":
+					assertEquals("http://www.purl.org/g/classes#geo_sample", triple.getObject().getURI());
+					break;
+				case "http://www.purl.org/g/properties#enrichment":
+					assertEquals("test fixed content", triple.getObject().getLiteralValue());
+					break;
+				default:
+					fail();
+					break;
+			}
 		}
 	}
 
@@ -518,19 +554,19 @@ public class TripleProcessingTest
 
 	private Rule createRuleWithCustomIDFlag() {
 		String id = "1";
-		RuleConfig ruleConfig = new RuleConfig("default", "http://example.org/onto/individual#").setMatrix(true);;
+		RuleConfig ruleConfig = new RuleConfig("default", "http://example.org/onto/individual#").setMatrix(true);
 		OWLClass subjectClass = ontologyHelper.getClass("geo sample");
-		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
+		List<TSVColumn> subjectTSVColumns = new ArrayList<>();
 		
 		TSVColumn subject = new TSVColumn();
 		subject.setTitle("");
-		List<Flag> subjectFlags = new ArrayList<Flag>();
+		List<Flag> subjectFlags = new ArrayList<>();
 		subjectFlags.add(new FlagCustomID("NormalizedData"));
 		subject.setFlags(subjectFlags);
 		
 		subjectTSVColumns.add(subject);
 
-		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<OWLProperty, TripleObject>();
+		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<>();
 		return new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects);
 	}
 
@@ -544,11 +580,16 @@ public class TripleProcessingTest
 		listRules.add(createRuleWithCustomIDFlag());
 
 		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
+		ontologiesList.add(ontologyPath);
 
-		TriplesProcessing processingClass = new TriplesProcessing( testFolderPath + "ontology.owl");
+		TriplesProcessing processingClass = new TriplesProcessing();;
 		processingClass.addDatasetToBeProcessed(testFolderPath + "NormalizedData.txt");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks, RuleConfig.getDefaultRuleConfigFromRuleList(listRules));
+			processingClass.createTriplesFromRules(listRules,
+													conditionsBlocks,
+													searchBlocks,
+													RuleConfig.getDefaultRuleConfigFromRuleList(listRules),
+													ontologiesList);
 		}catch(Exception e) {
 			e.printStackTrace();
 			fail();
@@ -570,19 +611,19 @@ public class TripleProcessingTest
 
 	private Rule createRuleWithBaseIRIWithNoNamespace() {
 		String id = "1";
-		RuleConfig ruleConfig = new RuleConfig("default").setMatrix(true);;
+		RuleConfig ruleConfig = new RuleConfig("default").setMatrix(true);
 		OWLClass subjectClass = ontologyHelper.getClass("geo sample");
-		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
+		List<TSVColumn> subjectTSVColumns = new ArrayList<>();
 
 		TSVColumn subject = new TSVColumn();
 		subject.setTitle("");
-		List<Flag> subjectFlags = new ArrayList<Flag>();
+		List<Flag> subjectFlags = new ArrayList<>();
 		subjectFlags.add(new FlagBaseIRI("http://purl.org/g/", null));
 		subject.setFlags(subjectFlags);
 
 		subjectTSVColumns.add(subject);
 
-		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<OWLProperty, TripleObject>();
+		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<>();
 		return new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects);
 	}
 
@@ -594,8 +635,9 @@ public class TripleProcessingTest
 
 		ontologyHelper.loadingOntologyFromFile(ontologyPath);
 		listRules.add(createRuleWithBaseIRIWithNoNamespace());
+		ontologiesList.add(ontologyPath);
 
-		TriplesProcessing processingClass = new TriplesProcessing( testFolderPath + "ontology.owl");
+		TriplesProcessing processingClass = new TriplesProcessing();;
 		processingClass.addDatasetToBeProcessed(testFolderPath + "NormalizedData.txt");
 
         thrown.expect(BaseIRIException.class);
@@ -603,7 +645,11 @@ public class TripleProcessingTest
 
 		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
 
-        processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks, RuleConfig.getDefaultRuleConfigFromRuleList(listRules));
+        processingClass.createTriplesFromRules(listRules,
+												conditionsBlocks,
+												searchBlocks,
+												RuleConfig.getDefaultRuleConfigFromRuleList(listRules),
+												ontologiesList);
 	}
 
 
@@ -614,17 +660,17 @@ public class TripleProcessingTest
 		String id = "1";
 		RuleConfig ruleConfig = new RuleConfig("default").setMatrix(true);
 		OWLClass subjectClass = ontologyHelper.getClass("geo sample");
-		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
+		List<TSVColumn> subjectTSVColumns = new ArrayList<>();
 
 		TSVColumn subject = new TSVColumn();
 		subject.setTitle("");
-		List<Flag> subjectFlags = new ArrayList<Flag>();
+		List<Flag> subjectFlags = new ArrayList<>();
 		subjectFlags.add(new FlagBaseIRI(null, "purl"));
 		subject.setFlags(subjectFlags);
 
 		subjectTSVColumns.add(subject);
 
-		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<OWLProperty, TripleObject>();
+		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<>();
 		return new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects);
 	}
 
@@ -636,8 +682,9 @@ public class TripleProcessingTest
 
 		ontologyHelper.loadingOntologyFromFile(ontologyPath);
 		listRules.add(createRuleWithBaseIRIWithNoIRI());
+		ontologiesList.add(ontologyPath);
 
-		TriplesProcessing processingClass = new TriplesProcessing( testFolderPath + "ontology.owl");
+		TriplesProcessing processingClass = new TriplesProcessing();;
 		processingClass.addDatasetToBeProcessed(testFolderPath + "NormalizedData.txt");
 
 		thrown.expect(BaseIRIException.class);
@@ -645,7 +692,11 @@ public class TripleProcessingTest
 
 		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
 
-		processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks, RuleConfig.getDefaultRuleConfigFromRuleList(listRules));
+		processingClass.createTriplesFromRules(listRules,
+												conditionsBlocks,
+												searchBlocks,
+												RuleConfig.getDefaultRuleConfigFromRuleList(listRules),
+												ontologiesList);
 	}
 
 
@@ -665,19 +716,23 @@ public class TripleProcessingTest
 		
 		//Changing the type of operation to manage not met the data inside the dataset
 		ConditionBlock cb = conditionsBlocks.get(1);
-		for(Iterator<Condition> iteratorCB = cb.getConditions().iterator(); iteratorCB.hasNext(); ) {
-			Condition condition = iteratorCB.next();
-			if(condition.getColumn().equals("Category")) {
+		for (Condition condition : cb.getConditions()) {
+			if (condition.getColumn().equals("Category")) {
 				condition.setOperation(EnumOperationsConditionBlock.EQUAL);
 			}
 		}
 
 		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
+		ontologiesList.add(ontologyPath);
 
-		TriplesProcessing processingClass = new TriplesProcessing( testFolderPath + "ontology.owl");
+		TriplesProcessing processingClass = new TriplesProcessing();;
 		processingClass.addDatasetToBeProcessed(testFolderPath + "enrichedDataGOTerm.tsv");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks, RuleConfig.getDefaultRuleConfigFromRuleList(listRules));
+			processingClass.createTriplesFromRules(listRules,
+													conditionsBlocks,
+													searchBlocks,
+													RuleConfig.getDefaultRuleConfigFromRuleList(listRules),
+													ontologiesList);
 		}catch(Exception e) {
 			fail();
 		}
@@ -689,19 +744,19 @@ public class TripleProcessingTest
 
 	private Rule createRuleSeparatorElementInSeparatorFlagDoesNotExist() {
 		String id = "1";
-		RuleConfig ruleConfig = new RuleConfig("default").setMatrix(true);;
+		RuleConfig ruleConfig = new RuleConfig("default").setMatrix(true);
 		OWLClass subjectClass = ontologyHelper.getClass("Gene");
-		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
+		List<TSVColumn> subjectTSVColumns = new ArrayList<>();
 		
 		TSVColumn subject = new TSVColumn();
 		subject.setTitle("Genes");
-		List<Flag> subjectFlags = new ArrayList<Flag>();
+		List<Flag> subjectFlags = new ArrayList<>();
 		subjectFlags.add(new FlagSeparator("-", new ArrayList<Integer>()));
 		subject.setFlags(subjectFlags);
 		
 		subjectTSVColumns.add(subject);
 
-		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<OWLProperty, TripleObject>();
+		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<>();
 		return new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects);
 	}
 	
@@ -749,11 +804,16 @@ public class TripleProcessingTest
 		createConditionBlockWithGreaterThanCondition();
 
 		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
+		ontologiesList.add(ontologyPath);
 
-		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "ontology.owl");
+		TriplesProcessing processingClass = new TriplesProcessing();;
 		processingClass.addDatasetToBeProcessed(testFolderPath + "enrichedDataGOTerm3.tsv");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks, RuleConfig.getDefaultRuleConfigFromRuleList(listRules));
+			processingClass.createTriplesFromRules(listRules,
+													conditionsBlocks,
+													searchBlocks,
+													RuleConfig.getDefaultRuleConfigFromRuleList(listRules),
+													ontologiesList);
 		}catch(Exception e) {
 			e.printStackTrace();
 		    fail();
@@ -804,12 +864,17 @@ public class TripleProcessingTest
         createConditionBlocks();
 
 		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
+		ontologiesList.add(ontologyPath);
 
-        TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "ontology.owl");
+		TriplesProcessing processingClass = new TriplesProcessing();;
         processingClass.addDatasetToBeProcessed(testFolderPath + "enrichedDataGOTerm.tsv");
         processingClass.addDatasetToBeProcessed(testFolderPath + "enrichedDataGOTerm3.tsv");
         try{
-            processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks, RuleConfig.getDefaultRuleConfigFromRuleList(listRules));
+            processingClass.createTriplesFromRules(listRules,
+													conditionsBlocks,
+													searchBlocks,
+													RuleConfig.getDefaultRuleConfigFromRuleList(listRules),
+													ontologiesList);
         }catch(Exception e) {
             e.printStackTrace();
             fail();
@@ -864,19 +929,19 @@ public class TripleProcessingTest
 		String id = "1";
 		RuleConfig ruleConfig = new RuleConfig(id, "http://example.org/onto/individual#");
 		OWLClass subjectClass = ontologyHelper.getClass("investigation");
-		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
+		List<TSVColumn> subjectTSVColumns = new ArrayList<>();
 
 		TSVColumn subject = new TSVColumn();
 		subject.setTitle("GSE67111_SERIES");
-		List<Flag> subjectFlags = new ArrayList<Flag>();
+		List<Flag> subjectFlags = new ArrayList<>();
 		subject.setFlags(subjectFlags);
 
 		subjectTSVColumns.add(subject);
 
-		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<OWLProperty, TripleObject>();
+		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<>();
 
 		OWLProperty statusProperty = ontologyHelper.getProperty("status");
-		List<Flag> contentDirection = new ArrayList<Flag>();
+		List<Flag> contentDirection = new ArrayList<>();
 		TripleObject statusTripleObject = new TripleObjectAsColumns(new TSVColumn("GSE67111_status",contentDirection));
 
 		OWLProperty summaryProperty = ontologyHelper.getProperty("summary");
@@ -900,11 +965,16 @@ public class TripleProcessingTest
 		createConditionBlockWithGreaterThanCondition();
 
 		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
+		ontologiesList.add(ontologyPath);
 
-		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "ontology.owl");
+		TriplesProcessing processingClass = new TriplesProcessing();;
 		processingClass.addDatasetToBeProcessed(testFolderPath + "GSE67111.tsv");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks, RuleConfig.getDefaultRuleConfigFromRuleList(listRules));
+			processingClass.createTriplesFromRules(listRules,
+													conditionsBlocks,
+													searchBlocks,
+													RuleConfig.getDefaultRuleConfigFromRuleList(listRules),
+													ontologiesList);
 		}catch(Exception e) {
 			e.printStackTrace();
 			fail();
@@ -950,18 +1020,18 @@ public class TripleProcessingTest
 		String id = "1";
 		RuleConfig ruleConfig = new RuleConfig(id, "http://example.org/onto/individual#");
 		OWLClass subjectClass = ontologyHelper.getClass("investigation");
-		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
+		List<TSVColumn> subjectTSVColumns = new ArrayList<>();
 
 		TSVColumn subject = new TSVColumn();
 		subject.setTitle("GSE67111_SERIES");
-		List<Flag> subjectFlags = new ArrayList<Flag>();
+		List<Flag> subjectFlags = new ArrayList<>();
 		subject.setFlags(subjectFlags);
 
 		subjectTSVColumns.add(subject);
 
-		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<OWLProperty, TripleObject>();
+		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<>();
 
-		TripleObject hasParticipantTripleObject = new TripleObjectAsRule(new ObjectAsRule(2, new ArrayList<Flag>()));
+		TripleObject hasParticipantTripleObject = new TripleObjectAsRule(new ObjectAsRule(2, new ArrayList<>()));
 
 		OWLProperty hasParticipantProperty = ontologyHelper.getProperty("has participant");
 
@@ -973,17 +1043,17 @@ public class TripleProcessingTest
 		id = "2";
 		ruleConfig = new RuleConfig(id, "http://example.org/onto/individual#");
 		subjectClass = ontologyHelper.getClass("microarray platform");
-		subjectTSVColumns = new ArrayList<TSVColumn>();
+		subjectTSVColumns = new ArrayList<>();
 
 		subject = new TSVColumn();
 		subject.setTitle("GPL19921_geo_accession");
-		subject.setFlags(new ArrayList<Flag>());
+		subject.setFlags(new ArrayList<>());
 		subjectTSVColumns.add(subject);
 
 		predicateObjects = new HashMap<>();
 
 		OWLProperty titleProperty = ontologyHelper.getProperty("Title");
-		TripleObject titleTripleObject = new TripleObjectAsColumns(new TSVColumn("GPL19921_title", new ArrayList<Flag>()));
+		TripleObject titleTripleObject = new TripleObjectAsColumns(new TSVColumn("GPL19921_title", new ArrayList<>()));
 		predicateObjects.put(titleProperty, titleTripleObject);
 
 		rules.add(new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects));
@@ -1003,12 +1073,17 @@ public class TripleProcessingTest
 		createConditionBlockWithGreaterThanCondition();
 
 		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
+		ontologiesList.add(ontologyPath);
 
-		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "ontology.owl");
+		TriplesProcessing processingClass = new TriplesProcessing();;
 		processingClass.addDatasetToBeProcessed(testFolderPath + "GSE67111.tsv");
 		processingClass.addDatasetToBeProcessed(testFolderPath + "GPL19921.tsv");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks, RuleConfig.getDefaultRuleConfigFromRuleList(listRules));
+			processingClass.createTriplesFromRules(listRules,
+													conditionsBlocks,
+													searchBlocks,
+													RuleConfig.getDefaultRuleConfigFromRuleList(listRules),
+													ontologiesList);
 		}catch(Exception e) {
 			e.printStackTrace();
 			fail();
@@ -1050,18 +1125,18 @@ public class TripleProcessingTest
 		String id = "1";
 		RuleConfig ruleConfig = new RuleConfig(id, "http://example.org/onto/individual/");
 		OWLClass subjectClass = ontologyHelper.getClass("investigation");
-		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
+		List<TSVColumn> subjectTSVColumns = new ArrayList<>();
 
 		TSVColumn subject = new TSVColumn();
 		subject.setTitle("GSE67111_SERIES");
-		subject.setFlags(new ArrayList<Flag>());
+		subject.setFlags(new ArrayList<>());
 
 		subjectTSVColumns.add(subject);
 
-		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<OWLProperty, TripleObject>();
+		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<>();
 
 		OWLProperty hasParticipantProperty = ontologyHelper.getProperty("has participant");
-		TripleObject hasParticipantTripleObject = new TripleObjectAsRule(new ObjectAsRule(2, new ArrayList<Flag>()));
+		TripleObject hasParticipantTripleObject = new TripleObjectAsRule(new ObjectAsRule(2, new ArrayList<>()));
 		predicateObjects.put(hasParticipantProperty, hasParticipantTripleObject);
 
 		rules.add(new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects));
@@ -1070,19 +1145,19 @@ public class TripleProcessingTest
 		id = "2";
 		ruleConfig = new RuleConfig(id, "http://example.org/onto/individual/").setMatrix(true);
 		subjectClass = ontologyHelper.getClass("Platform Data");
-		subjectTSVColumns = new ArrayList<TSVColumn>();
+		subjectTSVColumns = new ArrayList<>();
 
 		subject = new TSVColumn();
 		subject.setTitle("GPL19921_ID");
-		subject.setFlags(new ArrayList<Flag>());
+		subject.setFlags(new ArrayList<>());
 
 		TSVColumn subject2 = new TSVColumn();
 		subject2.setTitle("GPL19921_ORF");
-		subject2.setFlags(new ArrayList<Flag>());
+		subject2.setFlags(new ArrayList<>());
 
 		TSVColumn subject3 = new TSVColumn();
 		subject3.setTitle("GPL19921_Assay ID");
-		subject3.setFlags(new ArrayList<Flag>());
+		subject3.setFlags(new ArrayList<>());
 
 		subjectTSVColumns.add(subject);
 		subjectTSVColumns.add(subject2);
@@ -1091,10 +1166,10 @@ public class TripleProcessingTest
 		predicateObjects = new HashMap<>();
 
 		OWLProperty idProperty = ontologyHelper.getProperty("ID");
-		TripleObject idTripleObject = new TripleObjectAsColumns(new TSVColumn("GPL19921_ID",new ArrayList<Flag>()));
+		TripleObject idTripleObject = new TripleObjectAsColumns(new TSVColumn("GPL19921_ID",new ArrayList<>()));
 
 		OWLProperty orfProperty = ontologyHelper.getProperty("ORF");
-		TripleObject orfTripleObject = new TripleObjectAsColumns(new TSVColumn("GPL19921_ORF",new ArrayList<Flag>()));
+		TripleObject orfTripleObject = new TripleObjectAsColumns(new TSVColumn("GPL19921_ORF",new ArrayList<>()));
 
 		OWLProperty assayidProperty = ontologyHelper.getProperty("Assay ID");
 		List<Flag> assayidFlags = new ArrayList<>();
@@ -1122,12 +1197,17 @@ public class TripleProcessingTest
 		createConditionBlockWithGreaterThanCondition();
 
 		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
+		ontologiesList.add(ontologyPath);
 
-		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "ontology.owl");
+		TriplesProcessing processingClass = new TriplesProcessing();;
 		processingClass.addDatasetToBeProcessed(testFolderPath + "GSE67111.tsv");
 		processingClass.addDatasetToBeProcessed(testFolderPath + "GPL19921.tsv");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks, RuleConfig.getDefaultRuleConfigFromRuleList(listRules));
+			processingClass.createTriplesFromRules(listRules,
+													conditionsBlocks,
+													searchBlocks,
+													RuleConfig.getDefaultRuleConfigFromRuleList(listRules),
+													ontologiesList);
 		}catch(Exception e) {
 			e.printStackTrace();
 			fail();
@@ -1195,25 +1275,26 @@ public class TripleProcessingTest
 		String id = "1";
 		RuleConfig ruleConfig = new RuleConfig(id, "http://example.org/onto/individual/");
 		OWLClass subjectClass = ontologyHelper.getClass("investigation");
-		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
+		List<TSVColumn> subjectTSVColumns = new ArrayList<>();
 
 		TSVColumn subject = new TSVColumn();
 		subject.setTitle("GSE67111_SERIES");
-		subject.setFlags(new ArrayList<Flag>());
+		subject.setFlags(new ArrayList<>());
 
 		subjectTSVColumns.add(subject);
 
-		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<OWLProperty, TripleObject>();
+		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<>();
 
 		OWLProperty hasParticipantProperty = ontologyHelper.getProperty("has participant");
-		TripleObject hasParticipantTripleObject = new TripleObjectAsRule(new ObjectAsRule(2, new ArrayList<Flag>()));
+		TripleObject hasParticipantTripleObject = new TripleObjectAsRule(new ObjectAsRule(2, new ArrayList<>()));
 		predicateObjects.put(hasParticipantProperty, hasParticipantTripleObject);
 
 		Rule rule = new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects);
 
 		listRules.add(rule);
+		ontologiesList.add(ontologyPath);
 
-		TriplesProcessing processingClass = new TriplesProcessing( testFolderPath + "ontology.owl");
+		TriplesProcessing processingClass = new TriplesProcessing();;
 		processingClass.addDatasetToBeProcessed(testFolderPath + "NormalizedData.txt");
 
 		thrown.expect(RuleNotFound.class);
@@ -1221,7 +1302,11 @@ public class TripleProcessingTest
 
 		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
 
-		processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks, RuleConfig.getDefaultRuleConfigFromRuleList(listRules));
+		processingClass.createTriplesFromRules(listRules,
+												conditionsBlocks,
+												searchBlocks,
+												RuleConfig.getDefaultRuleConfigFromRuleList(listRules),
+												ontologiesList);
 
 	}
 
@@ -1235,19 +1320,19 @@ public class TripleProcessingTest
 		String id = "1";
 		RuleConfig ruleConfig = new RuleConfig(id, "http://example.org/onto/individual/").setMatrix(true);
 		OWLClass subjectClass = ontologyHelper.getClass("Platform Data");
-		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
+		List<TSVColumn> subjectTSVColumns = new ArrayList<>();
 
 		TSVColumn 	subject = new TSVColumn();
 					subject.setTitle("GPL19921_ID");
-					subject.setFlags(new ArrayList<Flag>());
+					subject.setFlags(new ArrayList<>());
 
 		TSVColumn 	subject2 = new TSVColumn();
 					subject2.setTitle("GPL19921_ORF");
-					subject2.setFlags(new ArrayList<Flag>());
+					subject2.setFlags(new ArrayList<>());
 
 		TSVColumn 	subject3 = new TSVColumn();
 					subject3.setTitle("GPL19921_Assay ID");
-					subject3.setFlags(new ArrayList<Flag>());
+					subject3.setFlags(new ArrayList<>());
 
 		subjectTSVColumns.add(subject);
 		subjectTSVColumns.add(subject2);
@@ -1267,11 +1352,11 @@ public class TripleProcessingTest
 		id = "2";
 		ruleConfig = new RuleConfig(id, "http://example.org/onto/individual/").setMatrix(true);
 		subjectClass = ontologyHelper.getClass("genetic material");
-		subjectTSVColumns = new ArrayList<TSVColumn>();
+		subjectTSVColumns = new ArrayList<>();
 
 		subject = new TSVColumn();
 		subject.setTitle("GPL19921_ID");
-		List<Flag> subjectFlags = new ArrayList<Flag>();
+		List<Flag> subjectFlags = new ArrayList<>();
 		subjectFlags.add(new FlagSearchBlock(1));
 		subject.setFlags(subjectFlags);
 
@@ -1296,12 +1381,17 @@ public class TripleProcessingTest
 		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
 		SearchBlock searchBlock = new SearchBlock(1, "http://bio2rdf.org/sparql", "http://bio2rdf.org/ctd_vocabulary:gene-symbol");
 		searchBlocks.put(searchBlock.getId(), searchBlock);
+		ontologiesList.add(ontologyPath);
 
-		TriplesProcessing processingClass = new TriplesProcessing(testFolderPath + "ontology.owl");
+		TriplesProcessing processingClass = new TriplesProcessing();;
 		processingClass.addDatasetToBeProcessed(testFolderPath + "GSE67111.tsv");
 		processingClass.addDatasetToBeProcessed(testFolderPath + "GPL19921.tsv");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks, RuleConfig.getDefaultRuleConfigFromRuleList(listRules));
+			processingClass.createTriplesFromRules(listRules,
+													conditionsBlocks,
+													searchBlocks,
+													RuleConfig.getDefaultRuleConfigFromRuleList(listRules),
+													ontologiesList);
 		}catch(Exception e) {
 			e.printStackTrace();
 			fail();
@@ -1345,19 +1435,19 @@ public class TripleProcessingTest
 
 	private Rule createRuleWithColFlag() {
 		String id = "1";
-		RuleConfig ruleConfig = new RuleConfig("default", "http://example.org/onto/individual/");;
+		RuleConfig ruleConfig = new RuleConfig("default", "http://example.org/onto/individual/");
 		OWLClass subjectClass = ontologyHelper.getClass("Gene");
-		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
+		List<TSVColumn> subjectTSVColumns = new ArrayList<>();
 
 		TSVColumn subject = new TSVColumn();
 		subject.setTitle("");
-		List<Flag> subjectFlags = new ArrayList<Flag>();
+		List<Flag> subjectFlags = new ArrayList<>();
 		subjectFlags.add(new FlagCol("enrichedDataGOTerm.tsv", 5));
 		subject.setFlags(subjectFlags);
 
 		subjectTSVColumns.add(subject);
 
-		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<OWLProperty, TripleObject>();
+		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<>();
 		return new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects);
 	}
 
@@ -1371,12 +1461,17 @@ public class TripleProcessingTest
 		listRules.add(createRuleWithColFlag());
 
 		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
+		ontologiesList.add(ontologyPath);
 
-		TriplesProcessing processingClass = new TriplesProcessing( testFolderPath + "ontology.owl");
+		TriplesProcessing processingClass = new TriplesProcessing();;
 		processingClass.addDatasetToBeProcessed(testFolderPath + "enrichedDataGOTerm.tsv");
 		processingClass.addDatasetToBeProcessed(testFolderPath + "enrichedDataGOTerm2.tsv");
 		try{
-			processingClass.createTriplesFromRules(listRules, conditionsBlocks, searchBlocks, RuleConfig.getDefaultRuleConfigFromRuleList(listRules));
+			processingClass.createTriplesFromRules(listRules,
+												conditionsBlocks,
+												searchBlocks,
+												RuleConfig.getDefaultRuleConfigFromRuleList(listRules),
+												ontologiesList);
 		}catch(Exception e) {
 			e.printStackTrace();
 			fail();

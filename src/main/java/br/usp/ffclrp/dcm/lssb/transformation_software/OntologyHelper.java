@@ -1,11 +1,16 @@
 package br.usp.ffclrp.dcm.lssb.transformation_software;
 
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.EnumTypeOfProperty;
+import org.apache.commons.io.FileUtils;
 import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.io.FileDocumentSource;
+import org.semanticweb.owlapi.io.OWLOntologyDocumentSource;
+import org.semanticweb.owlapi.io.StreamDocumentSource;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.search.EntitySearcher;
 
 import javax.annotation.Nonnull;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,15 +46,15 @@ public class OntologyHelper {
 	}
 
 	private void loadOntology(String path) throws OWLOntologyCreationException, IOException {
-		try(InputStream is = new FileInputStream(path)) {
-			
-			;
-			OWLOntology ontology = m.loadOntologyFromOntologyDocument(is);
+		try {
+			File file = new File(path);
+
+			OWLOntology ontology = m.loadOntologyFromOntologyDocument(file);
 			
 			m.directImports(ontology).forEach(o -> ontologies.add(o));
 			ontologies.add(ontology);
 
-		} catch (OWLOntologyCreationException | IOException e) {
+		} catch (OWLOntologyCreationException e) {
 			throw e;
 		}
 	}

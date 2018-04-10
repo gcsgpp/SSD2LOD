@@ -65,6 +65,7 @@ public class Utils {
 	}
 
 	static public String 			readFile(String pathfile){
+		System.out.println("Path: " + pathfile);
 		String fileContent = "";
 		try(Stream<String> stream = Files.lines(Paths.get(pathfile))){
 

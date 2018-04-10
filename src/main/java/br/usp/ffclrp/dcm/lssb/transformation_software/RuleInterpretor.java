@@ -59,11 +59,28 @@ public class RuleInterpretor implements Runnable
 	}*/
 
 	public static void main (String[] args) {
+
+	    /*   Test
+	    args = new String[3];
+	    args[0] = "runQuery";
+	    args[1] = "35d26403-fcc0-460f-b138-e7b70c130460";
+	    args[2] = "d10ff0a0-fee9-4ebd-9eda-ad4dfc0169ba";
+	     End test*/
+
 		RuleInterpretor ruleInterpretor = new RuleInterpretor();
-		ruleInterpretor.transformationId = args[0];
-		//ruleInterpretor.transformationId = "850ed3f2-aa22-4e0c-9ab7-ed6af275caca";
-		System.out.println("=============== Transformation ID: " + ruleInterpretor.transformationId);
-		ruleInterpretor.run();
+
+		if(args[0].equals("runTransformation")) {
+			ruleInterpretor.transformationId = args[1];
+			//ruleInterpretor.transformationId = "850ed3f2-aa22-4e0c-9ab7-ed6af275caca";
+			System.out.println("=============== Transformation ID: " + ruleInterpretor.transformationId);
+			ruleInterpretor.run();
+		}else if(args[0].equals("runQuery")){
+
+			ruleInterpretor.runQuery(args[1], args[2]);
+
+		}
+
+		System.out.println("Finished!");
 	}
 
 	public void 			setTransformationParameters(String transformationId,
@@ -89,7 +106,7 @@ public class RuleInterpretor implements Runnable
 
 			this.listOfOntologies 			= ontologiesList;
 			this.dataPaths   				= fileSystemManager.getAllDatasets(transformationId);
-			this.rulesFilePath  			= fileSystemManager.getRulesFile(transformationId);
+			this.rulesFilePath  			= fileSystemManager.getRulesFilePath(transformationId);
 			this.relativePathOntologyFile	= ontologiesList.get(0);
 		} catch (Exception e) {
 			throw e;
@@ -128,20 +145,18 @@ public class RuleInterpretor implements Runnable
 
 
 			fileSystemManager.updateStatus(transformationId, EnumActivityState.SUCCEEDED);
-			fileSystemManager.log(transformationId, null);
+			fileSystemManager.logTransformationError(transformationId, null);
 
 		} catch (Exception e) {
 			try {
 				fileSystemManager.updateStatus(transformationId, EnumActivityState.FAILED);
-				fileSystemManager.log(transformationId, e);
+				fileSystemManager.logTransformationError(transformationId, e);
 
 			} catch (StatusFileException | ErrorFileException w) {
 				System.out.println(w.getMessage());
 			}
 			System.out.println(e.getMessage());
 		}
-
-		System.out.println("Finished!");
 	}
 
 	public void 			extractRulesFromFile(String rulesRelativePath, List<String> listOfOntologies) throws Exception{
@@ -594,5 +609,25 @@ public class RuleInterpretor implements Runnable
 		System.out.println("Wrote RDF in " + elapsedTime / 1000 + " secs");
 		elapsedTime = stopTime - triplesProcessing.startTime;
 		System.out.println("Processed in " + elapsedTime / 1000 + " secs");
+	}
+
+	public void runQuery(String transformationId, String queryId){
+		fileSystemManager = new TransformationManagerImpl();
+
+		System.out.println("Query ID: " + queryId);
+		SPARQLQueryProcessing queryProcessing = new SPARQLQueryProcessing();
+		try {
+			queryProcessing.QuerySelect(transformationId, queryId);
+			fileSystemManager.updateQueryStatus(transformationId, queryId, EnumActivityState.SUCCEEDED);
+		} catch (Exception e) {
+			try {
+				fileSystemManager.updateQueryStatus(transformationId, queryId, EnumActivityState.FAILED);
+				fileSystemManager.logQueryError(transformationId, queryId, e);
+
+			} catch (StatusFileException | ErrorFileException w) {
+				System.out.println(w.getMessage());
+			}
+			System.out.println(e.getMessage());
+		}
 	}
 }

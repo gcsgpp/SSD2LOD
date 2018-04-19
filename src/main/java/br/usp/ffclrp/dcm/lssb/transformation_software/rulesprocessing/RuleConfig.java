@@ -103,21 +103,21 @@ public class RuleConfig {
 			lineFromBlock 	= Utils.removeRegexFromContent(EnumRegexList.SELECTPREDICATE.get(), lineFromBlock);
 			String value 	= Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(lineFromBlock, EnumRegexList.SELECTALL.get());
 			
-			if(column.toLowerCase().equals("default baseiri")) {
+			if(column.toLowerCase().equals("default_baseiri")) {
 				try {
 					rule.setDefaultBaseIRI(value);
 				}catch(Exception e) {
 					e.printStackTrace();
 					throw new Exception("One of the values inside rule_config block was not possible to understand. Rule Config block ID: " + ruleConfigId + " . Value found: " + value);
 				}
-			}else if(column.toLowerCase().equals("has header")) {
+			}else if(column.toLowerCase().equals("has_header")) {
 				try {
 					rule.setHeader(Boolean.parseBoolean(value));
 				}catch(Exception e) {
 					e.printStackTrace();
 					throw new Exception("One of the values inside rule_config block was not possible to understand. Rule Config block ID: " + ruleConfigId + " . Value found: " + value);
 				}
-			}else if(ruleConfigId.toLowerCase().equals("default") && column.toLowerCase().equals("export syntax")) {
+			}else if(ruleConfigId.toLowerCase().equals("default") && column.toLowerCase().equals("export_syntax")) {
 				if(		Lang.RDFXML	.getName().toLowerCase().equals(value))
 					rule.setSyntax(Lang.RDFXML);
 				else if(Lang.N3		.getName().toLowerCase().equals(value))

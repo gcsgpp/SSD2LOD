@@ -1000,7 +1000,7 @@ public class AppTest
 
 	@Test
 	public void extractDefaultRuleConfig(){
-		String 	sentence = "rule_config[default : \"default BaseIRI\" = \"http://www.example.org/onto/individual/\"]";
+		String 	sentence = "rule_config[default : \"default_BaseIRI\" = \"http://www.example.org/onto/individual/\"]";
 
 		sentence = sentence.replace("\t", "").replaceAll("\n", "");
 
@@ -1020,7 +1020,7 @@ public class AppTest
 
 	@Test
 	public void extractRuleConfig(){
-		String 	sentence = "rule_config[10 : \"default BaseIRI\" = \"http://www.example.org/onto/individual/\"]";
+		String 	sentence = "rule_config[10 : \"default_BaseIRI\" = \"http://www.example.org/onto/individual/\"]";
 
 		sentence = sentence.replace("\t", "").replaceAll("\n", "");
 
@@ -1040,7 +1040,7 @@ public class AppTest
 
 	@Test
 	public void extractRuleConfigWithMultipleRules(){
-		String 	sentence = 	"rule_config[default : \"default BaseIRI\" = \"http://www.example.org/onto/individual/\", \"export syntax\" = \"rdf/xml\"]";
+		String 	sentence = 	"rule_config[default : \"default_BaseIRI\" = \"http://www.example.org/onto/individual/\", \"export syntax\" = \"rdf/xml\"]";
 				sentence += "simple_rule[1, \"microarray platform\" = \"A-BUGS-23_Comment[ArrayExpressAccession]_4\" :\n" +
 							"\t\"Title\" = \"A-BUGS-23_Array Design Name_1\" /DT(\"literal\"),\n" +
 							"\t\"depends on\" = 2\n ]" +

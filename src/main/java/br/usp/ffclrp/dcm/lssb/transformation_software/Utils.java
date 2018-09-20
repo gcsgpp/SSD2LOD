@@ -31,7 +31,7 @@ public class Utils {
 		Matcher matcher = Utils.matchRegexOnString(regex, content);
 
 		try{
-			data = matcher.group(); 
+			data = matcher.group().trim();
 			int firstQuotationMark = data.indexOf("\"");
 			data = data.substring(firstQuotationMark +1, data.indexOf("\"", firstQuotationMark +1));
 		}catch(IllegalStateException e){

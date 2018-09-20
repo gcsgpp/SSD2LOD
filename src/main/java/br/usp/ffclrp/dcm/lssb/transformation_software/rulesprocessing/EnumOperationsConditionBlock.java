@@ -4,7 +4,7 @@ public enum EnumOperationsConditionBlock {
 	EQUAL("=="), DIFFERENT("!="), LESSTHAN("<"), GREATERTHAN(">");
 	
 	private final String operation;
-	private EnumOperationsConditionBlock(String operation) {
+	EnumOperationsConditionBlock(String operation) {
 		this.operation = operation;
 	}
 	

@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <catalog prefer="public" xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
     <group id="Folder Repository, directory=, recursive=true, Auto-Update=true, version=2" prefer="public" xml:base="">
-        <uri id="Automatically generated entry, Timestamp=1509321855555" name="duplicate:http://purl.org/g/onto/" uri="ontology.owl"/>
-        <uri id="Automatically generated entry, Timestamp=1509321855555" name="duplicate:http://purl.org/g/onto/" uri="ontology2.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1518463813160" name="http://example.com/geo_experiments/" uri="geo_preprocessed/ontology.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1518463813160" name="duplicate:http://purl.org/g/onto/" uri="ontology.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1518463813160" name="duplicate:http://purl.org/g/onto/" uri="ontology2.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1518463813160" name="http://www.purl.org/g/" uri="normalizedFiles/ontology.owl"/>
     </group>
 </catalog>

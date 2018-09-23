@@ -24,7 +24,7 @@ public class AppTest
 
 	private void createConfigRuleDefault(RuleInterpretor ruleInterpretor) throws Exception {
 
-		String sentence = "rule_config[default : \"default BaseIRI\" = \"http://www.example.org/onto/individual/\"]";
+		String sentence = "config_element{ \"default_BaseIRI\" = \"http://www.example.org/onto/individual/\" }";
 
 		List<RuleConfig> listRuleConfig = RuleConfig.extractRuleConfigFromString(sentence);
 		for(RuleConfig rc : listRuleConfig){
@@ -34,8 +34,8 @@ public class AppTest
 
 	@Test
 	public void exctractConditionsFromString() throws Exception {
-		String content = "condition_block[1: \"Category\" != \"KEGG_PATHWAY\", \"PValue\" < \"0.01\" ]";
-		content += "condition_block[2: \"Category\" == \"KEGG_PATHWAY\",	\"PValue\" < \"0.03\" ]";
+		String content = "condition_element condition1{\"Category\" != \"KEGG_PATHWAY\", \"PValue\" < \"0.01\" }";
+		content += "condition_element condition2{ \"Category\" == \"KEGG_PATHWAY\",	\"PValue\" < \"0.03\" }";
 
 		List<ConditionBlock> conditionsExtracted = null;
 		try {
@@ -49,7 +49,7 @@ public class AppTest
 
 		for(ConditionBlock conditionBlock : conditionsExtracted){
 			for(Condition condition : conditionBlock.getConditions())
-				if(conditionBlock.getId() == 1){
+				if(conditionBlock.getId().equals("condition1")){
 
 					assertEquals(2, conditionBlock.getConditions().size());
 
@@ -64,7 +64,7 @@ public class AppTest
 						fail();
 					}
 
-				}else if(conditionBlock.getId() == 2){
+				}else if(conditionBlock.getId().equals("condition2")){
 
 					assertEquals(2, conditionBlock.getConditions().size());
 
@@ -87,10 +87,10 @@ public class AppTest
 	@Test
 	public void creatingRuleFromStringWithBaseIRISeparatorConditionBlock() throws Exception {
 
-		String 	ruleString = "matrix_rule[1, \"Term\" = \"Term\" /SP(\"~\", 1) /BASEIRI(\"http://amigo1.geneontology.org/cgi-bin/amigo/term_details?term=\", \"go\") /CB(1) :" +
-				" \"has_pvalue\" = \"PValue\", " +
-				" \"name\" = \"Term\" /SP(\"~\", 2), " +
-				" \"has participant\" = 3	] ";
+		String 	ruleString = "row_based_rule rule1[ \"Term\" /SP(\"~\", 1) /BASEIRI(\"http://amigo1.geneontology.org/cgi-bin/amigo/term_details?term=\", \"go\") /CE(condition1) is_equivalent_to \"Term\"]{" +
+				" links_to \"PValue\" using \"has_pvalue\", " +
+				" links_to \"Term\" /SP(\"~\", 2) using \"name\", " +
+				" links_to rule3 using \"has participant\"	} ";
 
 		ruleString = ruleString.replace("\t", "").replaceAll("\n", "");
 
@@ -107,7 +107,7 @@ public class AppTest
 			fail();
 		}
 
-		assertEquals("1", rule1Extracted.getId());
+		assertEquals("rule1", rule1Extracted.getId());
 		assertEquals("http://purl.obolibrary.org/obo/NCIT_P382", rule1Extracted.getSubject().getIRI().toString());
 		for(TSVColumn column : rule1Extracted.getSubjectTSVColumns()){
 			if(column.getTitle().equals("Term")){
@@ -127,7 +127,7 @@ public class AppTest
 						assertEquals("go", baseiri.getNamespace());
 
 					}else if(flag instanceof FlagConditionBlock){
-						assertEquals(1, ((FlagConditionBlock) flag).getId().intValue());
+						assertEquals("condition1", ((FlagConditionBlock) flag).getId());
 
 					}else{
 						fail();
@@ -173,7 +173,7 @@ public class AppTest
 				assertEquals(1, object.getObject().size());
 
 				for(ObjectAsRule objectAsRule : object.getObject()){
-					assertEquals(3, objectAsRule.getRuleNumber().intValue());
+					assertEquals("rule3", objectAsRule.getRuleId());
 					assertEquals(0, objectAsRule.getFlags().size());
 
 				}
@@ -186,11 +186,11 @@ public class AppTest
 	@Test
 	public void creatingRuleFromStringUsingColonAsSeparator() throws Exception {
 
-		String 	ruleString = " matrix_rule[2, \"Term\" = \"Term\" /SP(\":\", 1) /BASEIRI(\"http://www.kegg.jp/entry/\", \"kegg\") /CB(2) : " +
-				" \"has_pvalue\" = \"PValue\", " +
-				" \"name\" = \"Term\" /SP(\":\", 2), " +
-				" \"has participant\" = 3 " +
-				"] ";
+		String 	ruleString = " row_based_rule rule2 [\"Term\" /SP(\":\", 1) /BASEIRI(\"http://www.kegg.jp/entry/\", \"kegg\") /CE(condition2) is_equivalent_to \"Term\"]{ " +
+				" links_to \"PValue\" using \"has_pvalue\", " +
+				" links_to \"Term\" /SP(\":\", 2) using \"name\", " +
+				" links_to rule3 using \"has participant\"" +
+				"} ";
 
 
 		ruleString = ruleString.replace("\t", "").replaceAll("\n", "");
@@ -208,7 +208,7 @@ public class AppTest
 			fail();
 		}
 
-		assertEquals("2", rule2Extracted.getId());
+		assertEquals("rule2", rule2Extracted.getId());
 		assertEquals("http://purl.obolibrary.org/obo/NCIT_P382", rule2Extracted.getSubject().getIRI().toString());
 		for(TSVColumn column : rule2Extracted.getSubjectTSVColumns()){
 			if(column.getTitle().equals("Term")){
@@ -226,7 +226,7 @@ public class AppTest
 						assertEquals("http://www.kegg.jp/entry/", baseiri.getIRI());
 						assertEquals("kegg", baseiri.getNamespace());
 					}else if(flag instanceof FlagConditionBlock){
-						assertEquals(2, ((FlagConditionBlock) flag).getId().intValue());
+						assertEquals("condition2", ((FlagConditionBlock) flag).getId());
 
 					}else{
 						fail();
@@ -274,7 +274,7 @@ public class AppTest
 				assertEquals(1, object.getObject().size());
 
 				for(ObjectAsRule objectAsRule : object.getObject()){
-					assertEquals(3, objectAsRule.getRuleNumber().intValue());
+					assertEquals("rule3", objectAsRule.getRuleId());
 					assertEquals(0, objectAsRule.getFlags().size());
 				}
 
@@ -288,11 +288,11 @@ public class AppTest
 	@Test
 	public void creatingRuleFromStringUsingCommaAsSeparator() throws Exception {
 
-		String 	ruleString = " matrix_rule[2, \"Term\" = \"Term\" /SP(\",\", 1) /BASEIRI(\"http://www.kegg.jp/entry/\", \"kegg\") /CB(2) : " +
-				" \"has_pvalue\" = \"PValue\", " +
-				" \"name\" = \"Term\" /SP(\",\", 2), " +
-				" \"has participant\" = 3 " +
-				"] ";
+		String 	ruleString = " row_based_rule rule2 [\"Term\" /SP(\",\", 1) /BASEIRI(\"http://www.kegg.jp/entry/\", \"kegg\") /CE(condition2) is_equivalent_to \"Term\" ]{ " +
+				" links_to \"PValue\" using \"has_pvalue\"," +
+				" links_to \"Term\" /SP(\",\", 2) using \"name\", " +
+				" links_to rule3 using \"has participant\"" +
+				"} ";
 
 
 		ruleString = ruleString.replace("\t", "").replaceAll("\n", "");
@@ -310,7 +310,7 @@ public class AppTest
 			fail();
 		}
 
-		assertEquals("2", rule2Extracted.getId());
+		assertEquals("rule2", rule2Extracted.getId());
 		assertEquals("http://purl.obolibrary.org/obo/NCIT_P382", rule2Extracted.getSubject().getIRI().toString());
 		for(TSVColumn column : rule2Extracted.getSubjectTSVColumns()){
 			if(column.getTitle().equals("Term")){
@@ -328,7 +328,7 @@ public class AppTest
 						assertEquals("http://www.kegg.jp/entry/", baseiri.getIRI());
 						assertEquals("kegg", baseiri.getNamespace());
 					}else if(flag instanceof FlagConditionBlock){
-						assertEquals(2, ((FlagConditionBlock) flag).getId().intValue());
+						assertEquals("condition2", ((FlagConditionBlock) flag).getId());
 
 					}else{
 						fail();
@@ -379,7 +379,7 @@ public class AppTest
 				assertEquals(1, object.getObject().size());
 
 				for(ObjectAsRule objectAsRule : object.getObject()){
-					assertEquals(3, objectAsRule.getRuleNumber().intValue());
+					assertEquals("rule3", objectAsRule.getRuleId());
 					assertEquals(0, objectAsRule.getFlags().size());
 				}
 
@@ -393,7 +393,7 @@ public class AppTest
 	@Test
 	public void creatingRuleFromStringWithNoPredicatesAndObjects() throws Exception {
 
-		String 	ruleString = " matrix_rule[3, \"Gene\" = \"Genes\" /SP(\", \") /BASEIRI(\"http://www.genecards.org/cgi-bin/carddisp.pl?gene=\", \"genecard\") ] ";
+		String 	ruleString = " row_based_rule rule3 [\"Genes\" /SP(\", \") /BASEIRI(\"http://www.genecards.org/cgi-bin/carddisp.pl?gene=\", \"genecard\") is_equivalent_to \"Gene\" ]{}";
 
 		ruleString = ruleString.replace("\t", "").replaceAll("\n", "");
 
@@ -410,7 +410,7 @@ public class AppTest
 			fail();
 		}
 
-		assertEquals("3", rule3Extracted.getId());
+		assertEquals("rule3", rule3Extracted.getId());
 		assertEquals("http://purl.org/g/onto/Gene", rule3Extracted.getSubject().getIRI().toString());
 		for(TSVColumn column : rule3Extracted.getSubjectTSVColumns()){
 			if(column.getTitle().equals("Genes")){
@@ -442,12 +442,12 @@ public class AppTest
 
 	@Test
 	public void creatingRuleFromStringWithTwoEqualPredicatesPointingToDifferentRules() throws Exception {
-		String 	ruleString = " matrix_rule[2, \"Term\" = \"Term\" /SP(\":\", 1) /BASEIRI(\"http://www.kegg.jp/entry/\", \"kegg\") /CB(2) : " +
-				" \"has_pvalue\" = \"PValue\", " +
-				" \"name\" = \"Term\" /SP(\":\", 2), " +
-				" \"has participant\" = 3, " +
-				" \"has participant\" = 4, " +
-				"] ";
+		String 	ruleString = " row_based_rule rule2 [\"Term\" /SP(\":\", 1) /BASEIRI(\"http://www.kegg.jp/entry/\", \"kegg\") /CE(condition2) is_equivalent_to \"Term\"]{" +
+				" links_to \"PValue\" using \"has_pvalue\", " +
+				" links_to \"Term\" /SP(\":\", 2) using \"name\", " +
+				" links_to rule3 using \"has participant\", " +
+				" links_to rule4 using \"has participant\" " +
+				"} ";
 
 
 		ruleString = ruleString.replace("\t", "").replaceAll("\n", "");
@@ -465,7 +465,7 @@ public class AppTest
 			fail();
 		}
 
-		assertEquals("2", rule2Extracted.getId());
+		assertEquals("rule2", rule2Extracted.getId());
 		assertEquals("http://purl.obolibrary.org/obo/NCIT_P382", rule2Extracted.getSubject().getIRI().toString());
 		for(TSVColumn column : rule2Extracted.getSubjectTSVColumns()){
 			if(column.getTitle().equals("Term")){
@@ -483,7 +483,7 @@ public class AppTest
 						assertEquals("http://www.kegg.jp/entry/", baseiri.getIRI());
 						assertEquals("kegg", baseiri.getNamespace());
 					}else if(flag instanceof FlagConditionBlock){
-						assertEquals(2, ((FlagConditionBlock) flag).getId().intValue());
+						assertEquals("condition2", ((FlagConditionBlock) flag).getId());
 
 					}else{
 						fail();
@@ -532,8 +532,8 @@ public class AppTest
 				assertEquals(2, object.getObject().size());
 
 				for(ObjectAsRule objectAsRule : object.getObject()){
-					assert((objectAsRule.getRuleNumber().intValue() == 3) ||
-							(objectAsRule.getRuleNumber().intValue() == 4));
+					assert((objectAsRule.getRuleId().equals("rule3")) ||
+							(objectAsRule.getRuleId().equals("rule4")));
 					assertEquals(0, objectAsRule.getFlags().size());
 
 				}
@@ -545,11 +545,11 @@ public class AppTest
 
 	@Test
 	public void creatingRuleFromStringWithTwoEqualPredicatesPointingToDifferentTSVColumns() throws Exception {
-		String 	ruleString = "matrix_rule[1, \"Term\" = \"Term\" /SP(\"~\", 1) /BASEIRI(\"http://amigo1.geneontology.org/cgi-bin/amigo/term_details?term=\", \"go\") /CB(1) :" +
-				" \"has_pvalue\" = \"PValue\", " +
-				" \"name\" = \"Term\" /SP(\"~\", 2), " +
-				" \"has_pvalue\" = \"List Total\", " +
-				" \"has participant\" = 3	] ";
+		String 	ruleString = "row_based_rule rule1 [\"Term\" /SP(\"~\", 1) /BASEIRI(\"http://amigo1.geneontology.org/cgi-bin/amigo/term_details?term=\", \"go\") /CE(condition1) is_equivalent_to \"Term\" ]{" +
+				" links_to \"PValue\" using \"has_pvalue\", " +
+				" links_to \"Term\" /SP(\"~\", 2) using \"name\", " +
+				" links_to \"List Total\" using \"has_pvalue\", " +
+				" links_to rule3 using \"has participant\" } ";
 
 
 		ruleString = ruleString.replace("\t", "").replaceAll("\n", "");
@@ -567,7 +567,7 @@ public class AppTest
 			fail();
 		}
 
-		assertEquals("1", ruleExtracted.getId());
+		assertEquals("rule1", ruleExtracted.getId());
 		assertEquals("http://purl.obolibrary.org/obo/NCIT_P382", ruleExtracted.getSubject().getIRI().toString());
 		for(TSVColumn column : ruleExtracted.getSubjectTSVColumns()){
 			if(column.getTitle().equals("Term")){
@@ -585,7 +585,7 @@ public class AppTest
 						assertEquals("http://amigo1.geneontology.org/cgi-bin/amigo/term_details?term=", baseiri.getIRI());
 						assertEquals("go", baseiri.getNamespace());
 					}else if(flag instanceof FlagConditionBlock){
-						assertEquals(1, ((FlagConditionBlock) flag).getId().intValue());
+						assertEquals("condition1", ((FlagConditionBlock) flag).getId());
 
 					}else{
 						fail();
@@ -639,7 +639,7 @@ public class AppTest
 				assertEquals(1, object.getObject().size());
 
 				for(ObjectAsRule objectAsRule : object.getObject()){
-					assert(objectAsRule.getRuleNumber().intValue() == 3);
+					assert(objectAsRule.getRuleId().equals("rule3"));
 					assertEquals(0, objectAsRule.getFlags().size());
 				}
 
@@ -650,7 +650,7 @@ public class AppTest
 
 	@Test
 	public void extractFixedContentFlag() {	
-		String sentence = "\\\"name\\\" = \\\"Term\\\" /FX(\"fixed content test\"), ";
+		String sentence = "\\\"Term\\\" /DefaultValue(\"fixed content test\") using \\\"name\\\", ";
 
 		RuleInterpretor ruleInterpretor = new RuleInterpretor();
 		List<Flag> flagsExtracted = null;
@@ -674,7 +674,7 @@ public class AppTest
 
 	@Test
 	public void extractNotMetadataFlag() {	
-		String sentence = "\\\"name\\\" = \\\"Term\\\" /NM, ";
+		String sentence = "\\\"Term\\\" /NM using \\\"name\\\", ";
 
 		RuleInterpretor ruleInterpretor = new RuleInterpretor();
 		List<Flag> flagsExtracted = null;
@@ -698,7 +698,7 @@ public class AppTest
 	
 	@Test
 	public void extractDatatypeContentFlag() {	
-		String sentence = "\\\"name\\\" = \\\"Term\\\" /DT(\"string\"), ";
+		String sentence = "\\\"Term\\\" /DT(\"string\") using \\\"name\\\", ";
 
 		RuleInterpretor ruleInterpretor = new RuleInterpretor();
 		List<Flag> flagsExtracted = null;
@@ -722,19 +722,19 @@ public class AppTest
 
 	@Test
 	public void operationNotIdentifiedAtConditionBlock() throws Exception {
-		String content = "condition_block[1: \"Category\" = \"KEGG_PATHWAY\", \"PValue\" <! \"0.01\" ]";
+		String content = "condition_element condition1 {\"Category\" = \"KEGG_PATHWAY\", \"PValue\" <! \"0.01\" }";
 		thrown.expect(ConditionBlockException.class);
-		thrown.expectMessage("No conditions found in the condition block 1");
+		thrown.expectMessage("No conditions found in the condition block condition1");
 		@SuppressWarnings("unused")
 		List<ConditionBlock> conditionsExtracted = ConditionBlock.extractConditionsBlocksFromString(content);
 	}
 
 	@Test
 	public void creatingRuleFromMultipleOntologies() throws Exception {
-		String 	ruleString = "matrix_rule[1, \"Term2\" = \"Term\" /SP(\"~\", 1) /BASEIRI(\"http://amigo1.geneontology.org/cgi-bin/amigo/term_details?term=\", \"go\") /CB(1) :" +
-				" \"has_pvalue\" = \"PValue\", " +
-				" \"name2\" = \"Term\" /SP(\"~\", 2), " +
-				" \"has participant\" = 3	] ";
+		String 	ruleString = "row_based_rule rule1 [\"Term\" /SP(\"~\", 1) /BASEIRI(\"http://amigo1.geneontology.org/cgi-bin/amigo/term_details?term=\", \"go\") /CE(rule1) is_equivalent_to \"Term2\"]{" +
+				" links_to \"PValue\" using \"has_pvalue\", " +
+				" links_to \"Term\" /SP(\"~\", 2) using \"name2\", " +
+				" links_to rule3 using \"has participant\" }";
 
 		ruleString = ruleString.replace("\t", "").replaceAll("\n", "");
 
@@ -754,7 +754,7 @@ public class AppTest
 			fail();
 		}
 
-		assertEquals("1", rule1Extracted.getId());
+		assertEquals("rule1", rule1Extracted.getId());
 		assertEquals("http://purl.obolibrary.org/obo/NCIT_P382_onto2", rule1Extracted.getSubject().getIRI().toString());
 		for(TSVColumn column : rule1Extracted.getSubjectTSVColumns()){
 			if(column.getTitle().equals("Term")){
@@ -774,7 +774,7 @@ public class AppTest
 						assertEquals("go", baseiri.getNamespace());
 
 					}else if(flag instanceof FlagConditionBlock){
-						assertEquals(1, ((FlagConditionBlock) flag).getId().intValue());
+						assertEquals("rule1", ((FlagConditionBlock) flag).getId());
 
 					}else{
 						fail();
@@ -820,7 +820,7 @@ public class AppTest
 				assertEquals(1, object.getObject().size());
 
 				for(ObjectAsRule objectAsRule : object.getObject()){
-					assertEquals(3, objectAsRule.getRuleNumber().intValue());
+					assertEquals("rule3", objectAsRule.getRuleId());
 					assertEquals(0, objectAsRule.getFlags().size());
 				}
 
@@ -831,7 +831,7 @@ public class AppTest
 
 	@Test
 	public void extractMultipleTSVColumnsFromSentence() {
-		String sentence = " \"column1\" ; \"column2\" /R ; \"column3\" /BASEIRI(\"http://teste.com\", \"test\") ";
+		String sentence = " \"column1\" ; \"column2\" ; \"column3\" /BASEIRI(\"http://teste.com\", \"test\") ";
 
 		RuleInterpretor ruleInterpretor = new RuleInterpretor();
 		List<TSVColumn> tsvColumns = null;
@@ -863,7 +863,7 @@ public class AppTest
 
 	@Test
 	public void separatorFlagColumnsAsRange() {
-		String sentence = "\\\"name\\\" = \\\"Term\\\" /SP(\"teste\", 1:3)";
+		String sentence = "\\\"Term\\\" /SP(\"teste\", 1:3) using \\\"name\\\"";
 
 		RuleInterpretor ruleInterpretor = new RuleInterpretor();
 		List<Flag> flagsExtracted = null;
@@ -890,8 +890,8 @@ public class AppTest
 
 	@Test
 	public void classNotExist() throws Exception {
-		String 	ruleString = "matrix_rule[1, \"Pudim\" = \"Term\" /SP(\"~\", 1) /BASEIRI(\"http://amigo1.geneontology.org/cgi-bin/amigo/term_details?term=\", \"go\") /CB(1) :" +
-				" \"has_pvalue\" = \"PValue\" ]";
+		String 	ruleString = "row_based_rule rule1 [\"Term\" /SP(\"~\", 1) /BASEIRI(\"http://amigo1.geneontology.org/cgi-bin/amigo/term_details?term=\", \"go\") /CE(condition1) is_equivalent_to \"Pudim\" ]{" +
+				"links_to \"PValue\" using \"has_pvalue\" }";
 
 		ruleString = ruleString.replace("\t", "").replaceAll("\n", "");
 
@@ -911,8 +911,8 @@ public class AppTest
 
 	@Test
 	public void propertyNotExist() throws Exception {
-		String 	ruleString = "matrix_rule[1, \"Term\" = \"Term\" /SP(\"~\", 1) /BASEIRI(\"http://amigo1.geneontology.org/cgi-bin/amigo/term_details?term=\", \"go\") /CB(1) :" +
-				" \"any property\" = \"PValue\" ]";
+		String 	ruleString = "row_based_rule rule1 [\"Term\" /SP(\"~\", 1) /BASEIRI(\"http://amigo1.geneontology.org/cgi-bin/amigo/term_details?term=\", \"go\") /CE(condition1) is_equivalent_to \"Term\"]{" +
+				" links_to \"PValue\" using \"any property\"}";
 
 		ruleString = ruleString.replace("\t", "").replaceAll("\n", "");
 
@@ -921,7 +921,7 @@ public class AppTest
 		ruleInterpretor.ontologyHelper.loadingOntologyFromFile("testFiles/unitTestsFiles/ontology.owl");
 
 		thrown.expect(PropertyNotExistException.class);
-		String message = " \"any property\" = \"PValue\" ]";
+		String message = " links_to \"PValue\" using \"any property\"}";
 		thrown.expectMessage("Property does not exist in ontology. Instruction: " + message);
 		try {
 			createConfigRuleDefault(ruleInterpretor);
@@ -933,8 +933,8 @@ public class AppTest
 
 	@Test
 	public void extractRangeFromSeparatorFlagFailure() throws Exception {
-		String 	ruleString = "matrix_rule[1, \"Term\" = \"Term\" /SP(\"~\", 1:p) /BASEIRI(\"http://amigo1.geneontology.org/cgi-bin/amigo/term_details?term=\", \"go\") /CB(1) :" +
-				" \"has_pvalue\" = \"PValue\" ]";
+		String 	ruleString = "row_based_rule rule1 [\"Term\" /SP(\"~\", 1:p) /BASEIRI(\"http://amigo1.geneontology.org/cgi-bin/amigo/term_details?term=\", \"go\") /CE(condition1) is_equivalent_to \"Term\"]{" +
+				" links_to \"PValue\" using \"has_pvalue\" }";
 
 		ruleString = ruleString.replace("\t", "").replaceAll("\n", "");
 
@@ -955,7 +955,7 @@ public class AppTest
 
 	@Test
 	public void baseIRIWithIDTermInURL(){
-		String 	sentence = "\"Term\" = \"Term\" /BASEIRI(\"http://amigo1.geneontology.org/cgi-bin/ID(amigo/term_details?term=\", \"go\")";
+		String 	sentence = "\"Term\" /BASEIRI(\"http://amigo1.geneontology.org/cgi-bin/ID(amigo/term_details?term=\", \"go\") using \"Term\"";
 
 		sentence = sentence.replace("\t", "").replaceAll("\n", "");
 
@@ -982,7 +982,7 @@ public class AppTest
 
 	@Test
 	public void datatypeNotFound() throws Exception {
-		String 	sentence = "\"Term\" = \"Term\" /DT(\"strng\")";
+		String 	sentence = "\"Term\" /DT(\"strng\") using \"Term\"";
 
 		sentence = sentence.replace("\t", "").replaceAll("\n", "");
 
@@ -999,8 +999,8 @@ public class AppTest
 	}
 
 	@Test
-	public void extractDefaultRuleConfig(){
-		String 	sentence = "rule_config[default : \"default_BaseIRI\" = \"http://www.example.org/onto/individual/\"]";
+	public void extractRuleConfig(){
+		String 	sentence = "config_element{ \"default_BaseIRI\" = \"http://www.example.org/onto/individual/\" }";
 
 		sentence = sentence.replace("\t", "").replaceAll("\n", "");
 
@@ -1019,32 +1019,12 @@ public class AppTest
 	}
 
 	@Test
-	public void extractRuleConfig(){
-		String 	sentence = "rule_config[10 : \"default_BaseIRI\" = \"http://www.example.org/onto/individual/\"]";
-
-		sentence = sentence.replace("\t", "").replaceAll("\n", "");
-
-		List<RuleConfig> rulesConfigExtracted = null;
-		try {
-			rulesConfigExtracted = RuleConfig.extractRuleConfigFromString(sentence);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		assertEquals(1, rulesConfigExtracted.size());
-		RuleConfig ruleConfig = rulesConfigExtracted.get(0);
-		assertEquals("10", ruleConfig.getId());
-		assertEquals("http://www.example.org/onto/individual/", ruleConfig.getDefaultBaseIRI());
-
-	}
-
-	@Test
 	public void extractRuleConfigWithMultipleRules(){
-		String 	sentence = 	"rule_config[default : \"default_BaseIRI\" = \"http://www.example.org/onto/individual/\", \"export syntax\" = \"rdf/xml\"]";
-				sentence += "simple_rule[1, \"microarray platform\" = \"A-BUGS-23_Comment[ArrayExpressAccession]_4\" :\n" +
-							"\t\"Title\" = \"A-BUGS-23_Array Design Name_1\" /DT(\"literal\"),\n" +
-							"\t\"depends on\" = 2\n ]" +
-							"simple_rule[2, \"organism\" = \"A-BUGS-23_Comment[Organism]_6\" ]";
+		String 	sentence = 	"config_element{\"default_BaseIRI\" = \"http://www.example.org/onto/individual/\", \"export syntax\" = \"rdf/xml\"}";
+				sentence += "column_based_rule rule1 [\"A-BUGS-23_Comment[ArrayExpressAccession]_4\" is_equivalent_to \"microarray platform\" ]{ " +
+							" links_to \"A-BUGS-23_Array Design Name_1\" /DT(\"literal\") using \t\"Title\",\n" +
+							" links_to rule2 using \t\"depends on\"\n }" +
+							"column_based_rule rule2[ \"A-BUGS-23_Comment[Organism]_6\" is_equivalent_to \"organism\"]{}";
 
 		sentence = sentence.replace("\t", "").replaceAll("\n", "");
 
@@ -1066,11 +1046,12 @@ public class AppTest
 
 	@Test
 	public void extractSearchBlockWithMultipleRules(){
-		String 	sentence = 	"search_block[1 : \"endpoint\" = \"http://bio2rdf.org/sparql\", \"predicate\" = \"http://bio2rdf.org/taxonomy_vocabulary:scientific-name\"]";
-		sentence += "simple_rule[1, \"microarray platform\" = \"A-BUGS-23_Comment[ArrayExpressAccession]_4\" :\n" +
+		//String 	sentence = 	"search_block[1 : \"endpoint\" = \"http://bio2rdf.org/sparql\", \"predicate\" = \"http://bio2rdf.org/taxonomy_vocabulary:scientific-name\"]";
+		String 	sentence = 	"search_element search1{ \"endpoint\" = \"http://bio2rdf.org/sparql\", \"predicate\" = \"http://bio2rdf.org/taxonomy_vocabulary:scientific-name\"}";
+		sentence += "column_based_rule rule1 [\"microarray platform\" = \"A-BUGS-23_Comment[ArrayExpressAccession]_4\"]{\n" +
 				"\t\"Title\" = \"A-BUGS-23_Array Design Name_1\" /DT(\"literal\"),\n" +
-				"\t\"depends on\" = 2\n ]" +
-				"simple_rule[2, \"organism\" = \"A-BUGS-23_Comment[Organism]_6\" ]";
+				"\t\"depends on\" = 2\n }" +
+				"column_based_rule rule2 [\"organism\" = \"A-BUGS-23_Comment[Organism]_6\"]{}";
 
 		sentence = sentence.replace("\t", "").replaceAll("\n", "");
 
@@ -1084,7 +1065,7 @@ public class AppTest
 
 		assertEquals(1, listSearchBlocks.size());
 		SearchBlock searchBlock = listSearchBlocks.get(0);
-		assertEquals(1, searchBlock.getId());
+		assertEquals("search1", searchBlock.getId());
 		assertEquals("http://bio2rdf.org/sparql", searchBlock.getEndpointIRI());
 		assertEquals("http://bio2rdf.org/taxonomy_vocabulary:scientific-name", searchBlock.getPredicateToSearch());
 
@@ -1092,10 +1073,10 @@ public class AppTest
 
 	@Test
 	public void noRuleConfigInFile() throws Exception {
-		String sentence = 	"simple_rule[1, \"microarray platform\" = \"A-BUGS-23_Comment[ArrayExpressAccession]_4\" :\n" +
-							"\t\"Title\" = \"A-BUGS-23_Array Design Name_1\" /DT(\"literal\"),\n" +
-							"\t\"depends on\" = 2\n ]" +
-							"simple_rule[2, \"organism\" = \"A-BUGS-23_Comment[Organism]_6\" ]";
+		String sentence = 	"column_based_rule rule1[\"A-BUGS-23_Comment[ArrayExpressAccession]_4\" is_equivalent_to \"microarray platform\" ]{ \n" +
+							"\t links_to \"A-BUGS-23_Array Design Name_1\" /DT(\"literal\") using \"Title\",\n" +
+							"\t links_to rule2 using \"depends on\"\n ]" +
+							"column_based_rule rule2[\"A-BUGS-23_Comment[Organism]_6\" is_equivalent_to \"organism\" ]{}";
 
 		sentence = sentence.replace("\t", "").replaceAll("\n", "");
 
@@ -1112,7 +1093,7 @@ public class AppTest
 
 	@Test
 	public void noRulesInFile() throws Exception {
-		String sentence = 	"";
+		String sentence = 	"123123412314adadasd asd asda sdas  we1 wdas dasd1 e12esd asd";
 
 		sentence = sentence.replace("\t", "").replaceAll("\n", "");
 
@@ -1129,7 +1110,7 @@ public class AppTest
 
 	@Test
 	public void extractColFlag(){
-		String 	sentence = 	"simple_rule[1, \"investigation\" = \"\" /COL(\"E-MTAB-5814.idf.tsv\", 56)";
+		String 	sentence = 	"column_based_rule rule1[\"\" /COL(\"E-MTAB-5814.idf.tsv\", 56) is_equivalent_to \"investigation\"]{}";
 
 		sentence = sentence.replace("\t", "").replaceAll("\n", "");
 

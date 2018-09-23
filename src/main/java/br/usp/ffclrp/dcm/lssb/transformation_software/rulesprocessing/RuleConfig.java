@@ -73,11 +73,10 @@ public class RuleConfig {
 	Boolean getHeader(){ return this.header;	}
 
 	private static RuleConfig createRuleConfigFromString(String rcAsText) throws Exception {
-		Matcher matcher 				=	Utils.matchRegexOnString(EnumRegexList.SELECTSUBJECTLINE.get(), rcAsText);
-		String subjectLine 				=	Utils.splitByIndex(rcAsText, matcher.start())[0];
-		String predicatesLinesOneBlock 	= 	Utils.splitByIndex(rcAsText, matcher.start())[1];
+		Matcher matcher 				=	Utils.matchRegexOnString(EnumRegexList.SELECTBLOCKBODY.get(), rcAsText);
+		String predicatesLinesOneBlock 	= 	matcher.group();
 
-		String ruleConfigId 			= 	extractRuleConfigIDFromSentence(subjectLine);
+		String ruleConfigId 			= 	"default";
 
 
 		matcher = Utils.matchRegexOnString(EnumRegexList.SELECTPREDICATESDIVISIONS.get(), predicatesLinesOneBlock);
@@ -99,8 +98,8 @@ public class RuleConfig {
 			String lineFromBlock = predicatesLinesOneBlock.substring(initialOfEachMatch.get(i) + 1, // +1 exists to not include the first character, a comma
 					finalChar);
 
-			String column 	= Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(lineFromBlock, EnumRegexList.SELECTPREDICATE.get());
-			lineFromBlock 	= Utils.removeRegexFromContent(EnumRegexList.SELECTPREDICATE.get(), lineFromBlock);
+			String column 	= Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(lineFromBlock, EnumRegexList.SELECTCONFIGPKEYS.get());
+			lineFromBlock 	= Utils.removeRegexFromContent(EnumRegexList.SELECTCONFIGPKEYS.get(), lineFromBlock);
 			String value 	= Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(lineFromBlock, EnumRegexList.SELECTALL.get());
 			
 			if(column.toLowerCase().equals("default_baseiri")) {
@@ -110,7 +109,7 @@ public class RuleConfig {
 					e.printStackTrace();
 					throw new Exception("One of the values inside rule_config block was not possible to understand. Rule Config block ID: " + ruleConfigId + " . Value found: " + value);
 				}
-			}else if(column.toLowerCase().equals("has_header")) {
+			}else if(column.toLowerCase().equals("has_non_processable_header")) {
 				try {
 					rule.setHeader(Boolean.parseBoolean(value));
 				}catch(Exception e) {

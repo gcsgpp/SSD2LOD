@@ -1,13 +1,13 @@
 package br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing;
 
 public class FlagSearchBlock extends Flag {
-    private Integer id;
+    private String id;
 
-    public FlagSearchBlock(Integer id) {
+    public FlagSearchBlock(String id) {
         this.id = id;
     }
 
-    public Integer getId(){
+    public String getId(){
         return this.id;
     }
 }

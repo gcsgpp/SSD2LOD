@@ -17,18 +17,18 @@ import java.util.regex.Matcher;
 
 public class SearchBlock {
 
-    private int id;
+    private String id;
     private String endpointIRI;
     private String predicateToSearch;
     private Map<String, String> externalNodesAlredyFound = new HashMap<>();
 
-    public SearchBlock(int id, String endpointIRI, String predicateToSearch){
+    public SearchBlock(String id, String endpointIRI, String predicateToSearch){
         this.id                 = id;
         this.endpointIRI        = endpointIRI;
         this.predicateToSearch  = predicateToSearch;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
@@ -78,26 +78,21 @@ public class SearchBlock {
         List<String> identifiedBlocks = RuleInterpretor.identifyBlocksFromString(fileContent);
 
         for(String block : identifiedBlocks){
-            if(block.startsWith("search_block"))
+            if(block.startsWith("search_element"))
                 searchBlocks.add(block);
         }
         return searchBlocks;
     }
 
     static private SearchBlock createSearchBlockFromString(String sbAsText) throws Exception {
-        Matcher matcher 				=	Utils.matchRegexOnString(EnumRegexList.SELECTSUBJECTLINE.get(), sbAsText);
-        String subjectLine 				=	Utils.splitByIndex(sbAsText, matcher.start())[0];
-        String predicatesLinesOneBlock 	= 	Utils.splitByIndex(sbAsText, matcher.start())[1];
+        Matcher matcher 				=	Utils.matchRegexOnString(EnumRegexList.SELECTSEARCHID.get(), sbAsText);
 
-        Integer searchBlockId;
-        try{
-            searchBlockId =	Integer.parseInt(extractSearchBlockIDFromSentence(subjectLine));
-        }catch (NumberFormatException e ){
-            throw new SearchBlockException("One of the identifiers of Search Blocks is not a number. Check your transformation rule file.");
-        }
+        String searchBlockId = matcher.group(2);
+                matcher = Utils.matchRegexOnString(EnumRegexList.SELECTSEARCHBODY.get(), sbAsText);;
+        String predicatesLinesOneBlock = matcher.group(2);
 
 
-        matcher = Utils.matchRegexOnString(EnumRegexList.SELECTPREDICATESDIVISIONS.get(), predicatesLinesOneBlock);
+        matcher = Utils.matchRegexOnString(EnumRegexList.SELECTSEARCHPREDICATESDIVISIONS.get(), predicatesLinesOneBlock);
         List<Integer> initialOfEachMatch = new ArrayList<Integer>();
         while(!matcher.hitEnd()){
             initialOfEachMatch.add(matcher.start());
@@ -116,8 +111,8 @@ public class SearchBlock {
             String lineFromBlock = predicatesLinesOneBlock.substring(initialOfEachMatch.get(i) + 1, // +1 exists to not include the first character, a comma
                     finalChar);
 
-            String column 	= Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(lineFromBlock, EnumRegexList.SELECTPREDICATE.get());
-            lineFromBlock 	= Utils.removeRegexFromContent(EnumRegexList.SELECTPREDICATE.get(), lineFromBlock);
+            String column 	= Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(lineFromBlock, EnumRegexList.SELECTSEARCHPREDICATESDIVISIONS.get());
+            lineFromBlock 	= Utils.removeRegexFromContent(EnumRegexList.SELECTSEARCHPREDICATESDIVISIONS.get(), lineFromBlock);
             String value 	= Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(lineFromBlock, EnumRegexList.SELECTALL.get());
 
             if(column.toLowerCase().equals("endpoint")) {
@@ -144,6 +139,7 @@ public class SearchBlock {
         String data = "";
 
         Matcher matcher = Utils.matchRegexOnString(EnumRegexList.SELECTSEARCHBLOCKID.get(), blockRulesAsText);
+        String test = matcher.group();
         data = matcher.group().replace("search_block[", "").trim();
         return data;
     }

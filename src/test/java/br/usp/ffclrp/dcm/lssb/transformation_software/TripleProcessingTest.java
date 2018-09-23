@@ -21,7 +21,7 @@ import static org.junit.Assert.fail;
 public class TripleProcessingTest 
 {
 	private OntologyHelper ontologyHelper;
-	private Map<Integer, ConditionBlock> conditionsBlocks;
+	private Map<String, ConditionBlock> conditionsBlocks;
 	private List<Rule> listRules;
 	private List<String> ontologiesList;
 
@@ -38,7 +38,7 @@ public class TripleProcessingTest
 	}
 
 	private Rule createRuleOne() {
-		String id = "1";
+		String id = "rule1";
 		RuleConfig ruleConfig = new RuleConfig("default").setMatrix(true);
 		OWLClass subjectClass = ontologyHelper.getClass("Term");
 		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
@@ -51,7 +51,7 @@ public class TripleProcessingTest
 		separatorCols.add(0);
 		subjectFlags.add(new FlagSeparator("~", separatorCols));
 		subjectFlags.add(new FlagBaseIRI("http://amigo1.geneontology.org/cgi-bin/amigo/term_details?term=", "go"));
-		subjectFlags.add(new FlagConditionBlock(1));
+		subjectFlags.add(new FlagConditionBlock("condition1"));
 
 		subject.setFlags(subjectFlags);
 		subjectTSVColumns.add(subject);
@@ -86,13 +86,13 @@ public class TripleProcessingTest
 		List<Flag> participantFlags = new ArrayList<>();
 		participantColumn.setFlags(participantFlags);
 
-		predicateObjects.put(ontologyHelper.getProperty("has participant"), new TripleObjectAsRule(new ObjectAsRule(3, participantFlags)));
+		predicateObjects.put(ontologyHelper.getProperty("has participant"), new TripleObjectAsRule(new ObjectAsRule("rule3", participantFlags)));
 
 		return new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects);
 	}
 
 	private Rule createRuleTwo() {
-		String id = "2";
+		String id = "rule2";
 		RuleConfig ruleConfig = new RuleConfig("default").setMatrix(true);
 		OWLClass subjectClass = ontologyHelper.getClass("Term");
 		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
@@ -105,7 +105,7 @@ public class TripleProcessingTest
 		separatorCols.add(0);
 		subjectFlags.add(new FlagSeparator(":", separatorCols));
 		subjectFlags.add(new FlagBaseIRI("http://www.kegg.jp/entry/", "kegg"));
-		subjectFlags.add(new FlagConditionBlock(2));
+		subjectFlags.add(new FlagConditionBlock("condition2"));
 
 		subject.setFlags(subjectFlags);
 		subjectTSVColumns.add(subject);
@@ -140,13 +140,13 @@ public class TripleProcessingTest
 		List<Flag> participantFlags = new ArrayList<>();
 		participantColumn.setFlags(participantFlags);
 
-		predicateObjects.put(ontologyHelper.getProperty("has participant"), new TripleObjectAsRule(new ObjectAsRule(3, participantFlags)));
+		predicateObjects.put(ontologyHelper.getProperty("has participant"), new TripleObjectAsRule(new ObjectAsRule("rule3", participantFlags)));
 
 		return new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects);
 	}
 
 	private Rule createRuleThree() {
-		String id = "3";
+		String id = "rule3";
 		RuleConfig ruleConfig = new RuleConfig("default").setMatrix(true);
 		OWLClass subjectClass = ontologyHelper.getClass("Gene");
 		List<TSVColumn> subjectTSVColumns = new ArrayList<TSVColumn>();
@@ -180,7 +180,7 @@ public class TripleProcessingTest
 					column.setTitle("PValue");
 		conditions.add(new Condition(column, EnumOperationsConditionBlock.LESSTHAN, "0.01"));
 
-		conditionsBlocks.put(1, new ConditionBlock("1", conditions));
+		conditionsBlocks.put("condition1", new ConditionBlock("condition1", conditions));
 
 		conditions = new ArrayList<>();
 
@@ -194,7 +194,7 @@ public class TripleProcessingTest
 					column.setTitle("PValue");
 		conditions.add(new Condition(column, EnumOperationsConditionBlock.LESSTHAN, "0.03"));
 
-		conditionsBlocks.put(2, new ConditionBlock("2", conditions));
+		conditionsBlocks.put("condition2", new ConditionBlock("condition2", conditions));
 	}
 
 	@Test
@@ -207,7 +207,7 @@ public class TripleProcessingTest
 		listRules.add(createRuleOne());
 		listRules.add(createRuleThree());
 		createConditionBlocks();
-		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
+		Map<String, SearchBlock> searchBlocks = new HashMap<>();
 		ontologiesList.add(ontologyPath);
 
 		TriplesProcessing processingClass = new TriplesProcessing();;
@@ -267,7 +267,7 @@ public class TripleProcessingTest
 		listRules.add(createRuleTwo());
 		listRules.add(createRuleThree());
 		createConditionBlocks();
-		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
+		Map<String, SearchBlock> searchBlocks = new HashMap<>();
 		ontologiesList.add(ontologyPath);
 
 		TriplesProcessing processingClass = new TriplesProcessing();;
@@ -316,7 +316,7 @@ public class TripleProcessingTest
 
 
 	private Rule createRuleWithNotMetadataFlag() {
-		String id = "1";
+		String id = "rule1";
 		RuleConfig ruleConfig = new RuleConfig("default", "http://example.org/onto/individual#").setMatrix(true);
 		OWLClass subjectClass = ontologyHelper.getClass("geo sample");
 		List<TSVColumn> subjectTSVColumns = new ArrayList<>();
@@ -344,7 +344,7 @@ public class TripleProcessingTest
 		ontologyHelper.loadingOntologyFromFile(ontologyPath);
 		listRules.add(createRuleWithNotMetadataFlag());
 
-		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
+		Map<String, SearchBlock> searchBlocks = new HashMap<>();
 		ontologiesList.add(ontologyPath);
 
 		TriplesProcessing processingClass = new TriplesProcessing();;
@@ -372,7 +372,7 @@ public class TripleProcessingTest
     // ##################
 
 	private Rule createRuleAssertingConditionBlockThatDontExist(){
-		String id = "1";
+		String id = "rule1";
 		RuleConfig ruleConfig = new RuleConfig("default").setMatrix(true);
 		OWLClass subjectClass = ontologyHelper.getClass("Term");
 		List<TSVColumn> subjectTSVColumns = new ArrayList<>();
@@ -381,7 +381,7 @@ public class TripleProcessingTest
 		subject.setTitle("Category");
 
 		List<Flag> subjectFlags = new ArrayList<>();
-		subjectFlags.add(new FlagConditionBlock(2));
+		subjectFlags.add(new FlagConditionBlock("condition2"));
 
 		subject.setFlags(subjectFlags);
 		subjectTSVColumns.add(subject);
@@ -404,7 +404,7 @@ public class TripleProcessingTest
 		thrown.expect(ConditionBlockException.class);
 		thrown.expectMessage("No condition block created");
 
-		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
+		Map<String, SearchBlock> searchBlocks = new HashMap<>();
 		ontologiesList.add(ontologyPath);
 
 		TriplesProcessing processingClass = new TriplesProcessing();;
@@ -422,7 +422,7 @@ public class TripleProcessingTest
 
 
 	private Rule createRuleWithFixedContentFlagOnSubjectLine() {
-		String id = "1";
+		String id = "rule1";
 		RuleConfig ruleConfig = new RuleConfig("default", "http://example.org/onto/individual#").setMatrix(true);
 		OWLClass subjectClass = ontologyHelper.getClass("geo sample");
 		List<TSVColumn> subjectTSVColumns = new ArrayList<>();
@@ -450,7 +450,7 @@ public class TripleProcessingTest
 		ontologyHelper.loadingOntologyFromFile(ontologyPath);
 		listRules.add(createRuleWithFixedContentFlagOnSubjectLine());
 		
-		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
+		Map<String, SearchBlock> searchBlocks = new HashMap<>();
 		ontologiesList.add(ontologyPath);
 
 		TriplesProcessing processingClass = new TriplesProcessing();;
@@ -480,7 +480,7 @@ public class TripleProcessingTest
 
 
 	private Rule createRuleWithFixedContentFlagOnObjectLine() {
-		String id = "1";
+		String id = "rule1";
 		RuleConfig ruleConfig = new RuleConfig("default").setMatrix(true);
 		OWLClass subjectClass = ontologyHelper.getClass("geo sample");
 		List<TSVColumn> subjectTSVColumns = new ArrayList<>();
@@ -514,7 +514,7 @@ public class TripleProcessingTest
 		ontologyHelper.loadingOntologyFromFile(ontologyPath);
 		listRules.add(createRuleWithFixedContentFlagOnObjectLine());
 
-		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
+		Map<String, SearchBlock> searchBlocks = new HashMap<>();
 		ontologiesList.add(ontologyPath);
 
 		TriplesProcessing processingClass = new TriplesProcessing();;
@@ -553,7 +553,7 @@ public class TripleProcessingTest
 
 
 	private Rule createRuleWithCustomIDFlag() {
-		String id = "1";
+		String id = "rule1";
 		RuleConfig ruleConfig = new RuleConfig("default", "http://example.org/onto/individual#").setMatrix(true);
 		OWLClass subjectClass = ontologyHelper.getClass("geo sample");
 		List<TSVColumn> subjectTSVColumns = new ArrayList<>();
@@ -579,7 +579,7 @@ public class TripleProcessingTest
 		ontologyHelper.loadingOntologyFromFile(ontologyPath);
 		listRules.add(createRuleWithCustomIDFlag());
 
-		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
+		Map<String, SearchBlock> searchBlocks = new HashMap<>();
 		ontologiesList.add(ontologyPath);
 
 		TriplesProcessing processingClass = new TriplesProcessing();;
@@ -610,7 +610,7 @@ public class TripleProcessingTest
 
 
 	private Rule createRuleWithBaseIRIWithNoNamespace() {
-		String id = "1";
+		String id = "rule1";
 		RuleConfig ruleConfig = new RuleConfig("default").setMatrix(true);
 		OWLClass subjectClass = ontologyHelper.getClass("geo sample");
 		List<TSVColumn> subjectTSVColumns = new ArrayList<>();
@@ -643,7 +643,7 @@ public class TripleProcessingTest
         thrown.expect(BaseIRIException.class);
         thrown.expectMessage("Some BaseIRI flag has an empty namespace field.");
 
-		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
+		Map<String, SearchBlock> searchBlocks = new HashMap<>();
 
         processingClass.createTriplesFromRules(listRules,
 												conditionsBlocks,
@@ -657,7 +657,7 @@ public class TripleProcessingTest
 
 
 	private Rule createRuleWithBaseIRIWithNoIRI() {
-		String id = "1";
+		String id = "rule1";
 		RuleConfig ruleConfig = new RuleConfig("default").setMatrix(true);
 		OWLClass subjectClass = ontologyHelper.getClass("geo sample");
 		List<TSVColumn> subjectTSVColumns = new ArrayList<>();
@@ -690,7 +690,7 @@ public class TripleProcessingTest
 		thrown.expect(BaseIRIException.class);
 		thrown.expectMessage("Some BaseIRI flag has an empty IRI field.");
 
-		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
+		Map<String, SearchBlock> searchBlocks = new HashMap<>();
 
 		processingClass.createTriplesFromRules(listRules,
 												conditionsBlocks,
@@ -715,14 +715,14 @@ public class TripleProcessingTest
 		createConditionBlocks();
 		
 		//Changing the type of operation to manage not met the data inside the dataset
-		ConditionBlock cb = conditionsBlocks.get(1);
+		ConditionBlock cb = conditionsBlocks.get("condition1");
 		for (Condition condition : cb.getConditions()) {
 			if (condition.getColumn().equals("Category")) {
 				condition.setOperation(EnumOperationsConditionBlock.EQUAL);
 			}
 		}
 
-		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
+		Map<String, SearchBlock> searchBlocks = new HashMap<>();
 		ontologiesList.add(ontologyPath);
 
 		TriplesProcessing processingClass = new TriplesProcessing();;
@@ -743,7 +743,7 @@ public class TripleProcessingTest
 
 
 	private Rule createRuleSeparatorElementInSeparatorFlagDoesNotExist() {
-		String id = "1";
+		String id = "rule1";
 		RuleConfig ruleConfig = new RuleConfig("default").setMatrix(true);
 		OWLClass subjectClass = ontologyHelper.getClass("Gene");
 		List<TSVColumn> subjectTSVColumns = new ArrayList<>();
@@ -789,7 +789,7 @@ public class TripleProcessingTest
 					column.setTitle("Pop Hits");
 		conditions.add(new Condition(column, EnumOperationsConditionBlock.GREATERTHAN, "800"));
 
-		conditionsBlocks.put(1, new ConditionBlock("1", conditions));
+		conditionsBlocks.put("condition1", new ConditionBlock("condition1", conditions));
 	}
 
 	@Test
@@ -803,7 +803,7 @@ public class TripleProcessingTest
 		listRules.add(createRuleThree());
 		createConditionBlockWithGreaterThanCondition();
 
-		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
+		Map<String, SearchBlock> searchBlocks = new HashMap<>();
 		ontologiesList.add(ontologyPath);
 
 		TriplesProcessing processingClass = new TriplesProcessing();;
@@ -863,7 +863,7 @@ public class TripleProcessingTest
         listRules.add(createRuleThree());
         createConditionBlocks();
 
-		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
+		Map<String, SearchBlock> searchBlocks = new HashMap<>();
 		ontologiesList.add(ontologyPath);
 
 		TriplesProcessing processingClass = new TriplesProcessing();;
@@ -926,7 +926,7 @@ public class TripleProcessingTest
 
 
     private Rule createSimpleRule(){
-		String id = "1";
+		String id = "rule1";
 		RuleConfig ruleConfig = new RuleConfig(id, "http://example.org/onto/individual#");
 		OWLClass subjectClass = ontologyHelper.getClass("investigation");
 		List<TSVColumn> subjectTSVColumns = new ArrayList<>();
@@ -964,7 +964,7 @@ public class TripleProcessingTest
 		listRules.add(createSimpleRule());
 		createConditionBlockWithGreaterThanCondition();
 
-		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
+		Map<String, SearchBlock> searchBlocks = new HashMap<>();
 		ontologiesList.add(ontologyPath);
 
 		TriplesProcessing processingClass = new TriplesProcessing();;
@@ -1017,7 +1017,7 @@ public class TripleProcessingTest
 	private List<Rule> createSimpleRuleInsideSimpleRuleAndOtherFile(){
 		List<Rule> rules = new ArrayList<>();
 		//RULE 1
-		String id = "1";
+		String id = "rule1";
 		RuleConfig ruleConfig = new RuleConfig(id, "http://example.org/onto/individual#");
 		OWLClass subjectClass = ontologyHelper.getClass("investigation");
 		List<TSVColumn> subjectTSVColumns = new ArrayList<>();
@@ -1031,7 +1031,7 @@ public class TripleProcessingTest
 
 		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<>();
 
-		TripleObject hasParticipantTripleObject = new TripleObjectAsRule(new ObjectAsRule(2, new ArrayList<>()));
+		TripleObject hasParticipantTripleObject = new TripleObjectAsRule(new ObjectAsRule("rule2", new ArrayList<>()));
 
 		OWLProperty hasParticipantProperty = ontologyHelper.getProperty("has participant");
 
@@ -1040,7 +1040,7 @@ public class TripleProcessingTest
 		rules.add(new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects));
 
 		//RULE 2
-		id = "2";
+		id = "rule2";
 		ruleConfig = new RuleConfig(id, "http://example.org/onto/individual#");
 		subjectClass = ontologyHelper.getClass("microarray platform");
 		subjectTSVColumns = new ArrayList<>();
@@ -1072,7 +1072,7 @@ public class TripleProcessingTest
 		listRules.addAll(createSimpleRuleInsideSimpleRuleAndOtherFile());
 		createConditionBlockWithGreaterThanCondition();
 
-		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
+		Map<String, SearchBlock> searchBlocks = new HashMap<>();
 		ontologiesList.add(ontologyPath);
 
 		TriplesProcessing processingClass = new TriplesProcessing();;
@@ -1122,7 +1122,7 @@ public class TripleProcessingTest
 	private List<Rule> createSimpleRuleInsideMatrixRule(){
 		List<Rule> rules = new ArrayList<>();
 		//RULE 1
-		String id = "1";
+		String id = "rule1";
 		RuleConfig ruleConfig = new RuleConfig(id, "http://example.org/onto/individual/");
 		OWLClass subjectClass = ontologyHelper.getClass("investigation");
 		List<TSVColumn> subjectTSVColumns = new ArrayList<>();
@@ -1136,13 +1136,13 @@ public class TripleProcessingTest
 		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<>();
 
 		OWLProperty hasParticipantProperty = ontologyHelper.getProperty("has participant");
-		TripleObject hasParticipantTripleObject = new TripleObjectAsRule(new ObjectAsRule(2, new ArrayList<>()));
+		TripleObject hasParticipantTripleObject = new TripleObjectAsRule(new ObjectAsRule("rule2", new ArrayList<>()));
 		predicateObjects.put(hasParticipantProperty, hasParticipantTripleObject);
 
 		rules.add(new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects));
 
 		//RULE 2
-		id = "2";
+		id = "rule2";
 		ruleConfig = new RuleConfig(id, "http://example.org/onto/individual/").setMatrix(true);
 		subjectClass = ontologyHelper.getClass("Platform Data");
 		subjectTSVColumns = new ArrayList<>();
@@ -1196,7 +1196,7 @@ public class TripleProcessingTest
 		listRules.addAll(createSimpleRuleInsideMatrixRule());
 		createConditionBlockWithGreaterThanCondition();
 
-		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
+		Map<String, SearchBlock> searchBlocks = new HashMap<>();
 		ontologiesList.add(ontologyPath);
 
 		TriplesProcessing processingClass = new TriplesProcessing();;
@@ -1272,7 +1272,7 @@ public class TripleProcessingTest
 
 
 		//RULE 1
-		String id = "1";
+		String id = "rule1";
 		RuleConfig ruleConfig = new RuleConfig(id, "http://example.org/onto/individual/");
 		OWLClass subjectClass = ontologyHelper.getClass("investigation");
 		List<TSVColumn> subjectTSVColumns = new ArrayList<>();
@@ -1286,7 +1286,7 @@ public class TripleProcessingTest
 		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<>();
 
 		OWLProperty hasParticipantProperty = ontologyHelper.getProperty("has participant");
-		TripleObject hasParticipantTripleObject = new TripleObjectAsRule(new ObjectAsRule(2, new ArrayList<>()));
+		TripleObject hasParticipantTripleObject = new TripleObjectAsRule(new ObjectAsRule("rule2", new ArrayList<>()));
 		predicateObjects.put(hasParticipantProperty, hasParticipantTripleObject);
 
 		Rule rule = new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects);
@@ -1298,9 +1298,9 @@ public class TripleProcessingTest
 		processingClass.addDatasetToBeProcessed(testFolderPath + "NormalizedData.txt");
 
 		thrown.expect(RuleNotFound.class);
-		thrown.expectMessage("Rule number 2 was not found/created check your file.");
+		thrown.expectMessage("Rule rule2 was not found/created check your file.");
 
-		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
+		Map<String, SearchBlock> searchBlocks = new HashMap<>();
 
 		processingClass.createTriplesFromRules(listRules,
 												conditionsBlocks,
@@ -1317,7 +1317,7 @@ public class TripleProcessingTest
 	private List<Rule> createRuleWithSearchBlock(){
 		List<Rule> rules = new ArrayList<>();
 		//RULE 1
-		String id = "1";
+		String id = "rule1";
 		RuleConfig ruleConfig = new RuleConfig(id, "http://example.org/onto/individual/").setMatrix(true);
 		OWLClass subjectClass = ontologyHelper.getClass("Platform Data");
 		List<TSVColumn> subjectTSVColumns = new ArrayList<>();
@@ -1341,7 +1341,7 @@ public class TripleProcessingTest
 		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<>();
 
 		OWLProperty 	idProperty 		= ontologyHelper.getProperty("ID");
-		TripleObject 	idTripleObject 	= new TripleObjectAsRule(new ObjectAsRule(2, new ArrayList<>()));
+		TripleObject 	idTripleObject 	= new TripleObjectAsRule(new ObjectAsRule("rule2", new ArrayList<>()));
 
 		predicateObjects.put(idProperty, idTripleObject);
 
@@ -1349,7 +1349,7 @@ public class TripleProcessingTest
 
 
 		//RULE 2
-		id = "2";
+		id = "rule2";
 		ruleConfig = new RuleConfig(id, "http://example.org/onto/individual/").setMatrix(true);
 		subjectClass = ontologyHelper.getClass("genetic material");
 		subjectTSVColumns = new ArrayList<>();
@@ -1357,7 +1357,7 @@ public class TripleProcessingTest
 		subject = new TSVColumn();
 		subject.setTitle("GPL19921_ID");
 		List<Flag> subjectFlags = new ArrayList<>();
-		subjectFlags.add(new FlagSearchBlock(1));
+		subjectFlags.add(new FlagSearchBlock("search1"));
 		subject.setFlags(subjectFlags);
 
 		subjectTSVColumns.add(subject);
@@ -1378,8 +1378,8 @@ public class TripleProcessingTest
 		ontologyHelper.loadingOntologyFromFile(ontologyPath);
 		listRules.addAll(createRuleWithSearchBlock());
 
-		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
-		SearchBlock searchBlock = new SearchBlock(1, "http://bio2rdf.org/sparql", "http://bio2rdf.org/ctd_vocabulary:gene-symbol");
+		Map<String, SearchBlock> searchBlocks = new HashMap<>();
+		SearchBlock searchBlock = new SearchBlock("search1", "http://bio2rdf.org/sparql", "http://bio2rdf.org/ctd_vocabulary:gene-symbol");
 		searchBlocks.put(searchBlock.getId(), searchBlock);
 		ontologiesList.add(ontologyPath);
 
@@ -1434,7 +1434,7 @@ public class TripleProcessingTest
 	// ##################
 
 	private Rule createRuleWithColFlag() {
-		String id = "1";
+		String id = "rule1";
 		RuleConfig ruleConfig = new RuleConfig("default", "http://example.org/onto/individual/");
 		OWLClass subjectClass = ontologyHelper.getClass("Gene");
 		List<TSVColumn> subjectTSVColumns = new ArrayList<>();
@@ -1460,7 +1460,7 @@ public class TripleProcessingTest
 		ontologyHelper.loadingOntologyFromFile(ontologyPath);
 		listRules.add(createRuleWithColFlag());
 
-		Map<Integer, SearchBlock> searchBlocks = new HashMap<>();
+		Map<String, SearchBlock> searchBlocks = new HashMap<>();
 		ontologiesList.add(ontologyPath);
 
 		TriplesProcessing processingClass = new TriplesProcessing();;

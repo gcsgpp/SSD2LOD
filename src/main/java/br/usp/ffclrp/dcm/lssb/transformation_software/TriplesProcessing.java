@@ -22,14 +22,14 @@ public class TriplesProcessing {
 
 	private SemistructuredFileReader fileReader;
 	private Model model = null;
-	private Map<Integer, Rule> allRules = new HashMap<Integer, Rule>();
+	private Map<String, Rule> allRules = new HashMap<>();
 	private List<Rule> regularRuleList;
 	private List<Rule> dependencyList = new ArrayList<Rule>();
-	private Map<Integer, ConditionBlock> conditionBlocks;
-	private Map<Integer, SearchBlock> searchBlocks;
+	private Map<String, ConditionBlock> conditionBlocks;
+	private Map<String, SearchBlock> searchBlocks;
 	public 	RuleConfig defaultRuleConfig;
 	private MatrixLineNumberTracking currentLineNumberMatrixRules = new MatrixLineNumberTracking();
-	private Map<Integer, List<Resource>> simpleRuleAlreadyProcessed = new HashMap<>();
+	private Map<String, List<Resource>> simpleRuleAlreadyProcessed = new HashMap<>();
 	public 	long startTime;
 	private List<String> ontologiesList = new ArrayList<>();
 
@@ -45,8 +45,8 @@ public class TriplesProcessing {
 	}
 	@SuppressWarnings("unchecked")
 	public void 			createTriplesFromRules(List<Rule> listRules,
-												  Map<Integer, ConditionBlock> conditionBlocks,
-												  Map<Integer, SearchBlock> searchBlocks,
+												  Map<String, ConditionBlock> conditionBlocks,
+												  Map<String, SearchBlock> searchBlocks,
 												  RuleConfig defaultRuleConfig,
 												  List<String> ontologiesList) throws Exception{
 
@@ -60,7 +60,7 @@ public class TriplesProcessing {
 		this.ontologiesList		= ontologiesList;
 
 		for(Rule rule : regularRuleList){	
-			allRules.put(Integer.parseInt(rule.getId()), rule);
+			allRules.put(rule.getId(), rule);
 		}
 
 		//POPULATE dependencyList
@@ -70,9 +70,9 @@ public class TriplesProcessing {
 				if(predicateMapEntry.getValue() instanceof TripleObjectAsRule){
 					List<ObjectAsRule> listOfRulesAndFlagsOfAPredicate = (List<ObjectAsRule>) predicateMapEntry.getValue().getObject();
 					for(ObjectAsRule objectRulesWithFlags : listOfRulesAndFlagsOfAPredicate) {
-						Rule objectRule = allRules.get(objectRulesWithFlags.getRuleNumber());
+						Rule objectRule = allRules.get(objectRulesWithFlags.getRuleId());
 						if(objectRule == null)
-							throw new RuleNotFound("Rule number " + objectRulesWithFlags.getRuleNumber() + " was not found/created check your file.");
+							throw new RuleNotFound("Rule " + objectRulesWithFlags.getRuleId() + " was not found/created check your file.");
 						dependencyList.add(objectRule);
 					}
 				}
@@ -83,8 +83,9 @@ public class TriplesProcessing {
 			regularRuleList.remove(rule);
 		}
 
+		System.out.println("Processing rules...");
  		for(Rule rule : regularRuleList){
-			//System.out.println("Processing rules...");
+			System.out.println("Processing rule: " + rule.getId());
 			processRule(rule);
 		}
 
@@ -92,13 +93,12 @@ public class TriplesProcessing {
 	}
 
 	private List<Resource> 	processRule(Rule rule) throws Exception {
-		System.out.println("Processing rules...");
 		List<Resource> subjectListToBeReturned = new LinkedList<>();
 		if(rule.isMatrix()){
 			if(currentLineNumberMatrixRules.isEmpty()){
 				for(Integer tsvLineNumber = rule.getStartLineNumber(); tsvLineNumber < fileReader.getLinesCount(); tsvLineNumber++) {
 					try {
-						currentLineNumberMatrixRules = new MatrixLineNumberTracking(tsvLineNumber, Integer.parseInt(rule.getId()));
+						currentLineNumberMatrixRules = new MatrixLineNumberTracking(tsvLineNumber, rule.getId());
 						for(TSVColumn ruleColumns : rule.getSubjectTSVColumns()){
 							if(!assertConditionBlock(ruleColumns.getFlags(), tsvLineNumber))
 								return null;
@@ -136,9 +136,9 @@ public class TriplesProcessing {
 
 
 		}else{
-			List<Resource> t = simpleRuleAlreadyProcessed.get(Integer.parseInt(rule.getId()));
+			List<Resource> t = simpleRuleAlreadyProcessed.get(rule.getId());
 
-			if(simpleRuleAlreadyProcessed.get(Integer.parseInt(rule.getId())) == null){
+			if(simpleRuleAlreadyProcessed.get(rule.getId()) == null){
 				// *** SUBJECT ***
 				List<Resource> subjectList = getSubject(rule, rule.getStartLineNumber()); //ONE SUBJECT FOR EACH ITEM IN THE CELL
 
@@ -150,7 +150,7 @@ public class TriplesProcessing {
 						}
 
 						List<Resource> subjectsProcessed = processPredicateAndObject(rule, tsvLineNumber, subjectList);
-						simpleRuleAlreadyProcessed.put(Integer.parseInt(rule.getId()), subjectsProcessed);
+						simpleRuleAlreadyProcessed.put(rule.getId(), subjectsProcessed);
 						subjectListToBeReturned = subjectsProcessed;
 
 					} catch (CustomWarnings w) {
@@ -161,7 +161,7 @@ public class TriplesProcessing {
 					}
 				}
 			}else{
-				subjectListToBeReturned = simpleRuleAlreadyProcessed.get(Integer.parseInt(rule.getId()));
+				subjectListToBeReturned = simpleRuleAlreadyProcessed.get(rule.getId());
 			}
 		}
 		return subjectListToBeReturned;
@@ -184,7 +184,7 @@ public class TriplesProcessing {
 					TripleObjectAsRule tripleObjectAsRule = (TripleObjectAsRule) predicateMapEntry.getValue();
 					for(ObjectAsRule objectAsRule : tripleObjectAsRule.getObject()){
 						if(assertConditionBlock(objectAsRule.getFlags(), tsvLineNumber)){
-							List<Resource> subjectsFromDependentRule = processRule(allRules.get(objectAsRule.getRuleNumber()));
+							List<Resource> subjectsFromDependentRule = processRule(allRules.get(objectAsRule.getRuleId()));
 							if(subjectsFromDependentRule != null){
 								for(Resource singleSubjectFromDependentRule : subjectsFromDependentRule){
 									addTripleToModel(subject, predicate, singleSubjectFromDependentRule);
@@ -493,7 +493,7 @@ public class TriplesProcessing {
 		for(TSVColumn column : listTSVColumn){
 			for(Flag flag : column.getFlags()){
 				if(flag instanceof FlagSearchBlock){
-					Integer searchBlockId = ((FlagSearchBlock) flag).getId();
+					String searchBlockId = ((FlagSearchBlock) flag).getId();
 
 					return this.searchBlocks.get(searchBlockId);
 				}

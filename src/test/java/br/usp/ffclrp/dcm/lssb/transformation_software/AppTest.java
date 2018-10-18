@@ -831,7 +831,7 @@ public class AppTest
 
 	@Test
 	public void extractMultipleTSVColumnsFromSentence() {
-		String sentence = " \"column1\" ; \"column2\" ; \"column3\" /BASEIRI(\"http://teste.com\", \"test\") ";
+		String sentence = " \"column1\" /; \"column2\" /; \"column3\" /BASEIRI(\"http://teste.com\", \"test\") ";
 
 		RuleInterpretor ruleInterpretor = new RuleInterpretor();
 		List<TSVColumn> tsvColumns = null;
@@ -1110,7 +1110,7 @@ public class AppTest
 
 	@Test
 	public void extractColFlag(){
-		String 	sentence = 	"column_based_rule rule1[\"\" /COL(\"E-MTAB-5814.idf.tsv\", 56) is_equivalent_to \"investigation\"]{}";
+		String 	sentence = 	"column_based_rule rule1[\"\" /COL(56, \"E-MTAB-5814.idf.tsv\") is_equivalent_to \"investigation\"]{}";
 
 		sentence = sentence.replace("\t", "").replaceAll("\n", "");
 

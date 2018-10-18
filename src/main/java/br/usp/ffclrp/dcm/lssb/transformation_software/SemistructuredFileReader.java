@@ -50,6 +50,7 @@ public class SemistructuredFileReader {
 	public String getData(TSVColumn tsvColumn, Integer lineNumber) throws ColumnNotFoundWarning {
 		String[] dataRow;
 
+		Boolean columnFoundInAnyFile = false;
 		Integer position = null;
 		FlagCol flagCol = FlagCol.getColFlag(tsvColumn.getFlags());
 
@@ -57,15 +58,29 @@ public class SemistructuredFileReader {
 			try {
 				if(flagCol == null) {
 					position = file.getHeader().get(tsvColumn.getTitle());
+					columnFoundInAnyFile = true;
 				}else{
 					if(file.getFilename().equals(flagCol.getFilename())) {
 						position = flagCol.getColPosition();
+
+						if(position >= file.getHeader().size())
+							continue;
+						else
+							columnFoundInAnyFile = true;
 					}else{
 						continue;
 					}
 				}
 
+				if(position == null)
+					continue;
+
+				//The column belongs to this file but there is no row anymore
+				if((lineNumber >= file.getAllRows().size()))
+					continue;
+
 				dataRow = file.getAllRows().get(lineNumber);
+
 				String str = dataRow[position];
 				if (str.startsWith("\"") && str.endsWith("\""))
 					str = str.substring(1, str.length() - 1);
@@ -77,10 +92,14 @@ public class SemistructuredFileReader {
 			}
 		}
 
-		if(flagCol == null) {
-			throw new ColumnNotFoundWarning("Not found the column required. Column tried to access: " + tsvColumn.getTitle() + ". This column may not exist.");
+		if(!columnFoundInAnyFile) {
+			if (flagCol == null) {
+				throw new ColumnNotFoundWarning("Column required not found. Column tried to access: " + tsvColumn.getTitle() + ". This column may not exist.");
+			} else {
+				throw new ColumnNotFoundWarning("Column required not found. Column tried to access: " + flagCol.getColPosition() + " from file: " + flagCol.getFilename() + ". This column/file may not exist.");
+			}
 		}else{
-			throw new ColumnNotFoundWarning("Not found the column required. Column tried to access: " + flagCol.getColPosition() + " from file: " + flagCol.getFilename() + ". This column may not exist.");
+			return null;
 		}
 	}
 	

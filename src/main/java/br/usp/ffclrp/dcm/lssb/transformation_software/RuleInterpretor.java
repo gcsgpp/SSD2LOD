@@ -60,10 +60,10 @@ public class RuleInterpretor implements Runnable
 
 	public static void main (String[] args) {
 
-	    /*   Test */
+	    //   Test
 	    args = new String[3];
 	    args[0] = "runTransformation";
-	    args[1] = "5a2bb707-39c8-4384-8283-3e661ddc11a0";
+	    args[1] = "dc6010d1-c02b-4846-9f6e-da5b5508478a";
 //	    args[2] = "d10ff0a0-fee9-4ebd-9eda-ad4dfc0169ba";
 	    /* End test */
 
@@ -331,7 +331,7 @@ public class RuleInterpretor implements Runnable
 
 	public List<TSVColumn> 	extractTSVColumnsFromSentence(String sentence) throws Exception{
 		List<TSVColumn> listOfColumns = new ArrayList<TSVColumn>();
-		String[] eachTSVColumnWithFlags = sentence.split(";");
+		String[] eachTSVColumnWithFlags = sentence.split("/;");
 
 		for(String s : eachTSVColumnWithFlags){
 

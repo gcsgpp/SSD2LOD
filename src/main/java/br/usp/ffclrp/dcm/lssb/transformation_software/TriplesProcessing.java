@@ -107,9 +107,10 @@ public class TriplesProcessing {
 						// *** SUBJECT ***
 						List<Resource> subjectList = getSubject(rule, tsvLineNumber); //ONE SUBJECT FOR EACH ITEM IN THE CELL
 						subjectListToBeReturned.addAll(processPredicateAndObject(rule, tsvLineNumber, subjectList));
-					} catch (CustomWarnings w) {
+					//}
+					//catch (CustomWarnings w) {
 						//System.out.println(w.getMessage());
-						continue;
+					//	continue;
 					} catch (ArrayIndexOutOfBoundsException e) {
 						continue;
 					}
@@ -126,9 +127,9 @@ public class TriplesProcessing {
 					// *** SUBJECT ***
 					List<Resource> subjectList = getSubject(rule, currentLineNumberMatrixRules.getLineNumber()); //ONE SUBJECT FOR EACH ITEM IN THE CELL
 					subjectListToBeReturned.addAll(processPredicateAndObject(rule, currentLineNumberMatrixRules.getLineNumber(), subjectList));
-				} catch (CustomWarnings w) {
+				//} catch (CustomWarnings w) {
 					//System.out.println(w.getMessage());
-					return null;
+				//	return null;
 				} catch (ArrayIndexOutOfBoundsException e) {
 					return null;
 				}
@@ -153,9 +154,9 @@ public class TriplesProcessing {
 						simpleRuleAlreadyProcessed.put(rule.getId(), subjectsProcessed);
 						subjectListToBeReturned = subjectsProcessed;
 
-					} catch (CustomWarnings w) {
+					//} catch (CustomWarnings w) {
 						//System.out.println(w.getMessage());
-						return null;
+					//	return null;
 					} catch (ArrayIndexOutOfBoundsException e) {
 						return null;
 					}
@@ -198,7 +199,7 @@ public class TriplesProcessing {
 					List<TSVColumn> dataColumns = (List<TSVColumn>) predicateMapEntry.getValue().getObject();
 					List<String> listOfContent = null;
 
-					for(TSVColumn dataColumn : (List<TSVColumn>) predicateMapEntry.getValue().getObject()) {
+					for(TSVColumn dataColumn : dataColumns) {
 						try {
 							listOfContent = extractDataFromTSVColumn(dataColumns, tsvLineNumber);
 						} catch (ColumnNotFoundWarning e) {
@@ -231,6 +232,10 @@ public class TriplesProcessing {
 
 				for(Condition condition : conditionBlock.getConditions()){
 					String contentTSVColumn = fileReader.getData(condition, tsvLineNumber);
+					if(contentTSVColumn == null)
+						return false;
+
+
 					Boolean result = true;
 					if(condition.getOperation() == EnumOperationsConditionBlock.EQUAL){
 						result = contentTSVColumn.equals(condition.getConditionValue());
@@ -299,16 +304,27 @@ public class TriplesProcessing {
 
 			for(Flag flag : column.getFlags()){
 				if(flag instanceof FlagSeparator){
-					dataColumnsSeparated.add(separateDataFromTSVColumn((FlagSeparator) flag, column, lineNumber));
+					String[] separatedData = separateDataFromTSVColumn((FlagSeparator) flag, column, lineNumber);
+					if(separatedData == null)
+						continue;
+					dataColumnsSeparated.add(separatedData);
 					extractedData = true;
 				}else if(flag instanceof FlagNotMetadata) {
 					String[] columnData = new String[1];
 					columnData[0] = fileReader.getData(column, 0);
+
+					if(columnData[0] == null)
+						continue;
+
 					dataColumnsSeparated.add(columnData);
 					extractedData = true;
 				}else if(flag instanceof FlagFixedContent) {
 					String[] columnData = new String[1];
 					columnData[0] = ((FlagFixedContent) flag).getContent();
+
+					if(columnData[0] == null)
+						continue;
+
 					dataColumnsSeparated.add(columnData);
 					extractedData = true;
 				}
@@ -318,9 +334,48 @@ public class TriplesProcessing {
 			if(!extractedData){
 				String[] columnData = new String[1];
 				columnData[0] = fileReader.getData(column, lineNumber);
+
+				if(columnData[0] == null)
+					continue;
+
 				dataColumnsSeparated.add(columnData);
 			}
 		}
+
+		//objectContent = metodoDoCaraio(dataColumnsSeparated);
+		objectContent = caraio2(dataColumnsSeparated);
+
+
+		return objectContent;
+	}
+
+
+	private List<String> caraio2 (List<String[]> dataColumnsSeparated){
+
+		//FINDS THE BIGGER ARRAY OF DATA EXTRACTED
+		Integer biggerColumn = Integer.MIN_VALUE;
+		for(String[] array : dataColumnsSeparated){
+			if(array.length > biggerColumn)
+				biggerColumn = array.length;
+		}
+
+		List<String> objectContent = new ArrayList<String>();
+
+		for(int i = 0; i < biggerColumn; i++)
+		{
+			String content = "";
+			for(String[] dataColumn : dataColumnsSeparated)
+			{
+				if(dataColumn.length > i)
+					content += " " + dataColumn[i].trim();
+			}
+			//System.out.println("Content: " + content.trim());
+			objectContent.add(content.trim());
+		}
+
+		return objectContent;
+	}
+	private List<String> metodoDoCaraio(List<String[]> dataColumnsSeparated){
 
 		//FINDS THE BIGGER ARRAY OF DATA EXTRACTED
 		Integer biggerColumn = Integer.MIN_VALUE;
@@ -330,23 +385,26 @@ public class TriplesProcessing {
 		}
 
 		//MAKES ALL ARRAYS BE THE SAME SIZE.
-		//THE ARRAYS THAT IS SMALLER THAN THE BIGGEST IS COMPLETED WITH 
+		//THE ARRAY THAT IS SMALLER THAN THE BIGGEST IS COMPLETED WITH
 		//THE DATA AT THE BEGGINING OF THE ARRAY ITSELF.
 		List<List<String>> dataColumns = new ArrayList<List<String>>();
 		for(String[] array : dataColumnsSeparated){
 			List<String> list = new ArrayList<String>();
 			int oldPosition = -1;
 			while(list.size() != biggerColumn.intValue()) {
-				try {
+
+				if((oldPosition + 1) < array.length) {
 					list.add(array[oldPosition + 1]);
 					oldPosition++;
-
-				}catch(ArrayIndexOutOfBoundsException e){
+				}else{
 					oldPosition = 0;
 				}
 			}
 			dataColumns.add(list);
 		}
+
+
+		List<String> objectContent = new ArrayList<String>();
 
 		//MERGE BETWEEN THE DATA ARRAYS EXTRACTED
 		//ONE ITEM FROM EACH ARRAY
@@ -362,8 +420,12 @@ public class TriplesProcessing {
 		return objectContent;
 	}
 
+
 	private String[] 		separateDataFromTSVColumn(FlagSeparator flag, TSVColumn column, Integer lineNumber) throws Exception {
 		String rawData = fileReader.getData(column, lineNumber);
+
+		if(rawData == null)
+			return null;
 
 		String flagTerm = Pattern.quote(flag.getTerm());
 

@@ -80,6 +80,12 @@ public class OntologyHelper {
 					mappingPredicatesAnnotations.put(labelFor(p), p);
 				});
 			}
+
+			try(Stream<OWLAnnotationProperty> annotationProperties = onto.annotationPropertiesInSignature()) {
+				annotationProperties.forEach(p -> {//System.out.println(labelFor(p) + " -> " + p);
+					mappingPredicatesAnnotations.put(labelFor(p), p);
+				});
+			}
 		}
 	}
 

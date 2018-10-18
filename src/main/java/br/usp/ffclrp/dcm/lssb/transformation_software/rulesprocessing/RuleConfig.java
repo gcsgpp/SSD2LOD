@@ -117,11 +117,11 @@ public class RuleConfig {
 					throw new Exception("One of the values inside rule_config block was not possible to understand. Rule Config block ID: " + ruleConfigId + " . Value found: " + value);
 				}
 			}else if(ruleConfigId.toLowerCase().equals("default") && column.toLowerCase().equals("export_syntax")) {
-				if(		Lang.RDFXML	.getName().toLowerCase().equals(value))
+				if(		Lang.RDFXML	.getName().toLowerCase().equals(value.toLowerCase()))
 					rule.setSyntax(Lang.RDFXML);
-				else if(Lang.N3		.getName().toLowerCase().equals(value))
+				else if(Lang.N3		.getName().toLowerCase().equals(value.toLowerCase()))
 					rule.setSyntax(Lang.N3);
-				else if(Lang.TURTLE	.getName().toLowerCase().equals(value))
+				else if(Lang.TURTLE	.getName().toLowerCase().equals(value.toLowerCase()))
 					rule.setSyntax(Lang.TURTLE);
 			}
 		}

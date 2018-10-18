@@ -17,7 +17,7 @@ public enum EnumRegexList {
 	SELECTCONDITIONBLOCK("condition_element\\s?\\w+\\s?\\{.+?\\}"),
 	SELECTCONDITIONID("(condition_element\\s*)(\\w+)"),
 	SELECTCONDITIONBODY("(condition_element\\s*\\w+)\\s*(\\{.+?\\})"),
-	SELECTPREDICATESDIVISIONSCONDITIONBLOCK("((\\{|,)(\\s*?)\"[^\"]*?\"(\\s*?)(\\/COL\\(\".*?\"\\s*?,\\s*?\\d+\\))?(\\s*?)((==)|(!=)|>|<)(\\s*?)\"(.*?)\")+?"),
+	SELECTPREDICATESDIVISIONSCONDITIONBLOCK("((\\{|,)(\\s*?)\"[^\"]*?\"(\\s*?)(\\/COL\\(\\s*?\\d+,\\s*?\".*?\"\\s*?\\))?(\\s*?)((==)|(!=)|>|<)(\\s*?)\"(.*?)\")+?"),
 
 
 	SELECTSUBJECTCLASSNAME("is_equivalent_to\\s*(\".+?\")"),
@@ -32,7 +32,7 @@ public enum EnumRegexList {
 	SELECTNAMESPACEBASEIRIFLAG("(,\\s*\"(.*)\")"),
 	SELECTFIXEDCONTENTFLAG("(\\/DefaultValue\\(\"(.*?)\"\\))"),
 	SELECTCONDITIONBLOCKFLAG("\\/CE\\(\\w+\\)"),
-	SELECTCOLFLAG("\\/COL\\(\\s*?\".*?\"\\s*?,\\s*?\\d*?\\s*?\\)"),
+	SELECTCOLFLAG("\\/COL\\(\\s*?\\d*?\\s*?,\\s*?\".*?\"\\s*?\\)"),
 	SELECTSEARCHBLOCKFLAG("(\\/SE\\(\\w*?\\))"),
 	SELECTSEPARATORFLAG("(\\/SP\\(\"(.*?)\"((,(.*?)\\))|\\)))"),
 	SELECTSEPARATORFLAGRANGENUMBERS("((\\d+\\s*:\\s*\\d+))"),
@@ -40,7 +40,7 @@ public enum EnumRegexList {
 	SELECTDATATYPEFLAG("(\\/DT\\(\"(.*?)\"\\))"),
 	SELECTNOTMETADATA("(\\/(NM)(?:\\W|\\s))"),
 	//CONDITION BLOCK REGEX:
-	SELECTCOLUMNCONDITIONBLOCK("((\".*\")\\s*?(\\/COL\\(\".*\",\\s?\\d+\\))?\\s*?(==|!=|>|<))"),
+	SELECTCOLUMNCONDITIONBLOCK("((\".*\")\\s*?(\\/COL\\(\\s*?\\d+,\\s*?\".*?\"\\s*?\\))?\\s*?(==|!=|>|<))"),
 	//SELECTPREDICATESDIVISIONSSEARCHBLOCK("((:|,)(\\s*?)\"(.*?)\"\\s?(=|!|>|<))"),
 	SELECTOPERATIONCONDITIONBLOCK("(==|!=|>|<)"),
 	SELECTALL("(.+)");

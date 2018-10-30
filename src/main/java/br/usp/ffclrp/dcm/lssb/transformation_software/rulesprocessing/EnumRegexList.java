@@ -17,7 +17,7 @@ public enum EnumRegexList {
 	SELECTCONDITIONBLOCK("condition_element\\s?\\w+\\s?\\{.+?\\}"),
 	SELECTCONDITIONID("(condition_element\\s*)(\\w+)"),
 	SELECTCONDITIONBODY("(condition_element\\s*\\w+)\\s*(\\{.+?\\})"),
-	SELECTPREDICATESDIVISIONSCONDITIONBLOCK("((\\{|,)(\\s*?)\"[^\"]*?\"(\\s*?)(\\/COL\\(\\s*?\\d+,\\s*?\".*?\"\\s*?\\))?(\\s*?)((==)|(!=)|>|<)(\\s*?)\"(.*?)\")+?"),
+	SELECTPREDICATESDIVISIONSCONDITIONBLOCK("((\\{|,)(\\s*?)\"[^\"]*?\"(\\s*?)(\\/COL\\(\\s*?((\\d*?)|(\\\"[^\"]*?\\\"))\\s*?,\\s*?\".*?\"\\s*?\\))?(\\s*?)((==)|(!=)|>|<)(\\s*?)\"(.*?)\")+?"),
 
 
 	SELECTSUBJECTCLASSNAME("is_equivalent_to\\s*(\".+?\")"),
@@ -32,15 +32,16 @@ public enum EnumRegexList {
 	SELECTNAMESPACEBASEIRIFLAG("(,\\s*\"(.*)\")"),
 	SELECTFIXEDCONTENTFLAG("(\\/DefaultValue\\(\"(.*?)\"\\))"),
 	SELECTCONDITIONBLOCKFLAG("\\/CE\\(\\w+\\)"),
-	SELECTCOLFLAG("\\/COL\\(\\s*?\\d*?\\s*?,\\s*?\".*?\"\\s*?\\)"),
-	SELECTSEARCHBLOCKFLAG("(\\/SE\\(\\w*?\\))"),
+	SELECTCOLFLAG("\\/COL\\(\\s*?((\\d*?)|(\\\"[^\"]*?\\\"))\\s*?,\\s*?\".*?\"\\s*?\\)"),
+	SELECTSEARCHBLOCKFLAG("(\\/SE\\((\\w*?)\\))"),
 	SELECTSEPARATORFLAG("(\\/SP\\(\"(.*?)\"((,(.*?)\\))|\\)))"),
 	SELECTSEPARATORFLAGRANGENUMBERS("((\\d+\\s*:\\s*\\d+))"),
 	SELECTCUSTOMDIDFLAG("(\\/ID\\(\"(.*?)\"\\))"),
 	SELECTDATATYPEFLAG("(\\/DT\\(\"(.*?)\"\\))"),
 	SELECTNOTMETADATA("(\\/(NM)(?:\\W|\\s))"),
+	SELECTNODEFLAG("\\/NODE\\(\\\"(.*?)\\\"\\)"),
 	//CONDITION BLOCK REGEX:
-	SELECTCOLUMNCONDITIONBLOCK("((\".*\")\\s*?(\\/COL\\(\\s*?\\d+,\\s*?\".*?\"\\s*?\\))?\\s*?(==|!=|>|<))"),
+	SELECTCOLUMNCONDITIONBLOCK("((\".*\")\\s*?(\\/COL\\(\\s*?((\\d*?)|(\\\"[^\"]*?\\\"))\\s*?,\\s*?\".*?\"\\s*?\\))?\\s*?(==|!=|>|<))"),
 	//SELECTPREDICATESDIVISIONSSEARCHBLOCK("((:|,)(\\s*?)\"(.*?)\"\\s?(=|!|>|<))"),
 	SELECTOPERATIONCONDITIONBLOCK("(==|!=|>|<)"),
 	SELECTALL("(.+)");

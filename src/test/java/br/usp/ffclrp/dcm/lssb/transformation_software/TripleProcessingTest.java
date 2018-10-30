@@ -4,6 +4,8 @@ import br.usp.ffclrp.dcm.lssb.custom_exceptions.BaseIRIException;
 import br.usp.ffclrp.dcm.lssb.custom_exceptions.ConditionBlockException;
 import br.usp.ffclrp.dcm.lssb.custom_exceptions.RuleNotFound;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.*;
+import org.apache.commons.collections4.MultiValuedMap;
+import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Statement;
@@ -56,7 +58,7 @@ public class TripleProcessingTest
 		subject.setFlags(subjectFlags);
 		subjectTSVColumns.add(subject);
 
-		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<>();
+		MultiValuedMap<OWLProperty, TripleObject> predicateObjects = new ArrayListValuedHashMap<>();
 
 		/* has_pvalue predicate */
 		TSVColumn pvalueColumn = new TSVColumn();
@@ -110,7 +112,7 @@ public class TripleProcessingTest
 		subject.setFlags(subjectFlags);
 		subjectTSVColumns.add(subject);
 
-		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<>();
+		MultiValuedMap<OWLProperty, TripleObject> predicateObjects = new ArrayListValuedHashMap<>();
 
 		/* has_pvalue predicate */
 		TSVColumn pvalueColumn = new TSVColumn();
@@ -163,7 +165,7 @@ public class TripleProcessingTest
 		subject.setFlags(subjectFlags);
 		subjectTSVColumns.add(subject);
 
-		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<>();
+		MultiValuedMap<OWLProperty, TripleObject> predicateObjects = new ArrayListValuedHashMap<>();
 
 		return new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects);
 	}
@@ -330,7 +332,7 @@ public class TripleProcessingTest
 		subject.setFlags(subjectFlags);
 		subjectTSVColumns.add(subject);
 
-		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<>();
+		MultiValuedMap<OWLProperty, TripleObject> predicateObjects = new ArrayListValuedHashMap<>();
 
 		return new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects);
 	}
@@ -387,7 +389,7 @@ public class TripleProcessingTest
 		subjectTSVColumns.add(subject);
 
 
-		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<>();
+		MultiValuedMap<OWLProperty, TripleObject> predicateObjects = new ArrayListValuedHashMap<>();
 
 		return new Rule(id,ruleConfig, subjectClass, subjectTSVColumns, predicateObjects );
 	}
@@ -436,7 +438,7 @@ public class TripleProcessingTest
 		subject.setFlags(subjectFlags);
 		subjectTSVColumns.add(subject);
 
-		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<>();
+		MultiValuedMap<OWLProperty, TripleObject> predicateObjects = new ArrayListValuedHashMap<>();
 
 		return new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects);
 	}
@@ -492,7 +494,7 @@ public class TripleProcessingTest
 		subject.setFlags(subjectFlags);
 		subjectTSVColumns.add(subject);
 
-		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<>();
+		MultiValuedMap<OWLProperty, TripleObject> predicateObjects = new ArrayListValuedHashMap<>();
 		
 		OWLProperty enrichmentProperty = ontologyHelper.getProperty("has enrichement");
 		
@@ -566,7 +568,7 @@ public class TripleProcessingTest
 		
 		subjectTSVColumns.add(subject);
 
-		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<>();
+		MultiValuedMap<OWLProperty, TripleObject> predicateObjects = new ArrayListValuedHashMap<>();
 		return new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects);
 	}
 
@@ -623,7 +625,7 @@ public class TripleProcessingTest
 
 		subjectTSVColumns.add(subject);
 
-		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<>();
+		MultiValuedMap<OWLProperty, TripleObject> predicateObjects = new ArrayListValuedHashMap<>();
 		return new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects);
 	}
 
@@ -670,7 +672,7 @@ public class TripleProcessingTest
 
 		subjectTSVColumns.add(subject);
 
-		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<>();
+		MultiValuedMap<OWLProperty, TripleObject> predicateObjects = new ArrayListValuedHashMap<>();
 		return new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects);
 	}
 
@@ -756,7 +758,7 @@ public class TripleProcessingTest
 		
 		subjectTSVColumns.add(subject);
 
-		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<>();
+		MultiValuedMap<OWLProperty, TripleObject> predicateObjects = new ArrayListValuedHashMap<>();
 		return new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects);
 	}
 	
@@ -938,7 +940,7 @@ public class TripleProcessingTest
 
 		subjectTSVColumns.add(subject);
 
-		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<>();
+		MultiValuedMap<OWLProperty, TripleObject> predicateObjects = new ArrayListValuedHashMap<>();
 
 		OWLProperty statusProperty = ontologyHelper.getProperty("status");
 		List<Flag> contentDirection = new ArrayList<>();
@@ -1029,7 +1031,7 @@ public class TripleProcessingTest
 
 		subjectTSVColumns.add(subject);
 
-		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<>();
+		MultiValuedMap<OWLProperty, TripleObject> predicateObjects = new ArrayListValuedHashMap<>();
 
 		TripleObject hasParticipantTripleObject = new TripleObjectAsRule(new ObjectAsRule("rule2", new ArrayList<>()));
 
@@ -1050,7 +1052,7 @@ public class TripleProcessingTest
 		subject.setFlags(new ArrayList<>());
 		subjectTSVColumns.add(subject);
 
-		predicateObjects = new HashMap<>();
+		predicateObjects = new ArrayListValuedHashMap<>();
 
 		OWLProperty titleProperty = ontologyHelper.getProperty("Title");
 		TripleObject titleTripleObject = new TripleObjectAsColumns(new TSVColumn("GPL19921_title", new ArrayList<>()));
@@ -1133,7 +1135,7 @@ public class TripleProcessingTest
 
 		subjectTSVColumns.add(subject);
 
-		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<>();
+		MultiValuedMap<OWLProperty, TripleObject> predicateObjects = new ArrayListValuedHashMap<>();
 
 		OWLProperty hasParticipantProperty = ontologyHelper.getProperty("has participant");
 		TripleObject hasParticipantTripleObject = new TripleObjectAsRule(new ObjectAsRule("rule2", new ArrayList<>()));
@@ -1163,7 +1165,7 @@ public class TripleProcessingTest
 		subjectTSVColumns.add(subject2);
 		subjectTSVColumns.add(subject3);
 
-		predicateObjects = new HashMap<>();
+		predicateObjects = new ArrayListValuedHashMap<>();
 
 		OWLProperty idProperty = ontologyHelper.getProperty("ID");
 		TripleObject idTripleObject = new TripleObjectAsColumns(new TSVColumn("GPL19921_ID",new ArrayList<>()));
@@ -1283,7 +1285,7 @@ public class TripleProcessingTest
 
 		subjectTSVColumns.add(subject);
 
-		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<>();
+		MultiValuedMap<OWLProperty, TripleObject> predicateObjects = new ArrayListValuedHashMap<>();
 
 		OWLProperty hasParticipantProperty = ontologyHelper.getProperty("has participant");
 		TripleObject hasParticipantTripleObject = new TripleObjectAsRule(new ObjectAsRule("rule2", new ArrayList<>()));
@@ -1338,7 +1340,7 @@ public class TripleProcessingTest
 		subjectTSVColumns.add(subject2);
 		subjectTSVColumns.add(subject3);
 
-		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<>();
+		MultiValuedMap<OWLProperty, TripleObject> predicateObjects = new ArrayListValuedHashMap<>();
 
 		OWLProperty 	idProperty 		= ontologyHelper.getProperty("ID");
 		TripleObject 	idTripleObject 	= new TripleObjectAsRule(new ObjectAsRule("rule2", new ArrayList<>()));
@@ -1362,7 +1364,7 @@ public class TripleProcessingTest
 
 		subjectTSVColumns.add(subject);
 
-		predicateObjects = new HashMap<>();
+		predicateObjects = new ArrayListValuedHashMap<>();
 
 		rules.add(new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects));
 
@@ -1442,12 +1444,12 @@ public class TripleProcessingTest
 		TSVColumn subject = new TSVColumn();
 		subject.setTitle("");
 		List<Flag> subjectFlags = new ArrayList<>();
-		subjectFlags.add(new FlagCol("enrichedDataGOTerm.tsv", 5));
+		subjectFlags.add(new FlagCol("enrichedDataGOTerm.tsv", 5, null));
 		subject.setFlags(subjectFlags);
 
 		subjectTSVColumns.add(subject);
 
-		Map<OWLProperty, TripleObject> predicateObjects = new HashMap<>();
+		MultiValuedMap<OWLProperty, TripleObject> predicateObjects = new ArrayListValuedHashMap<>();
 		return new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects);
 	}
 

@@ -2,7 +2,9 @@ package br.usp.ffclrp.dcm.lssb.transformation_software;
 
 import br.usp.ffclrp.dcm.lssb.custom_exceptions.*;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.*;
+import com.sun.org.apache.xpath.internal.SourceTree;
 import openllet.jena.PelletReasonerFactory;
+import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.jena.datatypes.BaseDatatype;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.graph.Node;
@@ -11,6 +13,7 @@ import org.apache.jena.rdf.model.*;
 import org.apache.jena.reasoner.Reasoner;
 import org.apache.jena.reasoner.ValidityReport;
 import org.apache.jena.reasoner.ValidityReport.Report;
+import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLProperty;
 
 import java.io.File;
@@ -29,12 +32,14 @@ public class TriplesProcessing {
 	private Map<String, SearchBlock> searchBlocks;
 	public 	RuleConfig defaultRuleConfig;
 	private MatrixLineNumberTracking currentLineNumberMatrixRules = new MatrixLineNumberTracking();
-	private Map<String, List<Resource>> simpleRuleAlreadyProcessed = new HashMap<>();
-	public 	long startTime;
+	private Map<String, List<Resource>> columnRulesAlreadyProcessed = new HashMap<>();
+	private Map<String, List<Resource>> simpleRulesAlreadyProcessed = new HashMap<>();
+	public 	Date startTime;
 	private List<String> ontologiesList = new ArrayList<>();
 
 	public 					TriplesProcessing() {
-		startTime = new Date().getTime();
+		startTime = Calendar.getInstance().getTime();
+		System.out.println("Processing Started time:" + Calendar.getInstance().getTime().toString());
 		this.model = ModelFactory.createDefaultModel();
 		//model.read(relativePathOntologyFile); //load ontology and add its axioms to the linked graph
 		fileReader = new SemistructuredFileReader();
@@ -64,9 +69,9 @@ public class TriplesProcessing {
 		}
 
 		//POPULATE dependencyList
-		for(Rule rule : regularRuleList){	
-			Map<OWLProperty, TripleObject> predicateObjectMAP = rule.getPredicateObjects();
-			for(Map.Entry<OWLProperty, TripleObject> predicateMapEntry : predicateObjectMAP.entrySet()){
+		for(Rule rule : regularRuleList){
+			MultiValuedMap<OWLProperty, TripleObject> predicateObjectMAP = rule.getPredicateObjects();
+			for(Map.Entry<OWLProperty, TripleObject> predicateMapEntry : predicateObjectMAP.entries()){
 				if(predicateMapEntry.getValue() instanceof TripleObjectAsRule){
 					List<ObjectAsRule> listOfRulesAndFlagsOfAPredicate = (List<ObjectAsRule>) predicateMapEntry.getValue().getObject();
 					for(ObjectAsRule objectRulesWithFlags : listOfRulesAndFlagsOfAPredicate) {
@@ -85,7 +90,7 @@ public class TriplesProcessing {
 
 		System.out.println("Processing rules...");
  		for(Rule rule : regularRuleList){
-			System.out.println("Processing rule: " + rule.getId());
+			//System.out.println("Processing rule: " + rule.getId());
 			processRule(rule);
 		}
 
@@ -93,78 +98,75 @@ public class TriplesProcessing {
 	}
 
 	private List<Resource> 	processRule(Rule rule) throws Exception {
+		//System.out.println("Processing rule: " + rule.getId());
 		List<Resource> subjectListToBeReturned = new LinkedList<>();
 		if(rule.isMatrix()){
-			if(currentLineNumberMatrixRules.isEmpty()){
+			//if(currentLineNumberMatrixRules.isEmpty()){
 				for(Integer tsvLineNumber = rule.getStartLineNumber(); tsvLineNumber < fileReader.getLinesCount(); tsvLineNumber++) {
-					try {
-						currentLineNumberMatrixRules = new MatrixLineNumberTracking(tsvLineNumber, rule.getId());
-						for(TSVColumn ruleColumns : rule.getSubjectTSVColumns()){
-							if(!assertConditionBlock(ruleColumns.getFlags(), tsvLineNumber))
-								return null;
-						}
+					//currentLineNumberMatrixRules = new MatrixLineNumberTracking(tsvLineNumber, rule.getId());
 
-						// *** SUBJECT ***
-						List<Resource> subjectList = getSubject(rule, tsvLineNumber); //ONE SUBJECT FOR EACH ITEM IN THE CELL
-						subjectListToBeReturned.addAll(processPredicateAndObject(rule, tsvLineNumber, subjectList));
-					//}
-					//catch (CustomWarnings w) {
-						//System.out.println(w.getMessage());
-					//	continue;
-					} catch (ArrayIndexOutOfBoundsException e) {
-						continue;
-					}
-				}
-
-				currentLineNumberMatrixRules = new MatrixLineNumberTracking();
-			}else{
-				try {
+					Boolean conditionBlock = true;
 					for(TSVColumn ruleColumns : rule.getSubjectTSVColumns()){
-						if(!assertConditionBlock(ruleColumns.getFlags(), currentLineNumberMatrixRules.getLineNumber()))
-							return null;
+						if(!assertConditionBlock(ruleColumns.getFlags(), tsvLineNumber))
+							conditionBlock = false;
 					}
 
-					// *** SUBJECT ***
-					List<Resource> subjectList = getSubject(rule, currentLineNumberMatrixRules.getLineNumber()); //ONE SUBJECT FOR EACH ITEM IN THE CELL
-					subjectListToBeReturned.addAll(processPredicateAndObject(rule, currentLineNumberMatrixRules.getLineNumber(), subjectList));
-				//} catch (CustomWarnings w) {
-					//System.out.println(w.getMessage());
-				//	return null;
-				} catch (ArrayIndexOutOfBoundsException e) {
-					return null;
+					if(conditionBlock) {
+						if (rule.processedLines.get(tsvLineNumber) == null) {
+
+							// *** SUBJECT ***
+							List<Resource> subjectList = getSubject(rule, tsvLineNumber); //ONE SUBJECT FOR EACH ITEM IN THE CELL
+							List<Resource> tripleSubjects = processPredicateAndObject(rule, tsvLineNumber, subjectList);
+							rule.processedLines.put(tsvLineNumber, tripleSubjects);
+							subjectListToBeReturned.addAll(tripleSubjects);
+						} else {
+							subjectListToBeReturned.addAll(rule.processedLines.get(tsvLineNumber));
+						}
+					}
 				}
-			}
+
+
+
+//				currentLineNumberMatrixRules = new MatrixLineNumberTracking();
+//
+//			}else{
+//				for(TSVColumn ruleColumns : rule.getSubjectTSVColumns()){
+//					if(!assertConditionBlock(ruleColumns.getFlags(), currentLineNumberMatrixRules.getLineNumber()))
+//						return null;
+//				}
+//
+//				// *** SUBJECT ***
+//				List<Resource> subjectList = getSubject(rule, currentLineNumberMatrixRules.getLineNumber()); //ONE SUBJECT FOR EACH ITEM IN THE CELL
+//				subjectListToBeReturned.addAll(processPredicateAndObject(rule, currentLineNumberMatrixRules.getLineNumber(), subjectList));
+//			}
 
 
 		}else{
-			List<Resource> t = simpleRuleAlreadyProcessed.get(rule.getId());
+			List<Resource> t = columnRulesAlreadyProcessed.get(rule.getId());
 
-			if(simpleRuleAlreadyProcessed.get(rule.getId()) == null){
+			if(columnRulesAlreadyProcessed.get(rule.getId()) == null){
 				// *** SUBJECT ***
 				List<Resource> subjectList = getSubject(rule, rule.getStartLineNumber()); //ONE SUBJECT FOR EACH ITEM IN THE CELL
 
 				for(Integer tsvLineNumber = rule.getStartLineNumber(); tsvLineNumber < fileReader.getLinesCount(); tsvLineNumber++) {
-					try {
-						for (TSVColumn ruleColumns : rule.getSubjectTSVColumns()) {
-							if (!assertConditionBlock(ruleColumns.getFlags(), tsvLineNumber))
-								return null;
-						}
 
-						List<Resource> subjectsProcessed = processPredicateAndObject(rule, tsvLineNumber, subjectList);
-						simpleRuleAlreadyProcessed.put(rule.getId(), subjectsProcessed);
-						subjectListToBeReturned = subjectsProcessed;
+					if(rule.getId().equals("rule1"))
+						System.out.println("Rule 1 - Line: " + tsvLineNumber);
 
-					//} catch (CustomWarnings w) {
-						//System.out.println(w.getMessage());
-					//	return null;
-					} catch (ArrayIndexOutOfBoundsException e) {
-						return null;
+					for (TSVColumn ruleColumns : rule.getSubjectTSVColumns()) {
+						if (!assertConditionBlock(ruleColumns.getFlags(), tsvLineNumber))
+							return null;
 					}
+
+					List<Resource> subjectsProcessed = processPredicateAndObject(rule, tsvLineNumber, subjectList);
+
+					subjectListToBeReturned = subjectsProcessed;
 				}
 			}else{
-				subjectListToBeReturned = simpleRuleAlreadyProcessed.get(rule.getId());
+				subjectListToBeReturned = columnRulesAlreadyProcessed.get(rule.getId());
 			}
 		}
+		columnRulesAlreadyProcessed.put(rule.getId(), subjectListToBeReturned);
 		return subjectListToBeReturned;
 	}
 
@@ -175,8 +177,8 @@ public class TriplesProcessing {
 
 		for(Resource subject : subjectList){
 
-			Map<OWLProperty, TripleObject> predicateObjectMAP = rule.getPredicateObjects();
-			for(Map.Entry<OWLProperty, TripleObject> predicateMapEntry : predicateObjectMAP.entrySet()){
+			MultiValuedMap<OWLProperty, TripleObject> predicateObjectMAP = rule.getPredicateObjects();
+			for(Map.Entry<OWLProperty, TripleObject> predicateMapEntry : predicateObjectMAP.entries()){
 				//GET PREDICATE IRI
 				predicate = model.createProperty(predicateMapEntry.getKey().getIRI().toString());
 
@@ -197,20 +199,29 @@ public class TriplesProcessing {
 				}else{
 					@SuppressWarnings("unchecked")
 					List<TSVColumn> dataColumns = (List<TSVColumn>) predicateMapEntry.getValue().getObject();
-					List<String> listOfContent = null;
+					List<String> listOfContent = extractDataFromTSVColumn(dataColumns, tsvLineNumber);
 
-					for(TSVColumn dataColumn : dataColumns) {
-						try {
-							listOfContent = extractDataFromTSVColumn(dataColumns, tsvLineNumber);
-						} catch (ColumnNotFoundWarning e) {
-							//Skipping to next rule line
-							continue;
+
+					Object 	 datatype = null;
+					FlagNode flagNodeObjectType = null;
+					for(TSVColumn column : dataColumns){
+						datatype = getDataTypeContentFlag(column); //get the first element
+						flagNodeObjectType = getNodeFlagFromTSVColumn(column); //get the first element
+					}
+
+					if(datatype != null && flagNodeObjectType != null)
+						throw new Exception("The triple object cannot have both Datatype Flag and Node Flag at the same time. Rule: " + rule.getId());
+
+					if(flagNodeObjectType != null){
+						Resource nodeType = model.createResource(flagNodeObjectType.getFlagNode().getIRI().toString());
+						List<Resource> objectList = getObjects(rule, listOfContent, dataColumns, nodeType);
+						for (Resource object : objectList) {
+							addTripleToModel(subject, predicate, object);
 						}
 
-						Object datatype = getDataTypeContentFlag(dataColumn); //get the first element, not necessarily the index 0
-
-						for(String content : listOfContent){
-							if(content != null && !content.equals(""))
+					}else {
+						for (String content : listOfContent) {
+							if (content != null && !content.equals(""))
 								addTripleToModel(subject, predicate, content, datatype);
 						}
 					}
@@ -229,6 +240,8 @@ public class TriplesProcessing {
 					throw new ConditionBlockException("No condition block created");
 
 				ConditionBlock conditionBlock = conditionBlocks.get(((FlagConditionBlock) flag).getId());
+				if(conditionBlock == null)
+					throw new ConditionBlockException("Condition block not found: " + ((FlagConditionBlock) flag).getId());
 
 				for(Condition condition : conditionBlock.getConditions()){
 					String contentTSVColumn = fileReader.getData(condition, tsvLineNumber);
@@ -247,11 +260,38 @@ public class TriplesProcessing {
 					}
 
 					if(condition.getOperation() == EnumOperationsConditionBlock.LESSTHAN){
-						result = Double.parseDouble(contentTSVColumn) < Double.parseDouble(condition.getConditionValue());
+
+						try {
+
+							Double value = condition.parsedValues.get(contentTSVColumn);
+							if(value == null) {
+								value = Double.parseDouble(contentTSVColumn);
+								condition.parsedValues.put(contentTSVColumn, value);
+							}
+
+							result = value < ((double) condition.getConditionValue());
+
+						}catch (Exception e ){
+							result = false;
+						}
+
 					}
 
 					if(condition.getOperation() == EnumOperationsConditionBlock.GREATERTHAN){
-						result = Double.parseDouble(contentTSVColumn) > Double.parseDouble(condition.getConditionValue());
+						try {
+
+							Double value = condition.parsedValues.get(contentTSVColumn);
+
+							if(value == null) {
+								value = Double.parseDouble(contentTSVColumn);
+								condition.parsedValues.put(contentTSVColumn, value);
+							}
+
+							result = value > ((double) condition.getConditionValue());
+
+						}catch (Exception e ) {
+							result = false;
+						}
 					}
 
 					if(!result)
@@ -264,7 +304,8 @@ public class TriplesProcessing {
 	}
 
 	private void 			addTripleToModel(Resource subject, Property predicate, Resource object) {
-		//System.out.println("S: " + subject.getURI() + " P: " + predicate.getURI() + " O: " + object.getURI());
+		if(object.toString().contains("GO_0008150"))
+			System.out.println("S: " + subject.getURI() + " P: " + predicate.getURI() + " O: " + object.getURI());
 		subject.addProperty(predicate, object);		
 	}
 
@@ -277,8 +318,13 @@ public class TriplesProcessing {
 			if(	model.contains(subject, predicate, contentElement))
 				return;
 			else{
-				subject.addProperty(predicate, contentElement);
-				return;
+				if(datatype != null){
+					subject.addProperty(predicate, contentElement, (RDFDatatype) datatype);
+					return;
+				}else {
+					subject.addProperty(predicate, contentElement);
+					return;
+				}
 			}
 		}
 
@@ -300,6 +346,7 @@ public class TriplesProcessing {
 
 		List<String[]> dataColumnsSeparated = new ArrayList<String[]>();
 		for(TSVColumn column : listTSVColumn){
+			String[] columnData = new String[1];
 			Boolean extractedData = false;
 
 			for(Flag flag : column.getFlags()){
@@ -307,50 +354,67 @@ public class TriplesProcessing {
 					String[] separatedData = separateDataFromTSVColumn((FlagSeparator) flag, column, lineNumber);
 					if(separatedData == null)
 						continue;
-					dataColumnsSeparated.add(separatedData);
+					columnData = separatedData;
 					extractedData = true;
 				}else if(flag instanceof FlagNotMetadata) {
-					String[] columnData = new String[1];
+
 					columnData[0] = fileReader.getData(column, 0);
 
 					if(columnData[0] == null)
 						continue;
 
-					dataColumnsSeparated.add(columnData);
 					extractedData = true;
 				}else if(flag instanceof FlagFixedContent) {
-					String[] columnData = new String[1];
 					columnData[0] = ((FlagFixedContent) flag).getContent();
 
 					if(columnData[0] == null)
 						continue;
 
-					dataColumnsSeparated.add(columnData);
 					extractedData = true;
 				}
 			}
 
-			//IF ANY OF THE SPECIAL CASES (FLAGS ABOVE) WERE MET, EXTRACT THE CONTENT NORMALLY. 
+			//IF ANY OF THE SPECIAL CASES (FLAGS ABOVE) WERE NOT MET, EXTRACT THE CONTENT NORMALLY.
 			if(!extractedData){
-				String[] columnData = new String[1];
 				columnData[0] = fileReader.getData(column, lineNumber);
 
 				if(columnData[0] == null)
 					continue;
-
-				dataColumnsSeparated.add(columnData);
 			}
+
+			//IF THERE IS A SEARCH BLOCK SET
+			for(Flag flag : column.getFlags()){
+				if(flag instanceof FlagSearchBlock) {
+					String flagId = ((FlagSearchBlock) flag).getId();
+					SearchBlock searchBlock = this.searchBlocks.get(flagId);
+
+					//System.out.print("line " + lineNumber + " - ");
+
+					try{
+						List<String> externalIRIs = searchBlock.getExternalNode(Arrays.asList(columnData));
+
+						if(externalIRIs == null || externalIRIs.isEmpty())
+							columnData = new String[0];
+						else
+							columnData = externalIRIs.toArray(new String[0]);
+					}catch (NullPointerException e){
+						e.printStackTrace();
+					}
+				}
+
+			}
+
+			dataColumnsSeparated.add(columnData);
 		}
 
-		//objectContent = metodoDoCaraio(dataColumnsSeparated);
-		objectContent = caraio2(dataColumnsSeparated);
+		objectContent = mergeContentOfMultipleTSVColumns(dataColumnsSeparated);
 
 
 		return objectContent;
 	}
 
 
-	private List<String> caraio2 (List<String[]> dataColumnsSeparated){
+	private List<String> mergeContentOfMultipleTSVColumns (List<String[]> dataColumnsSeparated){
 
 		//FINDS THE BIGGER ARRAY OF DATA EXTRACTED
 		Integer biggerColumn = Integer.MIN_VALUE;
@@ -375,51 +439,6 @@ public class TriplesProcessing {
 
 		return objectContent;
 	}
-	private List<String> metodoDoCaraio(List<String[]> dataColumnsSeparated){
-
-		//FINDS THE BIGGER ARRAY OF DATA EXTRACTED
-		Integer biggerColumn = Integer.MIN_VALUE;
-		for(String[] array : dataColumnsSeparated){
-			if(array.length > biggerColumn)
-				biggerColumn = array.length;
-		}
-
-		//MAKES ALL ARRAYS BE THE SAME SIZE.
-		//THE ARRAY THAT IS SMALLER THAN THE BIGGEST IS COMPLETED WITH
-		//THE DATA AT THE BEGGINING OF THE ARRAY ITSELF.
-		List<List<String>> dataColumns = new ArrayList<List<String>>();
-		for(String[] array : dataColumnsSeparated){
-			List<String> list = new ArrayList<String>();
-			int oldPosition = -1;
-			while(list.size() != biggerColumn.intValue()) {
-
-				if((oldPosition + 1) < array.length) {
-					list.add(array[oldPosition + 1]);
-					oldPosition++;
-				}else{
-					oldPosition = 0;
-				}
-			}
-			dataColumns.add(list);
-		}
-
-
-		List<String> objectContent = new ArrayList<String>();
-
-		//MERGE BETWEEN THE DATA ARRAYS EXTRACTED
-		//ONE ITEM FROM EACH ARRAY
-		for(int i = 0; i < biggerColumn; i++){
-			String content = "";
-			for(List<String> list : dataColumns){
-				content += " " + list.get(i);
-			}
-			content = content.trim();
-			objectContent.add(content);
-		}
-
-		return objectContent;
-	}
-
 
 	private String[] 		separateDataFromTSVColumn(FlagSeparator flag, TSVColumn column, Integer lineNumber) throws Exception {
 		String rawData = fileReader.getData(column, lineNumber);
@@ -465,9 +484,14 @@ public class TriplesProcessing {
 
 			List<String> subjectContent = extractDataFromTSVColumn(rule.getSubjectTSVColumns(), lineNumber);
 
-			for (String individualContent : subjectContent) {
-				subjectList.add(model.createResource(searchBlock.getExternalNode(individualContent), subjectType));
+			List<String> externalNodes = searchBlock.getExternalNode(subjectContent);
+
+			for (String node : externalNodes) {
+				subjectList.add(model.createResource(node, subjectType));
 			}
+//			for (String node : subjectContent) {
+//				subjectList.add(model.createResource(node, subjectType));
+//			}
 
 			return subjectList;
 		}
@@ -502,6 +526,49 @@ public class TriplesProcessing {
 		return subjectList;
 	}
 
+	private List<Resource> 	getObjects(Rule rule, List<String> listOfContent, List<TSVColumn> columns, Resource objectType) throws Exception {
+		String baseIRI = rule.getDefaultBaseIRI();
+		List<Resource> objectList = new ArrayList<Resource>();
+
+		SearchBlock searchBlock = getSearchBlockFlag(columns);
+		if(searchBlock != null){
+
+			for (String node : listOfContent) {
+				objectList.add(model.createResource(node, objectType));
+			}
+
+			return objectList;
+		}
+
+		String baseIRIFlag = getBASEIRIFlag(columns);
+		if(baseIRIFlag != null)
+			baseIRI = baseIRIFlag;
+
+		String customIDFlag = getCustomIDFlag(columns);
+		if (customIDFlag != null) {
+			objectList.add(model.createResource(baseIRI + customIDFlag, objectType));
+
+
+		} else {
+			String fixedContentFlag = getFixedContentFlag(columns);
+			if (fixedContentFlag != null) {
+				fixedContentFlag = fixedContentFlag.replaceAll(" ", "_");
+				objectList.add(model.createResource(baseIRI + fixedContentFlag, objectType));
+
+			} else {
+				List<String> subjectContent = new ArrayList<String>();
+				for (String content : listOfContent) {
+					subjectContent.add(content.replaceAll(" ", "_"));
+				}
+
+				for (String individualContent : subjectContent) {
+					objectList.add(model.createResource(baseIRI + individualContent, objectType));
+				}
+			}
+		}
+		return objectList;
+	}
+
 	private String 			getCustomIDFlag(List<TSVColumn> listTSVColumn) {
 		for(TSVColumn column : listTSVColumn){
 			for(Flag flag : column.getFlags()){
@@ -528,6 +595,15 @@ public class TriplesProcessing {
 		for(Flag flag : column.getFlags()){
 			if(flag instanceof FlagDataType){
 				return ((FlagDataType) flag).getDatatype();
+			}
+		}
+		return null;
+	}
+
+	private FlagNode 			getNodeFlagFromTSVColumn(TSVColumn column) {
+		for(Flag flag : column.getFlags()){
+			if(flag instanceof FlagNode){
+				return (FlagNode) flag;
 			}
 		}
 		return null;
@@ -591,6 +667,7 @@ public class TriplesProcessing {
 	public Boolean 			checkConsistency() throws Exception {
 		System.out.println("#####################################\nChecking consistency...");
 		for(String ontologyPath : ontologiesList) {
+			System.out.println("# Checking consistency of ontology: " + ontologyPath);
 			Model ontology = ModelFactory.createOntologyModel().read(ontologyPath);
 			Reasoner openPellet = PelletReasonerFactory.theInstance().create().bindSchema(ontology);
 			InfModel inf = ModelFactory.createInfModel(openPellet, model);

@@ -58,10 +58,14 @@ public class SemistructuredFileReader {
 			try {
 				if(flagCol == null) {
 					position = file.getHeader().get(tsvColumn.getTitle());
-					columnFoundInAnyFile = true;
+
+					if(position != null)
+						columnFoundInAnyFile = true;
 				}else{
 					if(file.getFilename().equals(flagCol.getFilename())) {
 						position = flagCol.getColPosition();
+						if(position == null)
+							position = file.getHeader().get(flagCol.getColName());
 
 						if(position >= file.getHeader().size())
 							continue;

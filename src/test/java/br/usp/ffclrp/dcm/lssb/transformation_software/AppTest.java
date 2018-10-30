@@ -140,7 +140,7 @@ public class AppTest
 
 		assertEquals(3, rule1Extracted.getPredicateObjects().size());
 
-		for(Entry<OWLProperty, TripleObject> entry : rule1Extracted.getPredicateObjects().entrySet()){
+		for(Entry<OWLProperty, TripleObject> entry : rule1Extracted.getPredicateObjects().entries()){
 
 			if(entry.getKey().getIRI().toString().equals("http://purl.org/g/onto/has_pvalue")){
 				TripleObjectAsColumns object = (TripleObjectAsColumns) entry.getValue();
@@ -239,7 +239,7 @@ public class AppTest
 
 		assertEquals(3, rule2Extracted.getPredicateObjects().size());
 
-		for(Entry<OWLProperty, TripleObject> entry : rule2Extracted.getPredicateObjects().entrySet()){
+		for(Entry<OWLProperty, TripleObject> entry : rule2Extracted.getPredicateObjects().entries()){
 
 			if(entry.getKey().getIRI().toString().equals("http://purl.org/g/onto/has_pvalue")){
 				TripleObjectAsColumns object = (TripleObjectAsColumns) entry.getValue();
@@ -341,7 +341,7 @@ public class AppTest
 
 		assertEquals(3, rule2Extracted.getPredicateObjects().size());
 
-		for(Entry<OWLProperty, TripleObject> entry : rule2Extracted.getPredicateObjects().entrySet()){
+		for(Entry<OWLProperty, TripleObject> entry : rule2Extracted.getPredicateObjects().entries()){
 
 			if(entry.getKey().getIRI().toString().equals("http://purl.org/g/onto/has_pvalue")){
 				TripleObjectAsColumns object = (TripleObjectAsColumns) entry.getValue();
@@ -494,9 +494,9 @@ public class AppTest
 			}
 		}
 
-		assertEquals(3, rule2Extracted.getPredicateObjects().size());
+		assertEquals(3, rule2Extracted.getPredicateObjects().asMap().size());
 
-		for(Entry<OWLProperty, TripleObject> entry : rule2Extracted.getPredicateObjects().entrySet()){
+		for(Entry<OWLProperty, TripleObject> entry : rule2Extracted.getPredicateObjects().entries()){
 
 			if(entry.getKey().getIRI().toString().equals("http://purl.org/g/onto/has_pvalue")){
 				TripleObjectAsColumns object = (TripleObjectAsColumns) entry.getValue();
@@ -526,21 +526,36 @@ public class AppTest
 					}
 				}
 
-			}else if(entry.getKey().getIRI().toString().equals("http://purl.org/g/onto/has_participant")){
+			}else if (entry.getKey().getIRI().toString().equals("http://purl.org/g/onto/has_participant")){
+				continue;
+			}else {
+				fail();
+			}
+		}
+
+		boolean rule3 = false;
+		boolean rule4 = false;
+		for(Entry<OWLProperty, TripleObject> entry : rule2Extracted.getPredicateObjects().entries()) {
+			if (entry.getKey().getIRI().toString().equals("http://purl.org/g/onto/has_participant")) {
 				TripleObjectAsRule object = (TripleObjectAsRule) entry.getValue();
 
-				assertEquals(2, object.getObject().size());
+				ObjectAsRule objectAsRule = (ObjectAsRule) object.getObject().get(0);
 
-				for(ObjectAsRule objectAsRule : object.getObject()){
-					assert((objectAsRule.getRuleId().equals("rule3")) ||
-							(objectAsRule.getRuleId().equals("rule4")));
+				if (objectAsRule.getRuleId().equals("rule3")) {
 					assertEquals(0, objectAsRule.getFlags().size());
-
+					rule3 = true;
 				}
 
-			}else
-				fail();
+				if (objectAsRule.getRuleId().equals("rule4")){
+					assertEquals(0, objectAsRule.getFlags().size());
+					rule4 = true;
+				}
+
+			}
 		}
+
+		assertTrue(rule3);
+		assertTrue(rule4);
 	}
 
 	@Test
@@ -596,20 +611,23 @@ public class AppTest
 			}
 		}
 
-		assertEquals(3, ruleExtracted.getPredicateObjects().size());
+		assertEquals(3, ruleExtracted.getPredicateObjects().asMap().size());
 
-		for(Entry<OWLProperty, TripleObject> entry : ruleExtracted.getPredicateObjects().entrySet()){
+
+		boolean passedPvalue = false;
+		boolean passedListTotal = false;
+		for(Entry<OWLProperty, TripleObject> entry : ruleExtracted.getPredicateObjects().entries()){
 
 			if(entry.getKey().getIRI().toString().equals("http://purl.org/g/onto/has_pvalue")){
 				TripleObjectAsColumns objects = (TripleObjectAsColumns) entry.getValue();
 
-				assertEquals(2, objects.getObject().size());
-
 				for(TSVColumn object : objects.getObject()) {
 					if(object.getTitle().equals("PValue")) {
 						assertEquals(0, object.getFlags().size());
+						passedPvalue = true;
 					}else if(object.getTitle().equals("List Total")) {
 						assertEquals(0, object.getFlags().size());
+						passedListTotal = true;
 					}else {
 						fail();
 					}
@@ -646,6 +664,9 @@ public class AppTest
 			}else
 				fail();
 		}
+
+		assertTrue(passedPvalue);
+		assertTrue(passedListTotal);
 	}
 
 	@Test
@@ -787,7 +808,7 @@ public class AppTest
 
 		assertEquals(3, rule1Extracted.getPredicateObjects().size());
 
-		for(Entry<OWLProperty, TripleObject> entry : rule1Extracted.getPredicateObjects().entrySet()){
+		for(Entry<OWLProperty, TripleObject> entry : rule1Extracted.getPredicateObjects().entries()){
 
 			if(entry.getKey().getIRI().toString().equals("http://purl.org/g/onto/has_pvalue")){
 				TripleObjectAsColumns object = (TripleObjectAsColumns) entry.getValue();

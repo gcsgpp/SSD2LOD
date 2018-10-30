@@ -1,8 +1,11 @@
 package br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing;
 
+import org.apache.commons.collections4.MultiValuedMap;
+import org.apache.jena.rdf.model.Resource;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLProperty;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -11,9 +14,10 @@ public class Rule {
 	private RuleConfig config;
 	private OWLClass subject;
 	private List<TSVColumn> subjectTSVColumns = null;
-	private Map<OWLProperty, TripleObject> predicateObjects;
+	private MultiValuedMap<OWLProperty, TripleObject> predicateObjects;
+	public Map<Integer, List<Resource>> processedLines = new HashMap<>();
 
-	public Rule(String id, RuleConfig ruleConfig, OWLClass subject, List<TSVColumn> subjectTSVColumns, Map<OWLProperty, TripleObject> predicateObjects){
+	public Rule(String id, RuleConfig ruleConfig, OWLClass subject, List<TSVColumn> subjectTSVColumns, MultiValuedMap<OWLProperty, TripleObject> predicateObjects){
 		this.id = id;
 		this.config = ruleConfig;
 		this.subject = subject;
@@ -33,7 +37,7 @@ public class Rule {
 		return this.subjectTSVColumns;
 	}
 
-	public Map<OWLProperty, TripleObject> getPredicateObjects() {
+	public MultiValuedMap<OWLProperty, TripleObject> getPredicateObjects() {
 		return this.predicateObjects;
 	}
 	

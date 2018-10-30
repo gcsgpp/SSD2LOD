@@ -121,6 +121,8 @@ public class RuleConfig {
 					rule.setSyntax(Lang.RDFXML);
 				else if(Lang.N3		.getName().toLowerCase().equals(value.toLowerCase()))
 					rule.setSyntax(Lang.N3);
+				else if(Lang.NTRIPLES.getName().toLowerCase().equals(value.toLowerCase()))
+					rule.setSyntax(Lang.NTRIPLES);
 				else if(Lang.TURTLE	.getName().toLowerCase().equals(value.toLowerCase()))
 					rule.setSyntax(Lang.TURTLE);
 			}

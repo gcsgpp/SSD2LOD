@@ -7,6 +7,7 @@ import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RiotException;
 import org.apache.jena.riot.lang.LangNTriples;
+import org.apache.jena.sparql.mgt.Explain;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -46,6 +47,7 @@ public class SPARQLQueryProcessing {
 
 
         ResultSet results;
+        ARQ.setExecutionLogging(Explain.InfoLevel.ALL) ;
         try (QueryExecution qexec = QueryExecutionFactory.create(query, model)) {
             results = qexec.execSelect();
 

@@ -1,7 +1,7 @@
 package br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing;
 
 public enum EnumRegexList {
-	SELECTELEMENTSBLOCKS("((row_based_rule|column_based_rule)\\s*\\w+\\s*\\[.+?\\]\\s*\\{(.+?)?\\})|(search_element\\s?\\w+\\s?\\{.+?\\})|(config_element\\s*\\{.+?\\})"),
+	SELECTELEMENTSBLOCKS("((row_based_rule|column_based_rule)\\s*\\w+\\s*\\[.+?\\]\\s*\\{(.+?)?\\})|(search_element\\s?\\w+\\s?\\[.+?\\]\\s*\\{\\$.+?\\$\\})|(config_element\\s*\\{.+?\\})"),
 	SELECTBLOCKBODY("\\{(.+?)?\\}"),
 
 	SELECTRULEID("(column_based_rule|row_based_rule|condition_element)\\s*(\\w+)"),
@@ -10,14 +10,14 @@ public enum EnumRegexList {
 
 	SELECTSEARCHBLOCKID("(?:search_element\\s*\\w+\\s*{.*})"),
 	SELECTSEARCHID("(search_element\\s*)(\\w+)"),
-	SELECTSEARCHBODY("(search_element\\s*\\w+)(\\{.+?\\})"),
+	SELECTSEARCHBODY("search_element\\s*\\w+\\s*\\[\\\"(.*)\\\"\\]\\{\\$(.*)\\$\\}"),
 	SELECTSEARCHPREDICATESDIVISIONS("((\\{|,)?\\s*?\"[^:,]*?\"\\s*=)"),
 
 
 	SELECTCONDITIONBLOCK("condition_element\\s?\\w+\\s?\\{.+?\\}"),
 	SELECTCONDITIONID("(condition_element\\s*)(\\w+)"),
 	SELECTCONDITIONBODY("(condition_element\\s*\\w+)\\s*(\\{.+?\\})"),
-	SELECTPREDICATESDIVISIONSCONDITIONBLOCK("((\\{|,)(\\s*?)\"[^\"]*?\"(\\s*?)(\\/COL\\(\\s*?((\\d*?)|(\\\"[^\"]*?\\\"))\\s*?,\\s*?\".*?\"\\s*?\\))?(\\s*?)((==)|(!=)|>|<)(\\s*?)\"(.*?)\")+?"),
+	SELECTPREDICATESDIVISIONSCONDITIONBLOCK("((\\{|,)(\\s*?)\"[^\"]*?\"(\\s*?)(\\/COL\\(\\s*?((\\d*?)|(\\\"[^\"]*?\\\"))\\s*?,\\s*?\".*?\"\\s*?\\))?(\\s*?)((==)|(!=)|>|<|<=|>=)(\\s*?)\"(.*?)\")+?"),
 
 
 	SELECTSUBJECTCLASSNAME("is_equivalent_to\\s*(\".+?\")"),
@@ -33,7 +33,7 @@ public enum EnumRegexList {
 	SELECTFIXEDCONTENTFLAG("(\\/DefaultValue\\(\"(.*?)\"\\))"),
 	SELECTCONDITIONBLOCKFLAG("\\/CE\\(\\w+\\)"),
 	SELECTCOLFLAG("\\/COL\\(\\s*?((\\d*?)|(\\\"[^\"]*?\\\"))\\s*?,\\s*?\".*?\"\\s*?\\)"),
-	SELECTSEARCHBLOCKFLAG("(\\/SE\\((\\w*?)\\))"),
+	SELECTSEARCHBLOCKFLAG("\\/SE\\((\\w*?),\\s*?(\\?\\w*?)\\)"),
 	SELECTSEPARATORFLAG("(\\/SP\\(\"(.*?)\"((,(.*?)\\))|\\)))"),
 	SELECTSEPARATORFLAGRANGENUMBERS("((\\d+\\s*:\\s*\\d+))"),
 	SELECTCUSTOMDIDFLAG("(\\/ID\\(\"(.*?)\"\\))"),

@@ -4,6 +4,8 @@ import br.usp.ffclrp.dcm.lssb.custom_exceptions.NotFoundExternalNodeException;
 import br.usp.ffclrp.dcm.lssb.custom_exceptions.SearchBlockException;
 import br.usp.ffclrp.dcm.lssb.transformation_software.RuleInterpretor;
 import br.usp.ffclrp.dcm.lssb.transformation_software.Utils;
+import org.apache.commons.collections4.MultiValuedMap;
+import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import org.apache.jena.base.Sys;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
@@ -17,16 +19,16 @@ public class SearchBlock {
 
     private String id;
     private String endpointIRI;
-    private String predicateToSearch;
-    private Map<String, String> externalNodesAlreadyFound = new HashMap<>();
+    private String query;
+    private MultiValuedMap<String, String> externalNodesAlreadyFound = new ArrayListValuedHashMap<>();
     private int qtd = 0;
     private int qtdSearched = 0;
     private Set<String> reused = new HashSet<>();
 
-    public SearchBlock(String id, String endpointIRI, String predicateToSearch){
+    public SearchBlock(String id, String endpointIRI, String query){
         this.id                 = id;
         this.endpointIRI        = endpointIRI;
-        this.predicateToSearch  = predicateToSearch;
+        this.query              = query;
     }
 
     public String getId() {
@@ -35,61 +37,43 @@ public class SearchBlock {
 
     public String getEndpointIRI() {    return endpointIRI;    }
 
-    public String getPredicateToSearch() {  return predicateToSearch;   }
+    public String getQueryToSearch() {  return query;   }
 
-    public List<String> getExternalNode(List<String> dataList) throws NotFoundExternalNodeException {
+    public List<String> getExternalNode(List<String> dataList, String variable) throws NotFoundExternalNodeException {
 
         List<String> externalNodeIRI = new ArrayList<>();
 
-        String dataString = "";
-
         for(String item : dataList){
-            String existed = externalNodesAlreadyFound.get(item);
-            if( existed == null) {
-                dataString += "\"" + item + "\"";
-                this.qtdSearched++;
+            Collection<String> existed = externalNodesAlreadyFound.get(item);
+            if( existed.size() > 0) {
+                externalNodeIRI.addAll(existed);
+                reused.addAll(existed);
+                continue;
             }else{
-                externalNodeIRI.add(existed);
-                reused.add(existed);
-                //System.out.println(" Reusing: " + existed + ";");
+
+                String query = this.query;
+                query = query.replaceAll("\\?tsvData", "\"" + item + "\"");
+
+                QueryExecution q = QueryExecutionFactory.sparqlService(this.endpointIRI, query);
+
+                ResultSet results;
+                try {
+                    results = q.execSelect();
+                }catch (Exception e){
+                    System.out.println(e.getMessage());
+                    return null;
+                }
+
+                this.qtdSearched++;
+                while(results.hasNext()){
+                    QuerySolution soln = results.nextSolution();
+                    externalNodeIRI.add(soln.get(variable).toString());
+                    externalNodesAlreadyFound.put(item, soln.get(variable).toString());
+                    this.qtd++;
+                }
             }
-            //System.out.print(item + " ");
         }
-
-        //There's nothing to search for
-        if(dataString.length() == 0) {
-            System.out.println("Terms reused: " + reused.size());
-            return externalNodeIRI;
-        }
-
-
-        //System.out.println(" Searching: " + dataString + ";");
-        String query = "SELECT DISTINCT ?s ?o2 WHERE { ?s <" + this.predicateToSearch + "> ?o . BIND(str(?o) as ?o2) . VALUES ?o2 { " + dataString + " } }";
-        QueryExecution q = QueryExecutionFactory.sparqlService(this.endpointIRI, query);
-
-        ResultSet results;
-        try {
-            results = q.execSelect();
-        }catch (Exception e){
-            System.out.println(e.getMessage());
-            return null;
-        }
-
-
-        while(results.hasNext()){
-            QuerySolution soln = results.nextSolution();
-            externalNodeIRI.add(soln.get("s").toString());
-            externalNodesAlreadyFound.put(soln.get("o2").toString(), soln.get("s").toString());
-            this.qtd++;
-        }
-        System.out.println("Terms found: " + qtd + " of " + qtdSearched + " (" + reused.size() + " reused)");
-
-
-        //throw new NotFoundExternalNodeException("Not found node with predicate <" + this.predicateToSearch + "> and object: \"" + object + "\"");
-        //System.out.println("Not found node with predicate <" + this.predicateToSearch + "> and object: \"" + object + "\"");
-        if(externalNodeIRI.isEmpty())
-            return null;
-
+        System.out.println("IRIs founds: " + qtd + " of " + qtdSearched + " (" + reused.size() + " reused)");
         return externalNodeIRI;
     }
 
@@ -120,59 +104,17 @@ public class SearchBlock {
         Matcher matcher 				=	Utils.matchRegexOnString(EnumRegexList.SELECTSEARCHID.get(), sbAsText);
 
         String searchBlockId = matcher.group(2);
-                matcher = Utils.matchRegexOnString(EnumRegexList.SELECTSEARCHBODY.get(), sbAsText);;
-        String predicatesLinesOneBlock = matcher.group(2);
+                matcher = Utils.matchRegexOnString(EnumRegexList.SELECTSEARCHBODY.get(), sbAsText);
 
-
-        matcher = Utils.matchRegexOnString(EnumRegexList.SELECTSEARCHPREDICATESDIVISIONS.get(), predicatesLinesOneBlock);
-        List<Integer> initialOfEachMatch = new ArrayList<Integer>();
-        while(!matcher.hitEnd()){
-            initialOfEachMatch.add(matcher.start());
-            matcher.find();
-        }
-
-        String endpoint = null;
-        String predicate = null;
-        for(int i = 0; i <= initialOfEachMatch.size()-1; i++){
-            int finalChar;
-            if(i == initialOfEachMatch.size()-1) //IF LAST MATCH, GET THE END OF THE SENTENCE
-                finalChar = predicatesLinesOneBlock.length();
-            else
-                finalChar = initialOfEachMatch.get(i+1);
-
-            String lineFromBlock = predicatesLinesOneBlock.substring(initialOfEachMatch.get(i) + 1, // +1 exists to not include the first character, a comma
-                    finalChar);
-
-            String column 	= Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(lineFromBlock, EnumRegexList.SELECTSEARCHPREDICATESDIVISIONS.get());
-            lineFromBlock 	= Utils.removeRegexFromContent(EnumRegexList.SELECTSEARCHPREDICATESDIVISIONS.get(), lineFromBlock);
-            String value 	= Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(lineFromBlock, EnumRegexList.SELECTALL.get());
-
-            if(column.toLowerCase().equals("endpoint")) {
-                endpoint = value;
-            }else if(column.toLowerCase().equals("predicate")){
-                predicate = value;
-            }else{
-                throw new SearchBlockException("It was not possible to identify the term field +\'" + column + "\'");
-            }
-
-
-        }
+        String endpoint = matcher.group(1).trim();
+        String query = matcher.group(2).trim();
 
         if(endpoint == null)
             throw new SearchBlockException("The field 'endpoint' is mandatory if you are using search_block but unfortunately this field was not identified in all search blocks. Please check your file.");
 
-        if(predicate == null)
-            throw new SearchBlockException("The field 'predicate' is mandatory if you are using search_block but unfortunately this field was not identified in all search blocks. Please check your file.");
+//        if(predicate == null)
+//            throw new SearchBlockException("The field 'predicate' is mandatory if you are using search_block but unfortunately this field was not identified in all search blocks. Please check your file.");
 
-        return new SearchBlock(searchBlockId, endpoint, predicate);
-    }
-
-    static private String extractSearchBlockIDFromSentence(String blockRulesAsText) {
-        String data = "";
-
-        Matcher matcher = Utils.matchRegexOnString(EnumRegexList.SELECTSEARCHBLOCKID.get(), blockRulesAsText);
-        String test = matcher.group();
-        data = matcher.group().replace("search_block[", "").trim();
-        return data;
+        return new SearchBlock(searchBlockId, endpoint, query);
     }
 }

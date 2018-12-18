@@ -126,6 +126,8 @@ public class ConditionBlock extends Flag {
 		else if(operation.equals(EnumOperationsConditionBlock.EQUAL.getOperation()))			return EnumOperationsConditionBlock.EQUAL;
 		else if(operation.equals(EnumOperationsConditionBlock.GREATERTHAN.getOperation())) 	return EnumOperationsConditionBlock.GREATERTHAN;
 		else if(operation.equals(EnumOperationsConditionBlock.LESSTHAN.getOperation()))		return EnumOperationsConditionBlock.LESSTHAN;
+		else if(operation.equals(EnumOperationsConditionBlock.GREATERTHANEQUALTO.getOperation()))		return EnumOperationsConditionBlock.LESSTHAN;
+		else if(operation.equals(EnumOperationsConditionBlock.LESSTHANEQUALTO.getOperation()))		return EnumOperationsConditionBlock.LESSTHAN;
 		else throw new ConditionBlockException("No valid condition operator identified in a condition block.");
 	}
 	

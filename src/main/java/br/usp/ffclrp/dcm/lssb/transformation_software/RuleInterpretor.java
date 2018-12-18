@@ -64,17 +64,16 @@ public class RuleInterpretor implements Runnable
 	public static void main (String[] args) {
 
 	    //   Test
-	    args = new String[3];
-	    args[0] = "runTransformation";
-	    args[1] = "dc6010d1-c02b-4846-9f6e-da5b5508478a";
-//	    args[2] = "523aaa36-9828-4f3b-974d-e7a689af77cf";
+//	    args = new String[3];
+//	    args[0] = "runTransformation";
+//	    args[1] = "15d2a177-7819-43b2-aa8f-48010c87cffb";
+//	    args[2] = "50bea367-a756-415b-8bb3-00933c07810a";
 	    /* End test */
 
 		RuleInterpretor ruleInterpretor = new RuleInterpretor();
 
 		if(args[0].equals("runTransformation")) {
 			ruleInterpretor.transformationId = args[1];
-			//ruleInterpretor.transformationId = "850ed3f2-aa22-4e0c-9ab7-ed6af275caca";
 			System.out.println("=============== Transformation ID: " + ruleInterpretor.transformationId);
 			ruleInterpretor.run();
 		}else if(args[0].equals("runQuery")){
@@ -494,11 +493,15 @@ public class RuleInterpretor implements Runnable
 		return new FlagConditionBlock(id);
 	}
 
-	private Flag 			extractDataFromFlagSearchBlockFromSentence(String sentence, String regex) {
+	private Flag 			extractDataFromFlagSearchBlockFromSentence(String sentence, String regex) throws Exception {
 
-		String id = Utils.matchRegexOnString(regex, sentence).group(2);
+		String id = Utils.matchRegexOnString(regex, sentence).group(1);
+		String variable = Utils.matchRegexOnString(regex, sentence).group(2);
 
-		return new FlagSearchBlock(id);
+		if(variable.equals("") || !variable.startsWith("?"))
+			throw new Exception("Variable of the search element flag is missing or is invalid. The variable must begin with '?'. Ocorrence: " + sentence);
+
+		return new FlagSearchBlock(id, variable);
 	}
 
 	private Flag 			extractDataFromFlagSeparatorFromSentence(String sentence, String regex) throws CustomExceptions {
@@ -661,7 +664,6 @@ public class RuleInterpretor implements Runnable
 		System.out.println("Query ID: " + queryId);
 		SPARQLQueryProcessing queryProcessing = new SPARQLQueryProcessing();
 		try {
-			fileSystemManager.updateQueryStatus(transformationId, queryId, EnumActivityState.RUNNING);
 			queryProcessing.QuerySelect(transformationId, queryId);
 			fileSystemManager.updateQueryStatus(transformationId, queryId, EnumActivityState.SUCCEEDED);
 		} catch (Exception e) {

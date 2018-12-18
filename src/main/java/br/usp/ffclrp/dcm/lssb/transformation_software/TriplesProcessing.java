@@ -2,7 +2,6 @@ package br.usp.ffclrp.dcm.lssb.transformation_software;
 
 import br.usp.ffclrp.dcm.lssb.custom_exceptions.*;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.*;
-import com.sun.org.apache.xpath.internal.SourceTree;
 import openllet.jena.PelletReasonerFactory;
 import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.jena.datatypes.BaseDatatype;
@@ -13,7 +12,6 @@ import org.apache.jena.rdf.model.*;
 import org.apache.jena.reasoner.Reasoner;
 import org.apache.jena.reasoner.ValidityReport;
 import org.apache.jena.reasoner.ValidityReport.Report;
-import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLProperty;
 
 import java.io.File;
@@ -199,7 +197,7 @@ public class TriplesProcessing {
 				}else{
 					@SuppressWarnings("unchecked")
 					List<TSVColumn> dataColumns = (List<TSVColumn>) predicateMapEntry.getValue().getObject();
-					List<String> listOfContent = extractDataFromTSVColumn(dataColumns, tsvLineNumber);
+					List<String> listOfContent = extractData(dataColumns, tsvLineNumber);
 
 
 					Object 	 datatype = null;
@@ -277,6 +275,24 @@ public class TriplesProcessing {
 
 					}
 
+					if(condition.getOperation() == EnumOperationsConditionBlock.LESSTHANEQUALTO){
+						try {
+
+							Double value = condition.parsedValues.get(contentTSVColumn);
+
+							if(value == null) {
+								value = Double.parseDouble(contentTSVColumn);
+								condition.parsedValues.put(contentTSVColumn, value);
+							}
+
+							result = value <= ((double) condition.getConditionValue());
+
+						}catch (Exception e ) {
+							result = false;
+						}
+					}
+
+
 					if(condition.getOperation() == EnumOperationsConditionBlock.GREATERTHAN){
 						try {
 
@@ -294,6 +310,24 @@ public class TriplesProcessing {
 						}
 					}
 
+					if(condition.getOperation() == EnumOperationsConditionBlock.GREATERTHANEQUALTO){
+						try {
+
+							Double value = condition.parsedValues.get(contentTSVColumn);
+
+							if(value == null) {
+								value = Double.parseDouble(contentTSVColumn);
+								condition.parsedValues.put(contentTSVColumn, value);
+							}
+
+							result = value >= ((double) condition.getConditionValue());
+
+						}catch (Exception e ) {
+							result = false;
+						}
+					}
+
+
 					if(!result)
 						return false;
 				}
@@ -304,8 +338,6 @@ public class TriplesProcessing {
 	}
 
 	private void 			addTripleToModel(Resource subject, Property predicate, Resource object) {
-		if(object.toString().contains("GO_0008150"))
-			System.out.println("S: " + subject.getURI() + " P: " + predicate.getURI() + " O: " + object.getURI());
 		subject.addProperty(predicate, object);		
 	}
 
@@ -340,7 +372,7 @@ public class TriplesProcessing {
 		subject.addProperty(predicate, contentElement, (RDFDatatype) datatype);
 	}
 
-	private List<String> 	extractDataFromTSVColumn(List<TSVColumn> listTSVColumn, Integer lineNumber) throws Exception {
+	private List<String> extractData(List<TSVColumn> listTSVColumn, Integer lineNumber) throws Exception {
 		List<String> objectContent = new ArrayList<String>();
 
 
@@ -391,12 +423,18 @@ public class TriplesProcessing {
 					//System.out.print("line " + lineNumber + " - ");
 
 					try{
-						List<String> externalIRIs = searchBlock.getExternalNode(Arrays.asList(columnData));
+						List<String> externalIRIs = null;
+						 while(externalIRIs == null){
+						 	//String data = fileReader.getData(column, lineNumber);
+						 	externalIRIs = searchBlock.getExternalNode(Arrays.asList(columnData), ((FlagSearchBlock) flag).getVariable());
+						 }
 
-						if(externalIRIs == null || externalIRIs.isEmpty())
-							columnData = new String[0];
-						else
+						if(!externalIRIs.isEmpty()) {
 							columnData = externalIRIs.toArray(new String[0]);
+						}else{
+						 	columnData = new String[0];
+						}
+
 					}catch (NullPointerException e){
 						e.printStackTrace();
 					}
@@ -404,8 +442,14 @@ public class TriplesProcessing {
 
 			}
 
-			dataColumnsSeparated.add(columnData);
+
+			if(columnData.length > 0)
+				dataColumnsSeparated.add(columnData);
 		}
+
+		if(dataColumnsSeparated.isEmpty())
+			return objectContent;
+
 
 		objectContent = mergeContentOfMultipleTSVColumns(dataColumnsSeparated);
 
@@ -479,19 +523,15 @@ public class TriplesProcessing {
 
 		Resource subjectType = model.createResource(rule.getSubject().getIRI().toString());
 
-		SearchBlock searchBlock = getSearchBlockFlag(rule.getSubjectTSVColumns());
-		if(searchBlock != null){
+		FlagSearchBlock searchBlockFlag = getSearchBlockFlag(rule.getSubjectTSVColumns());
+		if(searchBlockFlag != null){
+			SearchBlock searchBlock = this.searchBlocks.get(searchBlockFlag.getId());
 
-			List<String> subjectContent = extractDataFromTSVColumn(rule.getSubjectTSVColumns(), lineNumber);
+			List<String> subjects = extractData(rule.getSubjectTSVColumns(), lineNumber);
 
-			List<String> externalNodes = searchBlock.getExternalNode(subjectContent);
-
-			for (String node : externalNodes) {
+			for (String node : subjects) {
 				subjectList.add(model.createResource(node, subjectType));
 			}
-//			for (String node : subjectContent) {
-//				subjectList.add(model.createResource(node, subjectType));
-//			}
 
 			return subjectList;
 		}
@@ -511,7 +551,7 @@ public class TriplesProcessing {
 				subjectList.add(model.createResource(baseIRI + fixedContentFlag, subjectType));
 
 			} else {
-				List<String> subjectContentRaw = extractDataFromTSVColumn(rule.getSubjectTSVColumns(), lineNumber);
+				List<String> subjectContentRaw = extractData(rule.getSubjectTSVColumns(), lineNumber);
 
 				List<String> subjectContent = new ArrayList<String>();
 				for (String content : subjectContentRaw) {
@@ -530,9 +570,9 @@ public class TriplesProcessing {
 		String baseIRI = rule.getDefaultBaseIRI();
 		List<Resource> objectList = new ArrayList<Resource>();
 
-		SearchBlock searchBlock = getSearchBlockFlag(columns);
-		if(searchBlock != null){
-
+		FlagSearchBlock searchBlockFlag = getSearchBlockFlag(columns);
+		if(searchBlockFlag != null){
+			SearchBlock searchBlock = this.searchBlocks.get(searchBlockFlag.getId());
 			for (String node : listOfContent) {
 				objectList.add(model.createResource(node, objectType));
 			}
@@ -627,13 +667,11 @@ public class TriplesProcessing {
 		return null;
 	}
 
-	private SearchBlock 	getSearchBlockFlag(List<TSVColumn> listTSVColumn) {
+	private FlagSearchBlock 	getSearchBlockFlag(List<TSVColumn> listTSVColumn) {
 		for(TSVColumn column : listTSVColumn){
 			for(Flag flag : column.getFlags()){
 				if(flag instanceof FlagSearchBlock){
-					String searchBlockId = ((FlagSearchBlock) flag).getId();
-
-					return this.searchBlocks.get(searchBlockId);
+					return (FlagSearchBlock) flag;
 				}
 			}
 		}

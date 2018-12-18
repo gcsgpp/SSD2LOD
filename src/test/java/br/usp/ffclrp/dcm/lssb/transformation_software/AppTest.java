@@ -59,7 +59,7 @@ public class AppTest
 
 					}else if(condition.getColumn().getTitle().equals("PValue")){
 						assertEquals(EnumOperationsConditionBlock.LESSTHAN, condition.getOperation());
-						assertEquals("0.01", condition.getConditionValue());
+						assertEquals(0.01, condition.getConditionValue());
 					}else{
 						fail();
 					}
@@ -74,7 +74,7 @@ public class AppTest
 
 					}else if(condition.getColumn().getTitle().equals("PValue")){
 						assertEquals(EnumOperationsConditionBlock.LESSTHAN, condition.getOperation());
-						assertEquals("0.03", condition.getConditionValue());
+						assertEquals(0.03, condition.getConditionValue());
 					}else{
 						fail();
 					}
@@ -1068,7 +1068,7 @@ public class AppTest
 	@Test
 	public void extractSearchBlockWithMultipleRules(){
 		//String 	sentence = 	"search_block[1 : \"endpoint\" = \"http://bio2rdf.org/sparql\", \"predicate\" = \"http://bio2rdf.org/taxonomy_vocabulary:scientific-name\"]";
-		String 	sentence = 	"search_element search1{ \"endpoint\" = \"http://bio2rdf.org/sparql\", \"predicate\" = \"http://bio2rdf.org/taxonomy_vocabulary:scientific-name\"}";
+		String 	sentence = 	"search_element search1 [\"http://bio2rdf.org/sparql\"]{$ select * where { ?s ?p ?o } $}";
 		sentence += "column_based_rule rule1 [\"microarray platform\" = \"A-BUGS-23_Comment[ArrayExpressAccession]_4\"]{\n" +
 				"\t\"Title\" = \"A-BUGS-23_Array Design Name_1\" /DT(\"literal\"),\n" +
 				"\t\"depends on\" = 2\n }" +
@@ -1088,7 +1088,7 @@ public class AppTest
 		SearchBlock searchBlock = listSearchBlocks.get(0);
 		assertEquals("search1", searchBlock.getId());
 		assertEquals("http://bio2rdf.org/sparql", searchBlock.getEndpointIRI());
-		assertEquals("http://bio2rdf.org/taxonomy_vocabulary:scientific-name", searchBlock.getPredicateToSearch());
+		assertEquals("select * where { ?s ?p ?o }", searchBlock.getQueryToSearch());
 
 	}
 

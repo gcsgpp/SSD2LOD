@@ -1359,7 +1359,7 @@ public class TripleProcessingTest
 		subject = new TSVColumn();
 		subject.setTitle("GPL19921_ID");
 		List<Flag> subjectFlags = new ArrayList<>();
-		subjectFlags.add(new FlagSearchBlock("search1"));
+		subjectFlags.add(new FlagSearchBlock("search1", "?s"));
 		subject.setFlags(subjectFlags);
 
 		subjectTSVColumns.add(subject);
@@ -1381,7 +1381,7 @@ public class TripleProcessingTest
 		listRules.addAll(createRuleWithSearchBlock());
 
 		Map<String, SearchBlock> searchBlocks = new HashMap<>();
-		SearchBlock searchBlock = new SearchBlock("search1", "http://bio2rdf.org/sparql", "http://bio2rdf.org/ctd_vocabulary:gene-symbol");
+		SearchBlock searchBlock = new SearchBlock("search1", "http://bio2rdf.org/sparql", "select distinct * where { ?s <http://bio2rdf.org/ctd_vocabulary:gene-symbol> ?o1. bind(str(?o1) as ?o). values ?o { ?tsvData } }");
 		searchBlocks.put(searchBlock.getId(), searchBlock);
 		ontologiesList.add(ontologyPath);
 

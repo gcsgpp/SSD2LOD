@@ -14,11 +14,13 @@ public class RuleConfig {
 	private String defaultNS = null;
 	private Boolean header = null;
 	private Lang syntax = null;
+//	private String SSDFileType = null;
 	
 	public RuleConfig(String ID) {
 		this.matrix = false;
 		this.id = ID;
 		this.header = true;
+//		this.SSDFileType = "TSV";
 	}
 
 	public RuleConfig(String ID, String defaultBaseIRI){
@@ -26,6 +28,7 @@ public class RuleConfig {
 		this.id = ID;
 		this.defaultNS = defaultBaseIRI;
 		this.header = true;
+//		this.SSDFileType = "TSV";
 	}
 	
 	public String getId() {
@@ -71,6 +74,10 @@ public class RuleConfig {
 	}
 
 	Boolean getHeader(){ return this.header;	}
+
+//	public void setSSDFileType(String fileType){ this.SSDFileType = fileType; }
+
+//	public String getSSDFileType(){ return this.SSDFileType;	}
 
 	private static RuleConfig createRuleConfigFromString(String rcAsText) throws Exception {
 		Matcher matcher 				=	Utils.matchRegexOnString(EnumRegexList.SELECTBLOCKBODY.get(), rcAsText);
@@ -125,6 +132,11 @@ public class RuleConfig {
 					rule.setSyntax(Lang.NTRIPLES);
 				else if(Lang.TURTLE	.getName().toLowerCase().equals(value.toLowerCase()))
 					rule.setSyntax(Lang.TURTLE);
+//			}else if(column.toLowerCase().equals("ssd_filetype")) {
+//				if(value.toLowerCase().trim().equals("tsv"))
+//					rule.setSSDFileType("TSV");
+//				else if(value.toLowerCase().trim().equals("csv"))
+//					rule.setSSDFileType("CSV");
 			}
 		}
 

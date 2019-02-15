@@ -14,11 +14,13 @@ public class RuleConfig {
 	private String defaultNS = null;
 	private Boolean header = null;
 	private Lang syntax = null;
+//	private String SSDFileType = null;
 	
 	public RuleConfig(String ID) {
 		this.matrix = false;
 		this.id = ID;
 		this.header = true;
+//		this.SSDFileType = "TSV";
 	}
 
 	public RuleConfig(String ID, String defaultBaseIRI){
@@ -26,6 +28,7 @@ public class RuleConfig {
 		this.id = ID;
 		this.defaultNS = defaultBaseIRI;
 		this.header = true;
+//		this.SSDFileType = "TSV";
 	}
 	
 	public String getId() {
@@ -72,12 +75,15 @@ public class RuleConfig {
 
 	Boolean getHeader(){ return this.header;	}
 
-	private static RuleConfig createRuleConfigFromString(String rcAsText) throws Exception {
-		Matcher matcher 				=	Utils.matchRegexOnString(EnumRegexList.SELECTSUBJECTLINE.get(), rcAsText);
-		String subjectLine 				=	Utils.splitByIndex(rcAsText, matcher.start())[0];
-		String predicatesLinesOneBlock 	= 	Utils.splitByIndex(rcAsText, matcher.start())[1];
+//	public void setSSDFileType(String fileType){ this.SSDFileType = fileType; }
 
-		String ruleConfigId 			= 	extractRuleConfigIDFromSentence(subjectLine);
+//	public String getSSDFileType(){ return this.SSDFileType;	}
+
+	private static RuleConfig createRuleConfigFromString(String rcAsText) throws Exception {
+		Matcher matcher 				=	Utils.matchRegexOnString(EnumRegexList.SELECTBLOCKBODY.get(), rcAsText);
+		String predicatesLinesOneBlock 	= 	matcher.group();
+
+		String ruleConfigId 			= 	"default";
 
 
 		matcher = Utils.matchRegexOnString(EnumRegexList.SELECTPREDICATESDIVISIONS.get(), predicatesLinesOneBlock);
@@ -99,8 +105,8 @@ public class RuleConfig {
 			String lineFromBlock = predicatesLinesOneBlock.substring(initialOfEachMatch.get(i) + 1, // +1 exists to not include the first character, a comma
 					finalChar);
 
-			String column 	= Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(lineFromBlock, EnumRegexList.SELECTPREDICATE.get());
-			lineFromBlock 	= Utils.removeRegexFromContent(EnumRegexList.SELECTPREDICATE.get(), lineFromBlock);
+			String column 	= Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(lineFromBlock, EnumRegexList.SELECTCONFIGPKEYS.get());
+			lineFromBlock 	= Utils.removeRegexFromContent(EnumRegexList.SELECTCONFIGPKEYS.get(), lineFromBlock);
 			String value 	= Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(lineFromBlock, EnumRegexList.SELECTALL.get());
 			
 			if(column.toLowerCase().equals("default_baseiri")) {
@@ -110,7 +116,7 @@ public class RuleConfig {
 					e.printStackTrace();
 					throw new Exception("One of the values inside rule_config block was not possible to understand. Rule Config block ID: " + ruleConfigId + " . Value found: " + value);
 				}
-			}else if(column.toLowerCase().equals("has_header")) {
+			}else if(column.toLowerCase().equals("has_non_processable_header")) {
 				try {
 					rule.setHeader(Boolean.parseBoolean(value));
 				}catch(Exception e) {
@@ -118,12 +124,19 @@ public class RuleConfig {
 					throw new Exception("One of the values inside rule_config block was not possible to understand. Rule Config block ID: " + ruleConfigId + " . Value found: " + value);
 				}
 			}else if(ruleConfigId.toLowerCase().equals("default") && column.toLowerCase().equals("export_syntax")) {
-				if(		Lang.RDFXML	.getName().toLowerCase().equals(value))
+				if(		Lang.RDFXML	.getName().toLowerCase().equals(value.toLowerCase()))
 					rule.setSyntax(Lang.RDFXML);
-				else if(Lang.N3		.getName().toLowerCase().equals(value))
+				else if(Lang.N3		.getName().toLowerCase().equals(value.toLowerCase()))
 					rule.setSyntax(Lang.N3);
-				else if(Lang.TURTLE	.getName().toLowerCase().equals(value))
+				else if(Lang.NTRIPLES.getName().toLowerCase().equals(value.toLowerCase()))
+					rule.setSyntax(Lang.NTRIPLES);
+				else if(Lang.TURTLE	.getName().toLowerCase().equals(value.toLowerCase()))
 					rule.setSyntax(Lang.TURTLE);
+//			}else if(column.toLowerCase().equals("ssd_filetype")) {
+//				if(value.toLowerCase().trim().equals("tsv"))
+//					rule.setSSDFileType("TSV");
+//				else if(value.toLowerCase().trim().equals("csv"))
+//					rule.setSSDFileType("CSV");
 			}
 		}
 

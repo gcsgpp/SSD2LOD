@@ -6,6 +6,9 @@ import br.usp.ffclrp.dcm.lssb.transformation_manager.TransformationManagerImpl;
 import br.usp.ffclrp.dcm.lssb.transformation_manager.custom_exceptions.ErrorFileException;
 import br.usp.ffclrp.dcm.lssb.transformation_manager.custom_exceptions.StatusFileException;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.*;
+import org.apache.commons.collections4.MultiValuedMap;
+import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
+import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLProperty;
@@ -24,9 +27,9 @@ public class RuleInterpretor implements Runnable
 {
 	public 	OntologyHelper ontologyHelper;
 	public 	List<Rule> rulesList;
-	public 	Map<Integer	, ConditionBlock> 	conditionsBlocks 	= new HashMap<>();
+	public 	Map<String	, ConditionBlock> 	conditionsBlocks 	= new HashMap<>();
 	public 	Map<String	, RuleConfig> 		ruleConfigs 		= new HashMap<>();
-	public 	Map<Integer	, SearchBlock> 		searchBlocks		= new HashMap<>();
+	public 	Map<String	, SearchBlock> 		searchBlocks		= new HashMap<>();
 
 	//Parameters needed to implement Run()
 	TransformationManagerImpl	fileSystemManager;
@@ -60,18 +63,17 @@ public class RuleInterpretor implements Runnable
 
 	public static void main (String[] args) {
 
-	    /*   Test
+	    //   Test
 	    args = new String[3];
-	    args[0] = "runQuery";
-	    args[1] = "35d26403-fcc0-460f-b138-e7b70c130460";
-	    args[2] = "d10ff0a0-fee9-4ebd-9eda-ad4dfc0169ba";
-	     End test*/
+	    args[0] = "runTransformation";
+	    args[1] = "d330fb3f-b485-4876-8bf5-413d9ece070c";
+//	    args[2] = "50bea367-a756-415b-8bb3-00933c07810a";
+	    /* End test */
 
 		RuleInterpretor ruleInterpretor = new RuleInterpretor();
 
 		if(args[0].equals("runTransformation")) {
 			ruleInterpretor.transformationId = args[1];
-			//ruleInterpretor.transformationId = "850ed3f2-aa22-4e0c-9ab7-ed6af275caca";
 			System.out.println("=============== Transformation ID: " + ruleInterpretor.transformationId);
 			ruleInterpretor.run();
 		}else if(args[0].equals("runQuery")){
@@ -154,8 +156,10 @@ public class RuleInterpretor implements Runnable
 
 			} catch (StatusFileException | ErrorFileException w) {
 				System.out.println(w.getMessage());
+				w.printStackTrace();
 			}
-			System.out.println(e.getMessage());
+			System.out.println(e);
+			e.printStackTrace();
 		}
 	}
 
@@ -204,12 +208,13 @@ public class RuleInterpretor implements Runnable
 		if(matcher.hitEnd()){
 			return extractRuleFromOneLineRuleBlock(blockRulesAsText);
 		}
-		String subjectLine 				=	Utils.splitByIndex(blockRulesAsText, matcher.start())[0];
-		String predicatesLinesOneBlock 	= 	Utils.splitByIndex(blockRulesAsText, matcher.start())[1];
+//		String subjectLine 				=	Utils.splitByIndex(blockRulesAsText, matcher.start())[0];
+//		String predicatesLinesOneBlock 	= 	Utils.splitByIndex(blockRulesAsText, matcher.start())[1];
+		String subjectLine 				= 	matcher.group();
+				matcher 				= 	Utils.matchRegexOnString(EnumRegexList.SELECTBLOCKBODY.get(), blockRulesAsText);
+		String predicatesLinesOneBlock 	= 	matcher.group();
 
-		String ruleId 						= extractRuleIDFromSentence(subjectLine);
-
-
+		String ruleId 						= extractRuleIDFromSentence(blockRulesAsText);
 
 		RuleConfig ruleConfig				= ruleConfigs.get(ruleId);
 		if(ruleConfig == null){
@@ -217,7 +222,7 @@ public class RuleInterpretor implements Runnable
 			if(ruleConfig == null)
 				throw new Exception("Not found a config rule block for rule id '" + ruleId + "' neither a 'default' config rule block.");
 		}
-		if(subjectLine.contains("matrix_rule[")) {
+		if(blockRulesAsText.trim().startsWith("row_based_rule")) {
 			ruleConfig = ruleConfig.setMatrix(true);
 		}
 			
@@ -225,14 +230,14 @@ public class RuleInterpretor implements Runnable
 		subjectLine = Utils.removeRegexFromContent(EnumRegexList.SELECTSUBJECTCLASSNAME.get(), subjectLine);
 		List<TSVColumn> subjectTsvcolumns 	= extractTSVColumnsFromSentence(subjectLine);
 
-		matcher = Utils.matchRegexOnString(EnumRegexList.SELECTPREDICATESDIVISIONS.get(), predicatesLinesOneBlock);
+		matcher = Utils.matchRegexOnString(EnumRegexList.SELECTRULEPREDICATESDIVISIONS.get(), predicatesLinesOneBlock);
 		List<Integer> initialOfEachMatch = new ArrayList<Integer>();
 		while(!matcher.hitEnd()){
 			initialOfEachMatch.add(matcher.start());
 			matcher.find();
 		}
 
-		Map<OWLProperty, TripleObject> predicateObjects = new Hashtable<OWLProperty, TripleObject>();
+		MultiValuedMap<OWLProperty, TripleObject> predicateObjects = new ArrayListValuedHashMap<OWLProperty, TripleObject>();
 		for(int i = 0; i < initialOfEachMatch.size(); i++){
 			int finalChar;
 			if(i == initialOfEachMatch.size()-1) //IF LAST MATCH, GET THE END OF THE SENTENCE
@@ -247,22 +252,36 @@ public class RuleInterpretor implements Runnable
 
 			if(tripleObjectIsToAnotherRule(lineFromBlock)){
 
-				Integer ruleNumber = extractRuleNumberAsTripleObject(lineFromBlock);
+				String ruleNumber = extractRuleIdAsTripleObject(lineFromBlock);
 				List<Flag> flagsFromSentence = extractFlagsFromSentence(lineFromBlock);
 
-				if(predicateObjects.containsKey(propertyFromLine)){
+
+				ObjectAsRule object = new ObjectAsRule(ruleNumber, flagsFromSentence);
+				TripleObjectAsRule ruleObject = (TripleObjectAsRule) TripleObjectBuilder.createObjectToRule(object);
+				predicateObjects.put(propertyFromLine, ruleObject);
+
+
+
+				/*if(predicateObjects.containsKey(propertyFromLine)){
 					@SuppressWarnings("unchecked")
-					List<ObjectAsRule> ruleObjects = (List<ObjectAsRule>) predicateObjects.get(propertyFromLine).getObject();
+					List<ObjectAsRule> ruleObjects = (Collection<ObjectAsRule>) predicateObjects.get(propertyFromLine).getObject();
+					//List<ObjectAsRule> ruleObjects = (List<ObjectAsRule>) predicateObjects.get(propertyFromLine).getObject();
 					ruleObjects.add(new ObjectAsRule(ruleNumber, flagsFromSentence));
 				}else{
 					ObjectAsRule object = new ObjectAsRule(ruleNumber, flagsFromSentence);
 					TripleObjectAsRule ruleObject = (TripleObjectAsRule) TripleObjectBuilder.createObjectToRule(object);
 					predicateObjects.put(propertyFromLine, ruleObject);
-				}
+				}*/
+
+
 
 			}else{
 				List<TSVColumn> tsvcolumns = extractTSVColumnsFromSentence(lineFromBlock);
-				if(predicateObjects.containsKey(propertyFromLine)){
+				predicateObjects.put(propertyFromLine, TripleObjectBuilder.createObjectAsColumns(tsvcolumns));
+
+
+
+				/*if(predicateObjects.containsKey(propertyFromLine)){
 					@SuppressWarnings("unchecked")
 					List<TSVColumn> object = (List<TSVColumn>) predicateObjects.get(propertyFromLine).getObject();
 					for(TSVColumn column : tsvcolumns){
@@ -270,7 +289,7 @@ public class RuleInterpretor implements Runnable
 					}
 				}else{
 					predicateObjects.put(propertyFromLine, TripleObjectBuilder.createObjectAsColumns(tsvcolumns));
-				}
+				}*/
 
 			}
 		}
@@ -296,13 +315,13 @@ public class RuleInterpretor implements Runnable
 		subjectLine = Utils.removeRegexFromContent(EnumRegexList.SELECTSUBJECTCLASSNAME.get(), subjectLine);
 		List<TSVColumn> subjectTsvcolumns 	= extractTSVColumnsFromSentence(subjectLine);
 
-		return new Rule(ruleId, ruleConfig, ruleSubject, subjectTsvcolumns, new HashMap<OWLProperty, TripleObject>());
+		return new Rule(ruleId, ruleConfig, ruleSubject, subjectTsvcolumns, new ArrayListValuedHashMap<OWLProperty, TripleObject>());
 	}
 
-	public Integer 			extractRuleNumberAsTripleObject(String lineFromBlock) {
-		Matcher matcher = Utils.matchRegexOnString(EnumRegexList.SELECTFIRSTNUMBERS.get(), lineFromBlock);
+	public String 			extractRuleIdAsTripleObject(String lineFromBlock) {
+		Matcher matcher = Utils.matchRegexOnString(EnumRegexList.SELECTRULEIDFROMPREDICATE.get(), lineFromBlock);
 
-		return Integer.parseInt(matcher.group());
+		return matcher.group(1);
 	}
 
 	public boolean		 	tripleObjectIsToAnotherRule(String lineFromBlock) {
@@ -317,7 +336,7 @@ public class RuleInterpretor implements Runnable
 	}
 
 	private OWLProperty 	extractPredicateFromBlockLine(String lineFromBlock) throws Exception {
-		String predicateName = Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(lineFromBlock, EnumRegexList.SELECTPREDICATE.get());		
+		String predicateName = Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(lineFromBlock, EnumRegexList.SELECTPREDICATE.get());
 
 		OWLProperty prop = ontologyHelper.getProperty(predicateName);
 
@@ -329,7 +348,7 @@ public class RuleInterpretor implements Runnable
 
 	public List<TSVColumn> 	extractTSVColumnsFromSentence(String sentence) throws Exception{
 		List<TSVColumn> listOfColumns = new ArrayList<TSVColumn>();
-		String[] eachTSVColumnWithFlags = sentence.split(";");
+		String[] eachTSVColumnWithFlags = sentence.split("/;");
 
 		for(String s : eachTSVColumnWithFlags){
 
@@ -357,7 +376,9 @@ public class RuleInterpretor implements Runnable
 								EnumRegexList.SELECTDATATYPEFLAG.get()			+ "|" +
 								EnumRegexList.SELECTCUSTOMDIDFLAG.get()			+ "|" +
 								EnumRegexList.SELECTSEARCHBLOCKFLAG.get()		+ "|" +
-								EnumRegexList.SELECTCOLFLAG.get();
+								EnumRegexList.SELECTSEARCHBLOCKFLAG.get()		+ "|" +
+								EnumRegexList.SELECTCOLFLAG.get()				+ "|" +
+								EnumRegexList.SELECTNODEFLAG.get();
 
 
 		Matcher	matcher = Utils.matchRegexOnString(flagsToCheck, sentence);
@@ -370,17 +391,17 @@ public class RuleInterpretor implements Runnable
 				sentence = Utils.removeRegexFromContent(EnumRegexList.SELECTSEPARATORFLAG.get(), sentence);
 			}
 
-			else if(matcherString.contains("/CB")){
+			else if(matcherString.contains("/CE")){
 				flagsList.add(extractDataFromFlagConditionFromSentence(sentence, EnumRegexList.SELECTCONDITIONBLOCKFLAG.get()));
 				sentence = Utils.removeRegexFromContent(EnumRegexList.SELECTCONDITIONBLOCKFLAG.get(), sentence);
 			}
 
-			else if(matcherString.contains("/SB")){
+			else if(matcherString.contains("/SE")){
 				flagsList.add(extractDataFromFlagSearchBlockFromSentence(sentence, EnumRegexList.SELECTSEARCHBLOCKFLAG.get()));
 				sentence = Utils.removeRegexFromContent(EnumRegexList.SELECTSEARCHBLOCKFLAG.get(), sentence);
 			}
 
-			else if(matcherString.contains("/FX")){
+			else if(matcherString.contains("/DefaultValue")){
 				flagsList.add(extractDataFromFlagFixedContentFromSentence(sentence, EnumRegexList.SELECTFIXEDCONTENTFLAG.get()));
 				sentence = Utils.removeRegexFromContent(EnumRegexList.SELECTFIXEDCONTENTFLAG.get(), sentence);
 			}
@@ -410,10 +431,23 @@ public class RuleInterpretor implements Runnable
 				sentence = Utils.removeRegexFromContent(EnumRegexList.SELECTCOLFLAG.get(), sentence);
 			}
 
+			else if(matcherString.contains("/NODE")){
+				flagsList.add(extractFlagNodeFromSentence(sentence));
+				sentence = Utils.removeRegexFromContent(EnumRegexList.SELECTNODEFLAG.get(), sentence);
+			}
+
 			matcher.find();
 		}
 
 		return flagsList;
+	}
+
+	private FlagNode		extractFlagNodeFromSentence(String sentence){
+
+		String nodeTypeString = Utils.matchRegexOnString(EnumRegexList.SELECTNODEFLAG.get(), sentence).group(1);
+
+		return new FlagNode(ontologyHelper.getClass(nodeTypeString));
+
 	}
 
 	private Flag 			extractDataFromFlagDataTypeFromSentence(String sentence, String regex) throws Exception {
@@ -452,21 +486,22 @@ public class RuleInterpretor implements Runnable
 	private Flag 			extractDataFromFlagConditionFromSentence(String sentence, String regex) {
 
 		String cbFlagTerm = Utils.matchRegexOnString(regex, sentence).group();
-		String matchedConditionSelected = Utils.matchRegexOnString("\\d+", cbFlagTerm).group(); 
+		String matchedConditionSelected = Utils.matchRegexOnString("\\((\\w+)\\)", cbFlagTerm).group(1);
 
-		int id = Integer.parseInt(matchedConditionSelected);
+		String id = matchedConditionSelected;
 
 		return new FlagConditionBlock(id);
 	}
 
-	private Flag 			extractDataFromFlagSearchBlockFromSentence(String sentence, String regex) {
+	private Flag 			extractDataFromFlagSearchBlockFromSentence(String sentence, String regex) throws Exception {
 
-		String sbFlagTerm = Utils.matchRegexOnString(regex, sentence).group();
-		String matchedConditionSelected = Utils.matchRegexOnString("\\d+", sbFlagTerm).group();
+		String id = Utils.matchRegexOnString(regex, sentence).group(1);
+		String variable = Utils.matchRegexOnString(regex, sentence).group(2);
 
-		int id = Integer.parseInt(matchedConditionSelected);
+		if(variable.equals("") || !variable.startsWith("?"))
+			throw new Exception("Variable of the search element flag is missing or is invalid. The variable must begin with '?'. Ocorrence: " + sentence);
 
-		return new FlagSearchBlock(id);
+		return new FlagSearchBlock(id, variable);
 	}
 
 	private Flag 			extractDataFromFlagSeparatorFromSentence(String sentence, String regex) throws CustomExceptions {
@@ -478,7 +513,7 @@ public class RuleInterpretor implements Runnable
 
 		List<Integer> columnsSelected = new ArrayList<Integer>();
 
-		//Exctact range
+		//Extract range
 		if(contentWithoutQuotationMark.contains(",")) {
 			String[] rangeString = contentWithoutQuotationMark.split(",");
 
@@ -525,7 +560,8 @@ public class RuleInterpretor implements Runnable
 		String data = "";
 
 		Matcher matcher = Utils.matchRegexOnString(EnumRegexList.SELECTRULEID.get(), blockRulesAsText);
-		data = matcher.group().replace("matrix_rule[", "").replace("simple_rule[", "");
+		//data = matcher.group().replace("matrix_rule[", "").replace("simple_rule[", "");
+		data = matcher.group(2);
 		return data;
 	}
 
@@ -546,7 +582,7 @@ public class RuleInterpretor implements Runnable
 		try {
 			List<String> identifiedBlocks = identifyBlocksFromString(fileContent);
 			for(String block : identifiedBlocks){
-				if(block.startsWith("simple_rule") || block.startsWith("matrix_rule"))
+				if(block.startsWith("column_based_rule") || block.startsWith("row_based_rule"))
 					ruleBlocks.add(block);
 			}
 		}catch(Exception e){
@@ -564,7 +600,7 @@ public class RuleInterpretor implements Runnable
 			throw new Exception("No rule_config, simple_rule or matrix_rule blocks identified in your file of rules. Please check your file.");
 
 		for(String block : identifiedBlocks){
-			if(block.startsWith("rule_config"))
+			if(block.startsWith("config_element"))
 				configBlocks.add(block);
 		}
 
@@ -574,7 +610,7 @@ public class RuleInterpretor implements Runnable
 	}
 
 	public static List<String> 	identifyBlocksFromString(String fileContent) {
-		Pattern patternToFind = Pattern.compile("(matrix_rule|simple_rule|rule_config|search_block)\\[.*?(\\d+|\"|\\)|\\/NM|\\s+)\\]");
+		Pattern patternToFind = Pattern.compile(EnumRegexList.SELECTELEMENTSBLOCKS.get());
 		Matcher matcher = patternToFind.matcher(fileContent);
 		//matcher.find();
 
@@ -588,15 +624,25 @@ public class RuleInterpretor implements Runnable
 
 	public 	void 			writeRDF(TriplesProcessing triplesProcessing, String transformationId) throws Exception {
 		System.out.println("#####################################\nWriting RDF...");
-		long startTime = System.currentTimeMillis();
+		Date startTime = Calendar.getInstance().getTime();
 		try{
-			File f = new File(new TransformationManagerImpl().localStorage, transformationId + "/RDFTriples.rdf");
-			FileOutputStream fos = new FileOutputStream(f);
+
+			Lang lang = triplesProcessing.defaultRuleConfig.getSyntax();
+
+			TransformationManagerImpl manager = new TransformationManagerImpl();
+			File triplesetFolderPath = new File(manager.localStorage + "/" + transformationId,
+							  manager.properties.getProperty("transformations.triplesetSubpath"));
+			if(!triplesetFolderPath.exists())
+				triplesetFolderPath.mkdir();
+
+			File tripleset = new File(triplesetFolderPath, "RDFTriples." + lang.getFileExtensions().get(0));
+
+			FileOutputStream fos = new FileOutputStream(tripleset);
 			//RDFDataMgr.write(fos, model, Lang.TRIG);
 			//RDFDataMgr.write(fos, model, Lang.TURTLE);
-			//RDFDataMgr.write(fos, model, Lang.RDFXML);
-			//RDFDataMgr.write(fos, model, Lang.NTRIPLES);
-			RDFDataMgr.write(fos, triplesProcessing.getModel(), triplesProcessing.defaultRuleConfig.getSyntax());
+			//RDFDataMgr.write(fos, triplesProcessing.getModel(), Lang.RDFXML);
+			RDFDataMgr.write(fos, triplesProcessing.getModel(), lang);
+			//RDFDataMgr.write(fos, triplesProcessing.getModel(), lang);
 			fos.close();
 
 		} catch (Exception e) {
@@ -604,10 +650,11 @@ public class RuleInterpretor implements Runnable
 			throw new Exception(e.getMessage());
 		}
 
-		long stopTime = System.currentTimeMillis();
-		long elapsedTime = stopTime - startTime;
+		Date stopTime = Calendar.getInstance().getTime();
+		long elapsedTime = stopTime.getTime() - startTime.getTime();
 		System.out.println("Wrote RDF in " + elapsedTime / 1000 + " secs");
-		elapsedTime = stopTime - triplesProcessing.startTime;
+		System.out.println("Processing Finished time:" + stopTime);
+		elapsedTime = stopTime.getTime() - triplesProcessing.startTime.getTime();
 		System.out.println("Processed in " + elapsedTime / 1000 + " secs");
 	}
 
@@ -628,6 +675,7 @@ public class RuleInterpretor implements Runnable
 				System.out.println(w.getMessage());
 			}
 			System.out.println(e.getMessage());
+			e.printStackTrace();
 		}
 	}
 }

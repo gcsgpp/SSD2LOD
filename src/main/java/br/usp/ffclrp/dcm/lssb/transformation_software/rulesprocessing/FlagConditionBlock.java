@@ -1,13 +1,13 @@
 package br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing;
 
 public class FlagConditionBlock extends Flag {
-	private Integer id;
+	private String id;
 	
-	public FlagConditionBlock(Integer id) {
+	public FlagConditionBlock(String id) {
 		this.id = id;
 	}
 	
-	public Integer getId(){
+	public String getId(){
 		return this.id;
 	}
 }

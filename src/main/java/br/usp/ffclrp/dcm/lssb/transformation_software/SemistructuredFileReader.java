@@ -4,6 +4,10 @@ import br.usp.ffclrp.dcm.lssb.custom_exceptions.ColumnNotFoundWarning;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.Condition;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.FlagCol;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.TSVColumn;
+import com.univocity.parsers.common.AbstractParser;
+import com.univocity.parsers.common.CommonParserSettings;
+import com.univocity.parsers.csv.CsvParser;
+import com.univocity.parsers.csv.CsvParserSettings;
 import com.univocity.parsers.tsv.TsvParser;
 import com.univocity.parsers.tsv.TsvParserSettings;
 
@@ -13,8 +17,9 @@ import java.util.List;
 import java.util.Map;
 
 public class SemistructuredFileReader {
-	
-	
+	static final int maxCharPerColumn = 999999;
+	static final int maxColumns = 999999;
+
 	//List<String[]> allRows = null;
 	//Map<String, Integer> header = new HashMap<String, Integer>();
 	Map<String, FileToBeProcessed> filesToBeProcessed = new LinkedHashMap<>();
@@ -32,13 +37,31 @@ public class SemistructuredFileReader {
 
 	public List<String[]> getAllFileData(File file) throws IOException {
 		List<String[]> rows = null;
-		try(Reader fileReader = getReader(file)) {
-			TsvParserSettings settings = new TsvParserSettings();
-			settings.getFormat().setLineSeparator("\r\n");
-			settings.setMaxCharsPerColumn(999999);
-			settings.setMaxColumns(99999);
 
-			TsvParser parser = new TsvParser(settings);
+		String name = file.getName();
+		String extension = name.substring(name.lastIndexOf("."));
+
+		AbstractParser parser = null;
+		if(extension.equals(".CSV")) {
+			CsvParserSettings settings = new CsvParserSettings();
+
+			settings.getFormat().setLineSeparator("\r\n");
+			settings.setMaxCharsPerColumn(maxCharPerColumn);
+			settings.setMaxColumns(maxColumns);
+
+			parser = new CsvParser(settings);
+		}else{
+			TsvParserSettings settings = new TsvParserSettings();
+
+			settings.getFormat().setLineSeparator("\r\n");
+			settings.setMaxCharsPerColumn(maxCharPerColumn);
+			settings.setMaxColumns(maxColumns);
+
+			parser = new TsvParser(settings);
+		}
+
+
+		try(Reader fileReader = getReader(file)) {
 			rows = parser.parseAll(fileReader);
 		}catch (IOException e) {
 			throw e;
@@ -50,6 +73,7 @@ public class SemistructuredFileReader {
 	public String getData(TSVColumn tsvColumn, Integer lineNumber) throws ColumnNotFoundWarning {
 		String[] dataRow;
 
+		Boolean columnFoundInAnyFile = false;
 		Integer position = null;
 		FlagCol flagCol = FlagCol.getColFlag(tsvColumn.getFlags());
 
@@ -57,15 +81,33 @@ public class SemistructuredFileReader {
 			try {
 				if(flagCol == null) {
 					position = file.getHeader().get(tsvColumn.getTitle());
+
+					if(position != null)
+						columnFoundInAnyFile = true;
 				}else{
-					if(file.getFilename().equals(flagCol.getFilename())) {
+					if(file.getFilename().toUpperCase().equals(flagCol.getFilename().toUpperCase())) {
 						position = flagCol.getColPosition();
+						if(position == null)
+							position = file.getHeader().get(flagCol.getColName());
+
+						if(position >= file.getHeader().size())
+							continue;
+						else
+							columnFoundInAnyFile = true;
 					}else{
 						continue;
 					}
 				}
 
+				if(position == null)
+					continue;
+
+				//The column belongs to this file but there is no row anymore
+				if((lineNumber >= file.getAllRows().size()))
+					continue;
+
 				dataRow = file.getAllRows().get(lineNumber);
+
 				String str = dataRow[position];
 				if (str.startsWith("\"") && str.endsWith("\""))
 					str = str.substring(1, str.length() - 1);
@@ -77,10 +119,14 @@ public class SemistructuredFileReader {
 			}
 		}
 
-		if(flagCol == null) {
-			throw new ColumnNotFoundWarning("Not found the column required. Column tried to access: " + tsvColumn.getTitle() + ". This column may not exist.");
+		if(!columnFoundInAnyFile) {
+			if (flagCol == null) {
+				throw new ColumnNotFoundWarning("Column required not found. Column tried to access: " + tsvColumn.getTitle() + ". This column may not exist.");
+			} else {
+				throw new ColumnNotFoundWarning("Column required not found. Column tried to access: " + flagCol.getColPosition() + " from file: " + flagCol.getFilename() + ". This column/file may not exist.");
+			}
 		}else{
-			throw new ColumnNotFoundWarning("Not found the column required. Column tried to access: " + flagCol.getColPosition() + " from file: " + flagCol.getFilename() + ". This column may not exist.");
+			return null;
 		}
 	}
 	

@@ -10,10 +10,7 @@ import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.search.EntitySearcher;
 
 import javax.annotation.Nonnull;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -77,6 +74,12 @@ public class OntologyHelper {
 
 			try(Stream<OWLObjectProperty> objectProperties = onto.objectPropertiesInSignature()) {
 				objectProperties.forEach(p -> {//System.out.println(labelFor(p) + " -> " + p);
+					mappingPredicatesAnnotations.put(labelFor(p), p);
+				});
+			}
+
+			try(Stream<OWLAnnotationProperty> annotationProperties = onto.annotationPropertiesInSignature()) {
+				annotationProperties.forEach(p -> {//System.out.println(labelFor(p) + " -> " + p);
 					mappingPredicatesAnnotations.put(labelFor(p), p);
 				});
 			}

@@ -10,11 +10,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ConditionBlock extends Flag {
-	private Integer id;
+	private String id;
 	private List<Condition> conditions;
 	
 	public ConditionBlock(String id, List<Condition> conditions) {
-		this.id = Integer.parseInt(id);
+		this.id = id;
 		this.conditions = conditions;
 	}
 	
@@ -22,7 +22,7 @@ public class ConditionBlock extends Flag {
 		return this.conditions;
 	}
 	
-	public Integer getId(){
+	public String getId(){
 		return this.id;
 	}
 	
@@ -30,12 +30,13 @@ public class ConditionBlock extends Flag {
 		String data = "";
 
 		Matcher matcher = Utils.matchRegexOnString(EnumRegexList.SELECTRULEID.get(), blockRulesAsText);
-		data = matcher.group().replace("condition_block[", "");
+		data = matcher.group(2);
+		//data = matcher.group().replace("condition_block[", "");
 		return data;
 	}
 	
 	static private List<String> identifyConditionBlocksFromString(String fileContent) {
-		Pattern patternToFind = Pattern.compile("condition_block\\[(.*?)\\]");
+		Pattern patternToFind = Pattern.compile(EnumRegexList.SELECTCONDITIONBLOCK.get());
 		Matcher match = patternToFind.matcher(fileContent);
 
 		List<String> identifiedCB = new ArrayList<String>();
@@ -47,15 +48,16 @@ public class ConditionBlock extends Flag {
 	}
 
 	static private ConditionBlock createConditionBlockFromString(String cbAsText) throws Exception {
-		Matcher matcher 				=	Utils.matchRegexOnString(EnumRegexList.SELECTSUBJECTLINE.get(), cbAsText);
-		String subjectLine 				=	Utils.splitByIndex(cbAsText, matcher.start())[0];
-		String predicatesLinesOneBlock 	= 	Utils.splitByIndex(cbAsText, matcher.start())[1];
+		//Matcher matcher 				=	Utils.matchRegexOnString(EnumRegexList.SELECTSUBJECTLINE.get(), cbAsText);
+		//String subjectLine 				=	Utils.splitByIndex(cbAsText, matcher.start())[0];
+		//String predicatesLinesOneBlock 	= 	Utils.splitByIndex(cbAsText, matcher.start())[1];
 
-		String conditionBlockId 		= 	extractConditionBlockIDFromSentence(subjectLine);
+		String conditionBlockId 		= 	Utils.matchRegexOnString(EnumRegexList.SELECTCONDITIONID.get(), cbAsText).group(2);
+		String predicatesLinesOneBlock 	=	Utils.matchRegexOnString(EnumRegexList.SELECTCONDITIONBODY.get(), cbAsText).group(2);
 
 
 		List<Condition> conditions = new ArrayList<Condition>();
-		matcher = Utils.matchRegexOnString(EnumRegexList.SELECTPREDICATESDIVISIONSCONDITIONBLOCK.get(), predicatesLinesOneBlock);
+		Matcher matcher = Utils.matchRegexOnString(EnumRegexList.SELECTPREDICATESDIVISIONSCONDITIONBLOCK.get(), predicatesLinesOneBlock);
 		while(!matcher.hitEnd()){
 			String lineFromBlock = matcher.group();
 
@@ -124,6 +126,8 @@ public class ConditionBlock extends Flag {
 		else if(operation.equals(EnumOperationsConditionBlock.EQUAL.getOperation()))			return EnumOperationsConditionBlock.EQUAL;
 		else if(operation.equals(EnumOperationsConditionBlock.GREATERTHAN.getOperation())) 	return EnumOperationsConditionBlock.GREATERTHAN;
 		else if(operation.equals(EnumOperationsConditionBlock.LESSTHAN.getOperation()))		return EnumOperationsConditionBlock.LESSTHAN;
+		else if(operation.equals(EnumOperationsConditionBlock.GREATERTHANEQUALTO.getOperation()))		return EnumOperationsConditionBlock.LESSTHAN;
+		else if(operation.equals(EnumOperationsConditionBlock.LESSTHANEQUALTO.getOperation()))		return EnumOperationsConditionBlock.LESSTHAN;
 		else throw new ConditionBlockException("No valid condition operator identified in a condition block.");
 	}
 	

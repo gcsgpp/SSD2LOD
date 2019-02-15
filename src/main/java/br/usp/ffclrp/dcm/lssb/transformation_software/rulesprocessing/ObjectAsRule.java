@@ -3,16 +3,16 @@ package br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing;
 import java.util.List;
 
 public class ObjectAsRule {
-	private Integer ruleNumber = null;
+	private String ruleId = null;
 	private List<Flag> flags = null;
 	
-	public ObjectAsRule(Integer ruleNumber, List<Flag> flags) {
-		this.ruleNumber = ruleNumber;
+	public ObjectAsRule(String ruleId, List<Flag> flags) {
+		this.ruleId = ruleId;
 		this.flags = flags;
 	}
 
-	public Integer getRuleNumber() {
-		return ruleNumber;
+	public String getRuleId() {
+		return ruleId;
 	}
 
 	public List<Flag> getFlags() {

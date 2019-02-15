@@ -1,7 +1,7 @@
 package br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing;
 
 public enum EnumOperationsConditionBlock {
-	EQUAL("=="), DIFFERENT("!="), LESSTHAN("<"), GREATERTHAN(">");
+	EQUAL("=="), DIFFERENT("!="), LESSTHAN("<"), GREATERTHAN(">"), GREATERTHANEQUALTO(">="), LESSTHANEQUALTO("<=");
 	
 	private final String operation;
 	EnumOperationsConditionBlock(String operation) {

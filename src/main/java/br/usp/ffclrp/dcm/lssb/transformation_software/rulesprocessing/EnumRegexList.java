@@ -6,7 +6,8 @@ public enum EnumRegexList {
 
 	SELECTRULEID("(column_based_rule|row_based_rule|condition_element)\\s*(\\w+)"),
 	SELECTCONFIGRULEID("(?:config_element\\s*\\{)"),
-	SELECTCONFIGPKEYS("\".+?\"\\s*="),
+	SELECTCONFIGPKEYS("\"\\w+\"\\s*="),
+	SELECTNAMESPACECONFIGKEY("\".*?\"\\s*?refers_to\\s*?\".*?\""),
 
 	SELECTSEARCHBLOCKID("(?:search_element\\s*\\w+\\s*{.*})"),
 	SELECTSEARCHID("(search_element\\s*)(\\w+)"),
@@ -23,7 +24,8 @@ public enum EnumRegexList {
 	SELECTSUBJECTCLASSNAME("is_equivalent_to\\s*(\".+?\")"),
 	SELECTSUBJECTLINE("\\[.+?\\]\\{"),
 	//SELECTPREDICATESDIVISIONS("((\\{|,)\\s*?\"[^:,]*?\"\\s*=)"),
-	SELECTPREDICATESDIVISIONS("(\\{|,)\\s*"),
+//	SELECTPREDICATESDIVISIONS("(\\{|,)\\s*"),
+	SELECTPREDICATESDIVISIONS("\"\\w+\"\\s*?=\\s*?(\".*?\")\\s*((?!,)|(?!}))"),
 	SELECTRULEPREDICATESDIVISIONS("(\\{|,)\\s*links_to"),
 	SELECTPREDICATE("using\\s*\".+?\""),
 	SELECTCONTENTQUOTATIONMARK("(\".+?\")"),

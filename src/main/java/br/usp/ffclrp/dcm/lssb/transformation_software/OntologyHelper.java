@@ -1,6 +1,9 @@
 package br.usp.ffclrp.dcm.lssb.transformation_software;
 
+import br.usp.ffclrp.dcm.lssb.custom_exceptions.ClassNotFoundInOntologyException;
+import br.usp.ffclrp.dcm.lssb.custom_exceptions.PropertyNotExistException;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.EnumTypeOfProperty;
+import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.RuleConfig;
 import org.apache.commons.io.FileUtils;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.FileDocumentSource;
@@ -23,11 +26,22 @@ public class OntologyHelper {
 	OWLDataFactory factory;
 	Map<String, OWLClass> mappingClassesAnnotations;
 	Map<String, OWLProperty> mappingPredicatesAnnotations;
+	Map<String, String> namespaces;
 
 	public OntologyHelper(){
 		this.m = OWLManager.createOWLOntologyManager();
 		this.factory = m.getOWLDataFactory();
 
+	}
+
+	public void setNamespaces(Map<String, String> namespaces)
+	{
+		this.namespaces = namespaces;
+	}
+
+	public Map<String, String> getNamespaces()
+	{
+		return this.namespaces;
 	}
 
 	public void loadingOntologyFromFile(String path) throws OWLOntologyCreationException, IOException {
@@ -67,20 +81,29 @@ public class OntologyHelper {
 		for(OWLOntology onto : ontologies) {
 
 			try(Stream<OWLDataProperty> dataProperties = onto.dataPropertiesInSignature()){
-				dataProperties.forEach(p -> {//System.out.println(labelFor(p) + " -> " + p);
-					mappingPredicatesAnnotations.put(labelFor(p), p);
+				dataProperties.forEach(p -> {
+
+					String ns = getKnownNamespaceFromIri(p.getIRI().toString());
+
+					mappingPredicatesAnnotations.put(ns + labelFor(p), p);
 				});
 			}
 
 			try(Stream<OWLObjectProperty> objectProperties = onto.objectPropertiesInSignature()) {
-				objectProperties.forEach(p -> {//System.out.println(labelFor(p) + " -> " + p);
-					mappingPredicatesAnnotations.put(labelFor(p), p);
+				objectProperties.forEach(p -> {
+
+					String ns = getKnownNamespaceFromIri(p.getIRI().toString());
+
+					mappingPredicatesAnnotations.put(ns + labelFor(p), p);
 				});
 			}
 
 			try(Stream<OWLAnnotationProperty> annotationProperties = onto.annotationPropertiesInSignature()) {
-				annotationProperties.forEach(p -> {//System.out.println(labelFor(p) + " -> " + p);
-					mappingPredicatesAnnotations.put(labelFor(p), p);
+				annotationProperties.forEach(p -> {
+
+					String ns = getKnownNamespaceFromIri(p.getIRI().toString());
+
+					mappingPredicatesAnnotations.put(ns + labelFor(p), p);
 				});
 			}
 		}
@@ -89,12 +112,36 @@ public class OntologyHelper {
 	private void addAllClassesLabelsToMap() {
 
 		mappingClassesAnnotations = new HashMap<String, OWLClass>();
-		for(OWLOntology onto : ontologies) {
-			try(Stream<OWLClass> stream = onto.classesInSignature()) {
-				stream.forEach(c -> mappingClassesAnnotations.put(labelFor(c), c));
+		for (OWLOntology onto : ontologies) {
+
+			try (Stream<OWLClass> stream = onto.classesInSignature()) {
+
+				stream.forEach(c -> {
+
+					String ns = getKnownNamespaceFromIri(c.getIRI().toString());
+
+					mappingClassesAnnotations.put(ns + labelFor(c), c);
+
+				});
 			}
 		}
 	}
+
+	private String getKnownNamespaceFromIri(String iri)
+	{
+		String ns = "";
+
+		for(Map.Entry<String, String> entry : this.namespaces.entrySet())
+		{
+			if(iri.toLowerCase().contains(entry.getValue().toLowerCase())) {
+				ns = entry.getKey() + ":";
+				break;
+			}
+		}
+
+		return ns;
+	}
+
 
 	// @author Ignazio Palmisano (https://github.com/ignazio1977)
 	// Modified by Gabriel Gusmao (https://github.com/gcsgpp)
@@ -123,14 +170,25 @@ public class OntologyHelper {
 		}
 	}
 
-	public OWLClass getClass(String classLabel){
+	public OWLClass getClass(String classLabel) throws ClassNotFoundInOntologyException {
 
-		return mappingClassesAnnotations.get(classLabel);
+		OWLClass clazz = mappingClassesAnnotations.get(classLabel);
+
+
+		if(clazz == null)
+			throw new ClassNotFoundInOntologyException("Not found any ontology class with label '" + classLabel + "'");
+
+		return clazz;
 	}
 
-	public OWLProperty getProperty(String predicateLabel){
+	public OWLProperty getProperty(String predicateLabel) throws PropertyNotExistException {
 
-		return mappingPredicatesAnnotations.get(predicateLabel);
+		OWLProperty prop =  mappingPredicatesAnnotations.get(predicateLabel);
+
+		if(prop == null)
+			throw new PropertyNotExistException("Not found any ontology property with label '" + predicateLabel + "'");
+
+		return prop;
 	}
 
 	//Prerequisite: baseIri must **not** end with "#"

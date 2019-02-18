@@ -1,8 +1,6 @@
 package br.usp.ffclrp.dcm.lssb.transformation_software;
 
-import br.usp.ffclrp.dcm.lssb.custom_exceptions.BaseIRIException;
-import br.usp.ffclrp.dcm.lssb.custom_exceptions.ConditionBlockException;
-import br.usp.ffclrp.dcm.lssb.custom_exceptions.RuleNotFound;
+import br.usp.ffclrp.dcm.lssb.custom_exceptions.*;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.*;
 import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
@@ -39,7 +37,7 @@ public class TripleProcessingTest
 		ontologiesList = new ArrayList<>();
 	}
 
-	private Rule createRuleOne() {
+	private Rule createRuleOne() throws ClassNotFoundInOntologyException, PropertyNotExistException {
 		String id = "rule1";
 		RuleConfig ruleConfig = new RuleConfig("default").setMatrix(true);
 		OWLClass subjectClass = ontologyHelper.getClass("Term");
@@ -93,7 +91,7 @@ public class TripleProcessingTest
 		return new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects);
 	}
 
-	private Rule createRuleTwo() {
+	private Rule createRuleTwo() throws ClassNotFoundInOntologyException, PropertyNotExistException {
 		String id = "rule2";
 		RuleConfig ruleConfig = new RuleConfig("default").setMatrix(true);
 		OWLClass subjectClass = ontologyHelper.getClass("Term");
@@ -147,7 +145,7 @@ public class TripleProcessingTest
 		return new Rule(id, ruleConfig, subjectClass, subjectTSVColumns, predicateObjects);
 	}
 
-	private Rule createRuleThree() {
+	private Rule createRuleThree() throws ClassNotFoundInOntologyException {
 		String id = "rule3";
 		RuleConfig ruleConfig = new RuleConfig("default").setMatrix(true);
 		OWLClass subjectClass = ontologyHelper.getClass("Gene");
@@ -317,7 +315,7 @@ public class TripleProcessingTest
     // ##################
 
 
-	private Rule createRuleWithNotMetadataFlag() {
+	private Rule createRuleWithNotMetadataFlag() throws ClassNotFoundInOntologyException {
 		String id = "rule1";
 		RuleConfig ruleConfig = new RuleConfig("default", "http://example.org/onto/individual#").setMatrix(true);
 		OWLClass subjectClass = ontologyHelper.getClass("geo sample");
@@ -373,7 +371,7 @@ public class TripleProcessingTest
 
     // ##################
 
-	private Rule createRuleAssertingConditionBlockThatDontExist(){
+	private Rule createRuleAssertingConditionBlockThatDontExist() throws ClassNotFoundInOntologyException {
 		String id = "rule1";
 		RuleConfig ruleConfig = new RuleConfig("default").setMatrix(true);
 		OWLClass subjectClass = ontologyHelper.getClass("Term");
@@ -423,7 +421,7 @@ public class TripleProcessingTest
     // ##################
 
 
-	private Rule createRuleWithFixedContentFlagOnSubjectLine() {
+	private Rule createRuleWithFixedContentFlagOnSubjectLine() throws ClassNotFoundInOntologyException {
 		String id = "rule1";
 		RuleConfig ruleConfig = new RuleConfig("default", "http://example.org/onto/individual#").setMatrix(true);
 		OWLClass subjectClass = ontologyHelper.getClass("geo sample");
@@ -481,7 +479,7 @@ public class TripleProcessingTest
     // ##################
 
 
-	private Rule createRuleWithFixedContentFlagOnObjectLine() {
+	private Rule createRuleWithFixedContentFlagOnObjectLine() throws ClassNotFoundInOntologyException, PropertyNotExistException {
 		String id = "rule1";
 		RuleConfig ruleConfig = new RuleConfig("default").setMatrix(true);
 		OWLClass subjectClass = ontologyHelper.getClass("geo sample");
@@ -554,7 +552,7 @@ public class TripleProcessingTest
     // ##################
 
 
-	private Rule createRuleWithCustomIDFlag() {
+	private Rule createRuleWithCustomIDFlag() throws ClassNotFoundInOntologyException {
 		String id = "rule1";
 		RuleConfig ruleConfig = new RuleConfig("default", "http://example.org/onto/individual#").setMatrix(true);
 		OWLClass subjectClass = ontologyHelper.getClass("geo sample");
@@ -611,7 +609,7 @@ public class TripleProcessingTest
     // ##################
 
 
-	private Rule createRuleWithBaseIRIWithNoNamespace() {
+	private Rule createRuleWithBaseIRIWithNoNamespace() throws ClassNotFoundInOntologyException {
 		String id = "rule1";
 		RuleConfig ruleConfig = new RuleConfig("default").setMatrix(true);
 		OWLClass subjectClass = ontologyHelper.getClass("geo sample");
@@ -658,7 +656,7 @@ public class TripleProcessingTest
     // ##################
 
 
-	private Rule createRuleWithBaseIRIWithNoIRI() {
+	private Rule createRuleWithBaseIRIWithNoIRI() throws ClassNotFoundInOntologyException {
 		String id = "rule1";
 		RuleConfig ruleConfig = new RuleConfig("default").setMatrix(true);
 		OWLClass subjectClass = ontologyHelper.getClass("geo sample");
@@ -744,7 +742,7 @@ public class TripleProcessingTest
     // ##################
 
 
-	private Rule createRuleSeparatorElementInSeparatorFlagDoesNotExist() {
+	private Rule createRuleSeparatorElementInSeparatorFlagDoesNotExist() throws ClassNotFoundInOntologyException {
 		String id = "rule1";
 		RuleConfig ruleConfig = new RuleConfig("default").setMatrix(true);
 		OWLClass subjectClass = ontologyHelper.getClass("Gene");
@@ -927,7 +925,7 @@ public class TripleProcessingTest
 	// ##################
 
 
-    private Rule createSimpleRule(){
+    private Rule createSimpleRule() throws ClassNotFoundInOntologyException, PropertyNotExistException {
 		String id = "rule1";
 		RuleConfig ruleConfig = new RuleConfig(id, "http://example.org/onto/individual#");
 		OWLClass subjectClass = ontologyHelper.getClass("investigation");
@@ -1016,7 +1014,7 @@ public class TripleProcessingTest
 	// ##################
 
 
-	private List<Rule> createSimpleRuleInsideSimpleRuleAndOtherFile(){
+	private List<Rule> createSimpleRuleInsideSimpleRuleAndOtherFile() throws ClassNotFoundInOntologyException, PropertyNotExistException {
 		List<Rule> rules = new ArrayList<>();
 		//RULE 1
 		String id = "rule1";
@@ -1121,7 +1119,7 @@ public class TripleProcessingTest
 	// ##################
 
 
-	private List<Rule> createSimpleRuleInsideMatrixRule(){
+	private List<Rule> createSimpleRuleInsideMatrixRule() throws ClassNotFoundInOntologyException, PropertyNotExistException {
 		List<Rule> rules = new ArrayList<>();
 		//RULE 1
 		String id = "rule1";
@@ -1316,7 +1314,7 @@ public class TripleProcessingTest
 	// ##################
 
 
-	private List<Rule> createRuleWithSearchBlock(){
+	private List<Rule> createRuleWithSearchBlock() throws ClassNotFoundInOntologyException, PropertyNotExistException {
 		List<Rule> rules = new ArrayList<>();
 		//RULE 1
 		String id = "rule1";
@@ -1435,7 +1433,7 @@ public class TripleProcessingTest
 
 	// ##################
 
-	private Rule createRuleWithColFlag() {
+	private Rule createRuleWithColFlag() throws ClassNotFoundInOntologyException {
 		String id = "rule1";
 		RuleConfig ruleConfig = new RuleConfig("default", "http://example.org/onto/individual/");
 		OWLClass subjectClass = ontologyHelper.getClass("Gene");

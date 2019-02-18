@@ -4,8 +4,11 @@ import br.usp.ffclrp.dcm.lssb.transformation_software.RuleInterpretor;
 import br.usp.ffclrp.dcm.lssb.transformation_software.Utils;
 import org.apache.jena.riot.Lang;
 
+import javax.rmi.CORBA.Util;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 
 public class RuleConfig {
@@ -14,6 +17,7 @@ public class RuleConfig {
 	private String defaultNS = null;
 	private Boolean header = null;
 	private Lang syntax = null;
+	private Map<String, String> namespaces = null;
 //	private String SSDFileType = null;
 	
 	public RuleConfig(String ID) {
@@ -21,6 +25,7 @@ public class RuleConfig {
 		this.id = ID;
 		this.header = true;
 //		this.SSDFileType = "TSV";
+		this.namespaces = new HashMap<String, String>();
 	}
 
 	public RuleConfig(String ID, String defaultBaseIRI){
@@ -29,6 +34,17 @@ public class RuleConfig {
 		this.defaultNS = defaultBaseIRI;
 		this.header = true;
 //		this.SSDFileType = "TSV";
+		this.namespaces = new HashMap<String, String>();
+	}
+
+	public RuleConfig(RuleConfig rule) {
+		this.id = rule.getId();
+		this.matrix = rule.getMatrix();
+		this.defaultNS = rule.getDefaultBaseIRI();
+		this.header = rule.getHeader();
+		this.syntax = rule.getSyntax();
+//		this.SSDFileType = "TSV";
+		this.namespaces = rule.getNamespace();
 	}
 	
 	public String getId() {
@@ -36,9 +52,9 @@ public class RuleConfig {
 	}
 	
 	public RuleConfig setMatrix(Boolean setting) {
-		RuleConfig rule = new RuleConfig(this.id, this.defaultNS);
-		rule.setMatrixProperty(setting);
-		return rule;
+//		RuleConfig rule = new RuleConfig(this.id, this.defaultNS);
+		this.setMatrixProperty(setting);
+		return this;
 	}
 
 	private void setMatrixProperty(Boolean setting) {
@@ -102,12 +118,14 @@ public class RuleConfig {
 			else
 				finalChar = initialOfEachMatch.get(i+1);
 
-			String lineFromBlock = predicatesLinesOneBlock.substring(initialOfEachMatch.get(i) + 1, // +1 exists to not include the first character, a comma
+			String lineFromBlock = predicatesLinesOneBlock.substring(initialOfEachMatch.get(i), // +1 exists to not include the first character, a comma
 					finalChar);
 
 			String column 	= Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(lineFromBlock, EnumRegexList.SELECTCONFIGPKEYS.get());
 			lineFromBlock 	= Utils.removeRegexFromContent(EnumRegexList.SELECTCONFIGPKEYS.get(), lineFromBlock);
-			String value 	= Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(lineFromBlock, EnumRegexList.SELECTALL.get());
+			String value 	= null;
+			if(column.toLowerCase().equals("namespace") == false)
+				value 		= Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(lineFromBlock, EnumRegexList.SELECTALL.get());
 			
 			if(column.toLowerCase().equals("default_baseiri")) {
 				try {
@@ -137,6 +155,9 @@ public class RuleConfig {
 //					rule.setSSDFileType("TSV");
 //				else if(value.toLowerCase().trim().equals("csv"))
 //					rule.setSSDFileType("CSV");
+			}else if(column.toLowerCase().equals("namespace")){
+				Map<String, String> namespaces = extractNamespaceFromString(lineFromBlock);
+				rule.setNamespace(namespaces.get("key"), namespaces.get("value"));
 			}
 		}
 
@@ -145,7 +166,20 @@ public class RuleConfig {
 
 		return rule;
 	}
-	
+
+	private static Map<String, String> extractNamespaceFromString(String lineFromBlock) {
+		String ns = Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(lineFromBlock, EnumRegexList.SELECTALL.get());
+		lineFromBlock = Utils.removeDataFromFirstQuotationMarkBlockInsideRegex(lineFromBlock, EnumRegexList.SELECTALL.get());
+		String url = Utils.extractDataFromFirstQuotationMarkBlockInsideRegex(lineFromBlock, EnumRegexList.SELECTALL.get());
+
+		Map<String, String> namespace = new HashMap<>();
+		namespace.put("key", ns);
+		namespace.put("value", url);
+
+		return namespace;
+
+	}
+
 	static public List<RuleConfig> extractRuleConfigFromString(String fileContent) throws Exception {
 		List<String> ruleConfigListAsText = RuleInterpretor.identifyConfigBlocksFromString(fileContent);
 		List<RuleConfig> rcList = new ArrayList<>();
@@ -164,5 +198,15 @@ public class RuleConfig {
 		}
 
 		throw new Exception("There is no default rule configuration component.");
+	}
+
+	public void setNamespace(String key, String value)
+	{
+		this.namespaces.put(key, value);
+	}
+
+	public Map<String, String> getNamespace()
+	{
+		return this.namespaces;
 	}
 }

@@ -96,7 +96,7 @@ public class TriplesProcessing {
 	}
 
 	private List<Resource> 	processRule(Rule rule) throws Exception {
-		//System.out.println("Processing rule: " + rule.getId());
+//		System.out.println("Processing rule: " + rule.getId());
 		List<Resource> subjectListToBeReturned = new LinkedList<>();
 		if(rule.isMatrix()){
 			//if(currentLineNumberMatrixRules.isEmpty()){
@@ -147,10 +147,6 @@ public class TriplesProcessing {
 				List<Resource> subjectList = getSubject(rule, rule.getStartLineNumber()); //ONE SUBJECT FOR EACH ITEM IN THE CELL
 
 				for(Integer tsvLineNumber = rule.getStartLineNumber(); tsvLineNumber < fileReader.getLinesCount(); tsvLineNumber++) {
-
-					if(rule.getId().equals("rule1"))
-						System.out.println("Rule 1 - Line: " + tsvLineNumber);
-
 					for (TSVColumn ruleColumns : rule.getSubjectTSVColumns()) {
 						if (!assertConditionBlock(ruleColumns.getFlags(), tsvLineNumber))
 							return null;

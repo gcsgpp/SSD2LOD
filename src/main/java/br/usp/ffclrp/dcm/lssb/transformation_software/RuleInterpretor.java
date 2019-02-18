@@ -66,7 +66,7 @@ public class RuleInterpretor implements Runnable
 	    //   Test
 	    args = new String[3];
 	    args[0] = "runTransformation";
-	    args[1] = "d330fb3f-b485-4876-8bf5-413d9ece070c";
+	    args[1] = "tc4";
 //	    args[2] = "50bea367-a756-415b-8bb3-00933c07810a";
 	    /* End test */
 
@@ -164,8 +164,6 @@ public class RuleInterpretor implements Runnable
 	}
 
 	public void 			extractRulesFromFile(String rulesRelativePath, List<String> listOfOntologies) throws Exception{
-		ontologyHelper = new OntologyHelper();
-		ontologyHelper.loadingOntologyFromFile(listOfOntologies);
 		String fileContent = Utils.readFile(rulesRelativePath);
 
 		fileContent = fileContent.replaceAll("\n", "").replaceAll("\t", "");
@@ -176,6 +174,13 @@ public class RuleInterpretor implements Runnable
 		for(RuleConfig rc : listRuleConfig){
 			ruleConfigs.put(rc.getId(), rc);
 		}
+
+		//Ontology must be after the read of the ruleConfigs because of possible presence of the namespaces key
+		ontologyHelper = new OntologyHelper();
+		if(ruleConfigs.get("default") != null)
+			ontologyHelper.setNamespaces(ruleConfigs.get("default").getNamespace());
+		ontologyHelper.loadingOntologyFromFile(listOfOntologies);
+
 		
 		List<ConditionBlock> listConditionBlock = ConditionBlock.extractConditionsBlocksFromString(fileContent);
 		for(ConditionBlock conditionBlock : listConditionBlock){
@@ -218,12 +223,12 @@ public class RuleInterpretor implements Runnable
 
 		RuleConfig ruleConfig				= ruleConfigs.get(ruleId);
 		if(ruleConfig == null){
-			ruleConfig = ruleConfigs.get("default");
+			ruleConfig = new RuleConfig(ruleConfigs.get("default"));
 			if(ruleConfig == null)
 				throw new Exception("Not found a config rule block for rule id '" + ruleId + "' neither a 'default' config rule block.");
 		}
 		if(blockRulesAsText.trim().startsWith("row_based_rule")) {
-			ruleConfig = ruleConfig.setMatrix(true);
+			ruleConfig = new RuleConfig(ruleConfig.setMatrix(true));
 		}
 			
 		OWLClass ruleSubject 				= extractSubjectFromSentence(subjectLine);
@@ -340,9 +345,6 @@ public class RuleInterpretor implements Runnable
 
 		OWLProperty prop = ontologyHelper.getProperty(predicateName);
 
-		if(prop == null)
-			throw new PropertyNotExistException("Property does not exist in ontology. Instruction: " + lineFromBlock);
-
 		return prop;
 	}
 
@@ -442,7 +444,7 @@ public class RuleInterpretor implements Runnable
 		return flagsList;
 	}
 
-	private FlagNode		extractFlagNodeFromSentence(String sentence){
+	private FlagNode		extractFlagNodeFromSentence(String sentence) throws ClassNotFoundInOntologyException {
 
 		String nodeTypeString = Utils.matchRegexOnString(EnumRegexList.SELECTNODEFLAG.get(), sentence).group(1);
 

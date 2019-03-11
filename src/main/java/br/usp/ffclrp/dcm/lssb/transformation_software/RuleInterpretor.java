@@ -64,9 +64,9 @@ public class RuleInterpretor implements Runnable
 	public static void main (String[] args) {
 
 	    //   Test
-	    args = new String[3];
-	    args[0] = "runTransformation";
-	    args[1] = "tc4";
+//	    args = new String[3];
+//	    args[0] = "runTransformation";
+//	    args[1] = "tc4";
 //	    args[2] = "50bea367-a756-415b-8bb3-00933c07810a";
 	    /* End test */
 

@@ -30,8 +30,7 @@ public class TriplesProcessing {
 	private Map<String, SearchBlock> searchBlocks;
 	public 	RuleConfig defaultRuleConfig;
 	private MatrixLineNumberTracking currentLineNumberMatrixRules = new MatrixLineNumberTracking();
-	private Map<String, List<Resource>> columnRulesAlreadyProcessed = new HashMap<>();
-	private Map<String, List<Resource>> simpleRulesAlreadyProcessed = new HashMap<>();
+	private Map<String, List<Resource>> rulesAlreadyProcessed = new HashMap<>();
 	public 	Date startTime;
 	private List<String> ontologiesList = new ArrayList<>();
 
@@ -100,16 +99,17 @@ public class TriplesProcessing {
 		List<Resource> subjectListToBeReturned = new LinkedList<>();
 		if(rule.isMatrix()){
 			//if(currentLineNumberMatrixRules.isEmpty()){
-				for(Integer tsvLineNumber = rule.getStartLineNumber(); tsvLineNumber < fileReader.getLinesCount(); tsvLineNumber++) {
+			if(rulesAlreadyProcessed.get(rule.getId()) == null) {
+				for (Integer tsvLineNumber = rule.getStartLineNumber(); tsvLineNumber < fileReader.getLinesCount(); tsvLineNumber++) {
 					//currentLineNumberMatrixRules = new MatrixLineNumberTracking(tsvLineNumber, rule.getId());
 
 					Boolean conditionBlock = true;
-					for(TSVColumn ruleColumns : rule.getSubjectTSVColumns()){
-						if(!assertConditionBlock(ruleColumns.getFlags(), tsvLineNumber))
+					for (TSVColumn ruleColumns : rule.getSubjectTSVColumns()) {
+						if (!assertConditionBlock(ruleColumns.getFlags(), tsvLineNumber))
 							conditionBlock = false;
 					}
 
-					if(conditionBlock) {
+					if (conditionBlock) {
 						if (rule.processedLines.get(tsvLineNumber) == null) {
 
 							// *** SUBJECT ***
@@ -122,8 +122,9 @@ public class TriplesProcessing {
 						}
 					}
 				}
-
-
+			}else{
+				subjectListToBeReturned = rulesAlreadyProcessed.get(rule.getId());
+			}
 
 //				currentLineNumberMatrixRules = new MatrixLineNumberTracking();
 //
@@ -140,9 +141,8 @@ public class TriplesProcessing {
 
 
 		}else{
-			List<Resource> t = columnRulesAlreadyProcessed.get(rule.getId());
 
-			if(columnRulesAlreadyProcessed.get(rule.getId()) == null){
+			if(rulesAlreadyProcessed.get(rule.getId()) == null){
 				// *** SUBJECT ***
 				List<Resource> subjectList = getSubject(rule, rule.getStartLineNumber()); //ONE SUBJECT FOR EACH ITEM IN THE CELL
 
@@ -157,10 +157,11 @@ public class TriplesProcessing {
 					subjectListToBeReturned = subjectsProcessed;
 				}
 			}else{
-				subjectListToBeReturned = columnRulesAlreadyProcessed.get(rule.getId());
+				subjectListToBeReturned = rulesAlreadyProcessed.get(rule.getId());
 			}
+
 		}
-		columnRulesAlreadyProcessed.put(rule.getId(), subjectListToBeReturned);
+		rulesAlreadyProcessed.put(rule.getId(), subjectListToBeReturned);
 		return subjectListToBeReturned;
 	}
 

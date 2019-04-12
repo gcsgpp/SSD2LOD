@@ -85,7 +85,10 @@ public class OntologyHelper {
 
 					String ns = getKnownNamespaceFromIri(p.getIRI().toString());
 
-					mappingPredicatesAnnotations.put(ns + labelFor(p), p);
+					String label = labelFor(p);
+
+					if(label != null)
+						mappingPredicatesAnnotations.put(ns.toLowerCase() + label.toLowerCase(), p);
 				});
 			}
 
@@ -94,7 +97,10 @@ public class OntologyHelper {
 
 					String ns = getKnownNamespaceFromIri(p.getIRI().toString());
 
-					mappingPredicatesAnnotations.put(ns + labelFor(p), p);
+					String label = labelFor(p);
+
+					if(label != null)
+						mappingPredicatesAnnotations.put(ns.toLowerCase() + label.toLowerCase(), p);
 				});
 			}
 
@@ -103,7 +109,10 @@ public class OntologyHelper {
 
 					String ns = getKnownNamespaceFromIri(p.getIRI().toString());
 
-					mappingPredicatesAnnotations.put(ns + labelFor(p), p);
+					String label = labelFor(p);
+
+					if(label != null)
+						mappingPredicatesAnnotations.put(ns.toLowerCase() + label.toLowerCase(), p);
 				});
 			}
 		}
@@ -119,8 +128,10 @@ public class OntologyHelper {
 				stream.forEach(c -> {
 
 					String ns = getKnownNamespaceFromIri(c.getIRI().toString());
+					String label = labelFor(c);
 
-					mappingClassesAnnotations.put(ns + labelFor(c), c);
+					if(label != null)
+						mappingClassesAnnotations.put(ns.toLowerCase() + label.toLowerCase(), c);
 
 				});
 			}
@@ -133,7 +144,7 @@ public class OntologyHelper {
 
 		for(Map.Entry<String, String> entry : this.namespaces.entrySet())
 		{
-			if(iri.toLowerCase().contains(entry.getValue().toLowerCase())) {
+			if(iri.toLowerCase().trim().contains(entry.getValue().toLowerCase().trim())) {
 				ns = entry.getKey() + ":";
 				break;
 			}
@@ -172,8 +183,7 @@ public class OntologyHelper {
 
 	public OWLClass getClass(String classLabel) throws ClassNotFoundInOntologyException {
 
-		OWLClass clazz = mappingClassesAnnotations.get(classLabel);
-
+		OWLClass clazz = mappingClassesAnnotations.get(classLabel.toLowerCase());
 
 		if(clazz == null)
 			throw new ClassNotFoundInOntologyException("Not found any ontology class with label '" + classLabel + "'");
@@ -183,7 +193,7 @@ public class OntologyHelper {
 
 	public OWLProperty getProperty(String predicateLabel) throws PropertyNotExistException {
 
-		OWLProperty prop =  mappingPredicatesAnnotations.get(predicateLabel);
+		OWLProperty prop =  mappingPredicatesAnnotations.get(predicateLabel.toLowerCase());
 
 		if(prop == null)
 			throw new PropertyNotExistException("Not found any ontology property with label '" + predicateLabel + "'");

@@ -43,30 +43,12 @@ public class RuleInterpretor implements Runnable
 
 	}
 
-	/*public static void 		main( String[] args ) throws Exception {
-		List<String> listOfOntologies 	= new ArrayList<>();
-		listOfOntologies.add("testFiles/arraye_preprocessed/ontology.owl");
-		String rulesFilePath = "testFiles/arraye_preprocessed/rules.txt";
-		List<String> dataPaths = new ArrayList<>();
-		dataPaths.add("testFiles/arraye_preprocessed/Competency Questions/A-BUGS-23.adf.tsv");
-		dataPaths.add("testFiles/arraye_preprocessed/Competency Questions/E-MTAB-5814.idf.tsv");
-		dataPaths.add("testFiles/arraye_preprocessed/Competency Questions/E-MTAB-5814.sdrf.tsv");
-
-		RuleInterpretor ruleInterpretor = new RuleInterpretor();
-		ruleInterpretor.setTransformationParameters("",
-													listOfOntologies,
-													rulesFilePath,
-													"testFiles/arraye_preprocessed/ontology.owl",
-													dataPaths );
-		ruleInterpretor.run();
-	}*/
-
 	public static void main (String[] args) {
 
-	    //   Test
+//	       Test
 //	    args = new String[3];
 //	    args[0] = "runTransformation";
-//	    args[1] = "tc4";
+//	    args[1] = "TC2-nova-ontologia-alterada";
 //	    args[2] = "50bea367-a756-415b-8bb3-00933c07810a";
 	    /* End test */
 
@@ -127,18 +109,6 @@ public class RuleInterpretor implements Runnable
 			for (String path : dataPaths) {
 				triplesProcessing.addDatasetToBeProcessed(path);
 			}
-
-
-			//Local test
-			/*app.extractRulesFromFile("testFiles/geo_preprocessed/rules-modified_searchblock.txt", listOfOntologies);
-			TriplesProcessing triplesProcessing = new TriplesProcessing("testFiles/geo_preprocessed/ontology.owl");
-			triplesProcessing.addDatasetToBeProcessed("testFiles/geo_preprocessed/GPL19921.tsv");
-			triplesProcessing.addDatasetToBeProcessed("testFiles/geo_preprocessed/GSE67111.tsv");
-			triplesProcessing.addDatasetToBeProcessed("testFiles/geo_preprocessed/GSM1638971.tsv");
-			triplesProcessing.addDatasetToBeProcessed("testFiles/geo_preprocessed/GSM1638972.tsv");
-			triplesProcessing.addDatasetToBeProcessed("testFiles/geo_preprocessed/GSM1638973.tsv");
-			triplesProcessing.addDatasetToBeProcessed("testFiles/geo_preprocessed/GSM1638979.tsv");
-			*/
 
 			triplesProcessing.createTriplesFromRules(rulesList, conditionsBlocks, searchBlocks, ruleConfigs.get("default"), listOfOntologies);
 			triplesProcessing.checkConsistency();

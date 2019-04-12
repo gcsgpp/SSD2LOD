@@ -37,12 +37,16 @@ public class SemistructuredFileReader {
 
 	public List<String[]> getAllFileData(File file) throws IOException {
 		List<String[]> rows = null;
+		if(file.getName().equals("format.txt")) return rows;
 
-		String name = file.getName();
-		String extension = name.substring(name.lastIndexOf("."));
+
+		String formatFile = Utils.readFile(file.getParent() + "/format.txt");
+
+//		String name = file.getName();
+//		String extension = name.substring(name.lastIndexOf("."));
 
 		AbstractParser parser = null;
-		if(extension.equals(".CSV")) {
+		if(formatFile.toLowerCase().equals("csv")) {
 			CsvParserSettings settings = new CsvParserSettings();
 
 			settings.getFormat().setLineSeparator("\r\n");

@@ -16,6 +16,7 @@ import org.semanticweb.owlapi.model.OWLProperty;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -258,13 +259,18 @@ public class TriplesProcessing {
 
 						try {
 
-							Double value = condition.parsedValues.get(contentTSVColumn);
+							BigDecimal value = condition.parsedValues.get(contentTSVColumn);
+
 							if(value == null) {
-								value = Double.parseDouble(contentTSVColumn);
+								value = new BigDecimal(contentTSVColumn);
 								condition.parsedValues.put(contentTSVColumn, value);
 							}
 
-							result = value < ((double) condition.getConditionValue());
+							if(value.compareTo(new BigDecimal(condition.getConditionValue())) < 0)
+
+								result = true;
+							else
+								result = false;
 
 						}catch (Exception e ){
 							result = false;
@@ -275,14 +281,17 @@ public class TriplesProcessing {
 					if(condition.getOperation() == EnumOperationsConditionBlock.LESSTHANEQUALTO){
 						try {
 
-							Double value = condition.parsedValues.get(contentTSVColumn);
+							BigDecimal value = condition.parsedValues.get(contentTSVColumn);
 
 							if(value == null) {
-								value = Double.parseDouble(contentTSVColumn);
+								value = new BigDecimal(contentTSVColumn);
 								condition.parsedValues.put(contentTSVColumn, value);
 							}
 
-							result = value <= ((double) condition.getConditionValue());
+							if(value.compareTo(new BigDecimal(condition.getConditionValue())) <= 0)
+								result = true;
+							else
+								result = false;
 
 						}catch (Exception e ) {
 							result = false;
@@ -293,14 +302,19 @@ public class TriplesProcessing {
 					if(condition.getOperation() == EnumOperationsConditionBlock.GREATERTHAN){
 						try {
 
-							Double value = condition.parsedValues.get(contentTSVColumn);
+							BigDecimal value = condition.parsedValues.get(contentTSVColumn);
 
 							if(value == null) {
-								value = Double.parseDouble(contentTSVColumn);
+								value = new BigDecimal(contentTSVColumn);
 								condition.parsedValues.put(contentTSVColumn, value);
 							}
 
-							result = value > ((double) condition.getConditionValue());
+							if(value.compareTo(new BigDecimal(condition.getConditionValue())) > 0)
+
+								result = true;
+							else
+								result = false;
+
 
 						}catch (Exception e ) {
 							result = false;
@@ -310,14 +324,18 @@ public class TriplesProcessing {
 					if(condition.getOperation() == EnumOperationsConditionBlock.GREATERTHANEQUALTO){
 						try {
 
-							Double value = condition.parsedValues.get(contentTSVColumn);
+							BigDecimal value = condition.parsedValues.get(contentTSVColumn);
 
 							if(value == null) {
-								value = Double.parseDouble(contentTSVColumn);
+								value = new BigDecimal(contentTSVColumn);
 								condition.parsedValues.put(contentTSVColumn, value);
 							}
 
-							result = value >= ((double) condition.getConditionValue());
+							if(value.compareTo(new BigDecimal(condition.getConditionValue())) >= 0)
+
+								result = true;
+							else
+								result = false;
 
 						}catch (Exception e ) {
 							result = false;
@@ -543,11 +561,11 @@ public class TriplesProcessing {
 
 
 		} else {
-			String fixedContentFlag = getFixedContentFlag(rule.getSubjectTSVColumns());
-			if (fixedContentFlag != null) {
-				subjectList.add(model.createResource(baseIRI + fixedContentFlag, subjectType));
-
-			} else {
+//			String fixedContentFlag = getFixedContentFlag(rule.getSubjectTSVColumns());
+//			if (fixedContentFlag != null) {
+//				subjectList.add(model.createResource(baseIRI + fixedContentFlag, subjectType));
+//
+//			} else {
 				List<String> subjectContentRaw = extractData(rule.getSubjectTSVColumns(), lineNumber);
 
 				List<String> subjectContent = new ArrayList<String>();
@@ -559,7 +577,7 @@ public class TriplesProcessing {
 					subjectList.add(model.createResource(baseIRI + individualContent, subjectType));
 				}
 			}
-		}
+//		}
 		return subjectList;
 	}
 

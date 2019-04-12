@@ -43,9 +43,9 @@ public enum EnumRegexList {
 	SELECTNOTMETADATA("(\\/(NM)(?:\\W|\\s))"),
 	SELECTNODEFLAG("\\/NODE\\(\\\"(.*?)\\\"\\)"),
 	//CONDITION BLOCK REGEX:
-	SELECTCOLUMNCONDITIONBLOCK("((\".*\")\\s*?(\\/COL\\(\\s*?((\\d*?)|(\\\"[^\"]*?\\\"))\\s*?,\\s*?\".*?\"\\s*?\\))?\\s*?(==|!=|>|<))"),
+	SELECTCOLUMNCONDITIONBLOCK("((\".*\")\\s*?(\\/COL\\(\\s*?((\\d*?)|(\\\"[^\"]*?\\\"))\\s*?,\\s*?\".*?\"\\s*?\\))?\\s*?(==|!=|>=|<=|>|<))"),
 	//SELECTPREDICATESDIVISIONSSEARCHBLOCK("((:|,)(\\s*?)\"(.*?)\"\\s?(=|!|>|<))"),
-	SELECTOPERATIONCONDITIONBLOCK("(==|!=|>|<)"),
+	SELECTOPERATIONCONDITIONBLOCK("(==|!=|>=|<=|>|<)"),
 	SELECTALL("(.+)");
 	
 	private final String regexExpressions;

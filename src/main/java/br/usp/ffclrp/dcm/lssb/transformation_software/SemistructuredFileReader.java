@@ -32,7 +32,8 @@ public class SemistructuredFileReader {
 		File file = new File(relativePathDataFile);
 		List<String[]> dataRows = getAllFileData(file);
 
-		filesToBeProcessed.put(file.getName(), new FileToBeProcessed(file, dataRows));
+		if(dataRows != null)
+			filesToBeProcessed.put(file.getName(), new FileToBeProcessed(file, dataRows));
 	}
 
 	public List<String[]> getAllFileData(File file) throws IOException {

@@ -6,14 +6,17 @@ import br.usp.ffclrp.dcm.lssb.transformation_manager.TransformationManagerImpl;
 import br.usp.ffclrp.dcm.lssb.transformation_manager.custom_exceptions.ErrorFileException;
 import br.usp.ffclrp.dcm.lssb.transformation_manager.custom_exceptions.StatusFileException;
 import br.usp.ffclrp.dcm.lssb.transformation_software.rulesprocessing.*;
+import okhttp3.*;
 import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
+import org.apache.jena.base.Sys;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLProperty;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -48,7 +51,7 @@ public class RuleInterpretor implements Runnable
 //	       Test
 //	    args = new String[3];
 //	    args[0] = "runTransformation";
-//	    args[1] = "TC2-nova-ontologia-alterada";
+//	    args[1] = "d5232266-fa04-4f1b-919d-cb9761ec1d35";
 //	    args[2] = "50bea367-a756-415b-8bb3-00933c07810a";
 	    /* End test */
 
@@ -617,6 +620,10 @@ public class RuleInterpretor implements Runnable
 			//RDFDataMgr.write(fos, triplesProcessing.getModel(), lang);
 			fos.close();
 
+
+			addTriplesInFuseki(triplesetFolderPath, triplesProcessing, transformationId);
+
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new Exception(e.getMessage());
@@ -649,5 +656,89 @@ public class RuleInterpretor implements Runnable
 			System.out.println(e.getMessage());
 			e.printStackTrace();
 		}
+	}
+
+	public void addTriplesInFuseki(File triplesetFolderPath, TriplesProcessing triplesProcessing, String transformationId) throws Exception {
+
+		//Generate tripleset in NTRIPLES format
+		File tripleset = new File(triplesetFolderPath, "TriplesToFuseki." + Lang.NTRIPLES.getFileExtensions().get(0));
+		FileOutputStream fos = new FileOutputStream(tripleset);
+		RDFDataMgr.write(fos, triplesProcessing.getModel(), Lang.NTRIPLES);
+		fos.close();
+
+
+		OkHttpClient client = new OkHttpClient();
+		MediaType mediaType = MediaType.parse("application/x-www-form-urlencoded");
+		Request request;
+		Response response;
+
+
+		Properties properties = new Properties();
+		properties.load(new FileInputStream("/opt/ssd2lod/fuseki.properties"));
+
+
+		/*
+		 * Create a new DB in Fuseki.
+		 * Authorization -> Login and password encoded in Base64
+		 */
+		String fusekiCredentials = properties.getProperty("username") + ":" + properties.getProperty("password");
+		String fusekiCredentialsEncoded = Base64.getEncoder().encodeToString(fusekiCredentials.getBytes());
+
+		if(!datasetExistsInFuseki(client, transformationId, fusekiCredentialsEncoded)) {
+			RequestBody body = RequestBody.create(mediaType, "dbType=tdb&dbName=" + transformationId);
+			request = new Request.Builder()
+					.url("http://kode.ffclrp.usp.br:8081/fuseki/$/datasets")
+					.post(body)
+					.addHeader("Content-Type", "application/x-www-form-urlencoded")
+					.addHeader("Authorization", "Basic " + fusekiCredentialsEncoded)
+					.addHeader("cache-control", "no-cache")
+					.build();
+
+			response = client.newCall(request).execute();
+
+			if (!response.isSuccessful()) {
+				System.out.println(response.message());
+				throw new Exception("It was not possible to create a new SPARQL endpoint.");
+			}
+		}
+
+
+		/*
+		 * Insert triples in the new DB in Fuseki.
+		 */
+		mediaType = MediaType.parse("multipart/form-data");
+		RequestBody requestBody = new MultipartBody.Builder()
+				.setType(MultipartBody.FORM)
+				.addFormDataPart("triples", tripleset.getName(),
+						RequestBody.create(mediaType, tripleset))
+				.build();
+
+		request = new Request.Builder()
+				.url("http://kode.ffclrp.usp.br:8081/fuseki/" + transformationId + "?graph=default")
+				.post(requestBody)
+				.addHeader("content-type", "multipart/form-data")
+				.addHeader("cache-control", "no-cache")
+				.build();
+
+		response = client.newCall(request).execute();
+
+		if(!response.isSuccessful()){
+			System.out.println(response.message());
+			throw new Exception("It was not possible to add triples to the new SPARQL endpoint.");
+		}
+
+		tripleset.delete();
+	}
+
+	public boolean datasetExistsInFuseki(OkHttpClient client, String transformationId, String fusekiCredentialsEncoded) throws Exception{
+
+		Request request = new Request.Builder()
+				.addHeader("Authorization", "Basic " + fusekiCredentialsEncoded)
+				.url("http://kode.ffclrp.usp.br:8081/fuseki/$/datasets/" + transformationId)
+				.build();
+
+		Response response = client.newCall(request).execute();
+
+		return response.isSuccessful();
 	}
 }
